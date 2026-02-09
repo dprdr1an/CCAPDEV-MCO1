@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bean There – Ratings</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #efe8d6;
+      --sidebar: #5b5f10;
+      --accent: #7f7b2e;
+      --muted: #bfb0a8;
+      --content-width: 1500px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:Montserrat, system-ui, sans-serif;
+      background:var(--bg);
+      color:#2b2b2b;
+    }
+
+    .frame{
+      width:100%;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:260px 1fr;
+      height:100%;
+      column-gap:18px;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      background:var(--sidebar);
+      color:#fff;
+      padding:28px;
+      margin:18px 0 18px 18px;
+      border-radius:22px;
+      height:calc(100% - 36px);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .logo{
+      font-family:Lora, serif;
+      font-size:42px;
+      font-weight:700;
+      letter-spacing:1px;
+    }
+
+    .nav{
+      margin-top:36px;
+      display:flex;
+      flex-direction:column;
+      gap:26px;
+    }
+
+    .nav a{
+      color:#fff;
+      text-decoration:none;
+      font-size:20px;
+    }
+
+    .auth{font-size:20px}
+
+    .sidebar .nav a:hover,
+    .sidebar .auth div:hover{
+      color:#fa7a11;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    /* MAIN */
+    .main{
+      height:calc(100% - 36px);
+      margin:18px 18px 0 0;
+      padding:32px 16px;
+      border:1.5px solid rgba(127,123,46,0.4);
+      border-radius:24px;
+      overflow-y:auto;
+    }
+
+    .search-wrap{
+      display:flex;
+      justify-content:center;
+    }
+
+    .search{
+      width:100%;
+      max-width:var(--content-width);
+      padding:14px 18px;
+      border-radius:40px;
+      border:1.5px solid rgba(127,123,46,0.4);
+      background:transparent;
+      display:flex;
+      align-items:center;
+    }
+
+    /* REVIEWS */
+    .reviews {
+      max-width: var(--content-width);
+      margin: 22px auto 0px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .review-card {
+      background: #cfe0ff;
+      border-radius: 22px;
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 22px;
+    }
+
+    .review-img {
+      width: 100%;
+      height: 180px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #dfe8f5;
+    }
+
+    .review-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .review-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .review-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #253d67;
+      opacity: 1; 
+    }
+
+    .review-title {
+      font-family: Lora, serif;
+      font-size: 28px;
+      color: #d45a2a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .review-location {
+      color: #253d67;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: -8px;
+    }
+
+    .review-text {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .review-tags {
+      display: flex;
+      gap: 14px;
+      font-size: 13px;
+      color: #253d67;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag img {
+      width: 14px;
+      height: 14px;
+    }
+
+    .search input{
+      flex:1;
+      border:0;
+      background:transparent;
+      outline:none;
+      font-size:18px;
+    }
+
+    .search button{
+      border:0;
+      background:transparent;
+      font-size:20px;
+      cursor:pointer;
+    }
+
+    .rating {
+      display: inline-flex;
+      gap: 4px;
+      margin-left: 6px;
+    }
+
+    .rating img {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* MOBILE */
+    @media(max-width:880px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{order:2;height:auto}
+      .main{order:1}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="frame">
+    <div class="layout">
+
+      <aside class="sidebar">
+        <div>
+          <div class="logo">bean<br>there</div>
+          <nav class="nav">
+            <a href="index.html">Home</a>
+            <a href="profile.html">Profile</a>
+            <a href="tbv.html">TBV</a>
+            <a href="ratings.html">Ratings</a>
+          </nav>
+        </div>
+        <div class="auth">
+          <div style="margin-bottom:14px">Log in</div>
+          <div>Sign up</div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="search-wrap">
+          <div class="search">
+            <input id="q" placeholder="Search cafes, owners, tags..." />
+            <button id="searchBtn">🔍</button>
+          </div>
+        </div>
+        
+        <div class="reviews">
+
+        <!-- Rating 1 -->
+        <div class="review-card">
+          <div class="review-img">
+            <img src="https://lh3.googleusercontent.com/gps-cs-s/AHVAweoNj2_HH9Ho-MmyoFPk8mG4zf6vr5FOMSB3-aST99B2xnw_-0v4pofDgkD_UwFt_Zj6FTXTMU_4cDekMRcNKEw5k1-YB2sZG8xtu69mjtcKMagffk6fCziZCMGxaC-HzHeOcLx_6efmaPw=w203-h270-k-no" alt="Cafe">
+          </div>
+
+          <div class="review-content">
+            <div class="review-top">
+              <div>
+                <strong>dpr.drian</strong><br>
+                February 28, 2026
+              </div>
+
+              <div class="review-tags">
+                <span class="tag">
+                  <img src="icons/ac.png" alt="">
+                  Air-conditioned
+                </span>
+
+                <span class="tag">
+                  <img src="icons/socket.png" alt="">
+                  Socket
+                </span>
+
+                <span class="tag">
+                  <img src="icons/wifi.png" alt="">
+                  Wifi
+                </span>
+
+                <span class="tag">
+                  <img src="icons/oat.png" alt="">
+                  Sub Oat
+                </span>
+            </div>
+            </div>
+
+            <div class="review-title">
+              Yardstick
+              <span class="rating">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+              </span>
+            </div>
+
+            <div class="review-location">
+              Universal LMS Building, 106 Esteban, Makati City, Metro Manila
+            </div>
+
+            <div class="review-text">
+              Bro, what do you mean you haven't tried Yardstick? Sa bagay, if you know, you know lang naman. Solid talaga yung beans nila! Balanced, hindi maasim, hindi rin flat. Perfect for people who actually taste their coffee and not just drink it for caffeine. Perfect for quiet conversations or just zoning out with a cup. Definitely a go-to if you're serious about coffee like me.
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating 2 -->
+        <div class="review-card">
+          <div class="review-img">
+            <img src="https://lh3.googleusercontent.com/gps-cs-s/AHVAweo4bimsDpUNZ-hlgYEhxMc57HDkABzQCLnndvraoYCb-FY-pHRT2_8K9oJdmNcS2xGMK7g9Iry57sBtLgWHTu6X_YGwqtvJuhS8mpd2BiO-yeNClj87Hkn72hsyz1a8Owpy02WnslroPWg=s1360-w1360-h1020-rw" alt="Cafe">
+          </div>
+
+          <div class="review-content">
+            <div class="review-top">
+              <div>
+                <strong>sophiancls</strong><br>
+                February 28, 2026
+              </div>
+
+              <div class="review-tags">
+                <span class="tag">
+                  <img src="icons/ac.png" alt="">
+                  Air-conditioned
+                </span>
+
+                <span class="tag">
+                  <img src="icons/socket.png" alt="">
+                  Socket
+                </span>
+
+                <span class="tag">
+                  <img src="icons/wifi.png" alt="">
+                  Wifi
+                </span>
+
+                <span class="tag">
+                  <img src="icons/oat.png" alt="">
+                  Sub Oat
+                </span>
+            </div>
+            </div>
+
+            <div class="review-title">
+              Cooper's Coffee Haus
+              <span class="rating">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+              </span>
+            </div>
+
+            <div class="review-location">
+              C3 29th St, Taguig, Metro Manila
+            </div>
+
+            <div class="review-text">
+              As a #MatchaLover, yummy yung ceremonial-grade matcha that's smooth, creamy, and not bitter at all. Perfect for matcha lovers who want quality without the overpowering earthiness.
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating 3 -->
+        <div class="review-card">
+          <div class="review-img">
+            <img src="https://lh3.googleusercontent.com/p/AF1QipNHjiG8hr5m6A1vkcVL3zSPi4dlEbhXyqCp3igh=s1360-w1360-h1020-rw" alt="Cafe">
+          </div>
+
+          <div class="review-content">
+            <div class="review-top">
+              <div>
+                <strong>jrsyesc</strong><br>
+                February 15, 2026
+              </div>
+
+              <div class="review-tags">
+                <span class="tag">
+                  <img src="icons/ac.png" alt="">
+                  Air-conditioned
+                </span>
+
+                <span class="tag">
+                  <img src="icons/socket.png" alt="">
+                  Socket
+                </span>
+
+                <span class="tag">
+                  <img src="icons/wifi.png" alt="">
+                  Wifi
+                </span>
+
+                <span class="tag">
+                  <img src="icons/oat.png" alt="">
+                  Sub Oat
+                </span>
+            </div>
+            </div>
+
+            <div class="review-title">
+              Group Hug Specialty Coffee
+              <span class="rating">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+              </span>
+            </div>
+
+            <div class="review-location">
+              Westgate Center, Filinvest Ave, Alabang, Muntinlupa, 1781 Metro Manila
+            </div>
+
+            <div class="review-text">
+              Warm, cozy, and easygoing. Group Hug Coffee lives up to its name with a comforting vibe and drinks that are easy to enjoy. Liit nga langs.
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating 4 -->
+        <div class="review-card">
+          <div class="review-img">
+            <img src="https://lh3.googleusercontent.com/gps-cs-s/AHVAweq3fqXz8l7vCzMwnPoj_1K5lEHeRgcz65d8Q5P65dXv8_dESUc5Czj2ik6_pMFictgbW1QZzpRCZPpWRfdnfZ44bK2-qmkoNk1cLi45Kz5RIAoe2vWU4j1e5RTV-AJJ3xbhyzrFuOEEtPKf=s1360-w1360-h1020-rw" alt="Cafe">
+          </div>
+
+          <div class="review-content">
+            <div class="review-top">
+              <div>
+                <strong>erylle_g</strong><br>
+                February 23, 2026
+              </div>
+
+              <div class="review-tags">
+                <span class="tag">
+                  <img src="icons/ac.png" alt="">
+                  Air-conditioned
+                </span>
+
+                <span class="tag">
+                  <img src="icons/socket.png" alt="">
+                  Socket
+                </span>
+
+                <span class="tag">
+                  <img src="icons/wifi.png" alt="">
+                  Wifi
+                </span>
+
+                <span class="tag">
+                  <img src="icons/oat.png" alt="">
+                  Sub Oat
+                </span>
+            </div>
+            </div>
+
+            <div class="review-title">
+              CV Matcha
+              <span class="rating">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+              </span>
+            </div>
+
+            <div class="review-location">
+              Unit 3028-3029, 3rd floor, Ayala Malls Manila Bay, Pres. Diosdado Macapagal Ave, cor. Aseana Ave
+            </div>
+
+            <div class="review-text">
+              Smooth ceremonial-grade matcha with a rich, earthy taste. A great spot to slow down sa gitna ng mall and enjoy a proper cup.
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating 5 -->
+        <div class="review-card">
+          <div class="review-img">
+            <img src="https://lh3.googleusercontent.com/gps-cs-s/AHVAweq-ljo7qoTiL8NkMRF4DQ3sSwUR0ghFx6mLXlcp42ABSqiGrq5vuLnsEhQrTxiH0GSx0Qa-ydyb_eyzCd-w0hAk5SC_dpoiP_hsjBjYdFb5_4LEhjq56F5srNLWuEADVwT-rHuPQA=s1360-w1360-h1020-rw" alt="Cafe">
+          </div>
+
+          <div class="review-content">
+            <div class="review-top">
+              <div>
+                <strong>krstnplm_</strong><br>
+                February 19, 2026
+              </div>
+
+              <div class="review-tags">
+                <span class="tag">
+                  <img src="icons/ac.png" alt="">
+                  Air-conditioned
+                </span>
+
+                <span class="tag">
+                  <img src="icons/socket.png" alt="">
+                  Socket
+                </span>
+
+                <span class="tag">
+                  <img src="icons/wifi.png" alt="">
+                  Wifi
+                </span>
+
+                <span class="tag">
+                  <img src="icons/oat.png" alt="">
+                  Sub Oat
+                </span>
+            </div>
+            </div>
+
+            <div class="review-title">
+              BL.CK Cafe
+              <span class="rating">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+                <img src="icons/bean.png" alt="bean">
+              </span>
+            </div>
+
+            <div class="review-location">
+              Unit 1C, Caimito Place, 102 Caimito Rd, Caloocan, 1407 Metro Manila
+            </div>
+
+            <div class="review-text">
+              Straightforward specialty coffee with bold flavors and consistent quality. A no-frills spot that focuses on good beans and proper brewing.
+            </div>
+          </div>
+        </div>
+      </div>
+      </main>
+
+    </div>
+  </div>
+</body>
+</html>
