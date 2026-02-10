@@ -509,6 +509,8 @@
       <label for="inputUsername" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Username</label>
       <input id="inputUsername" type="text" placeholder="@your_username" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;" required>
 
+      <label for="inputTitle" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Job Title</label>
+      <input id="inputTitle" type="text" placeholder="Job Title" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;">
       <label for="inputBio" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Short bio</label>
       <textarea id="inputBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;"></textarea>
 
@@ -583,22 +585,49 @@
   const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
   // Load saved values on startup (if any)
  function loadSaved(){
-    const savedUser = localStorage.getItem(LS_USER);
-    const savedBio = localStorage.getItem(LS_BIO);
+    // Keys used in your Sign Up function
+    const LS_NAME   = 'beanthere_profile_fullname';
+    const LS_USER   = 'beanthere_profile_username';
+    const LS_BIO    = 'beanthere_profile_bio';
+    const LS_AVATAR = 'beanthere_profile_avatar';
+  // Add these lines to your loadSaved() in profile.html
+    const LS_TITLE = 'beanthere_profile_title';
+    const savedTitle = localStorage.getItem(LS_TITLE);
+
+    const dropdownSub = document.querySelector('.ud-sub');
+    if(savedTitle && dropdownSub) {
+    dropdownSub.textContent = savedTitle;
+    }
+    const savedName   = localStorage.getItem(LS_NAME);
+    const savedUser   = localStorage.getItem(LS_USER);
+    const savedBio    = localStorage.getItem(LS_BIO);
     const savedAvatar = localStorage.getItem(LS_AVATAR);
 
+    // 1. Update Full Name (the <h1> tag)
+    const nameHeading = document.querySelector('.profile-meta h1');
+    if(savedName && nameHeading) {
+      nameHeading.textContent = savedName;
+      // Also update the greeting in the dropdown menu
+      const dropdownGreet = document.querySelector('.ud-greet');
+      if(dropdownGreet) dropdownGreet.textContent = `Hi, ${savedName}!`;
+    }
+
+    // 2. Update Username/Handle
     if(savedUser && handleText) handleText.textContent = savedUser;
+
+    // 3. Update Bio
     if(savedBio && bioText) bioText.textContent = savedBio;
 
+    // 4. Update Avatars
     if(savedAvatar && avatarLarge && avatarMini){
       avatarLarge.src = savedAvatar;
       avatarMini.src = savedAvatar;
-      modalPreview.src = savedAvatar;
+      if(modalPreview) modalPreview.src = savedAvatar;
     } else {
-      // ensure preview shows current default
-      if(modalPreview && avatarLarge){
-        modalPreview.src = avatarLarge.src || DEFAULT_LARGE_SRC;
-      }
+      // Revert to default if no avatar is saved
+      if(avatarLarge) avatarLarge.src = DEFAULT_LARGE_SRC;
+      if(avatarMini)  avatarMini.src  = DEFAULT_MINI_SRC;
+      if(modalPreview) modalPreview.src = DEFAULT_LARGE_SRC;
     }
   }
 
@@ -685,6 +714,10 @@
 
   // handle submit
   form.addEventListener('submit', function(e){
+    // Add this inside the submit event listener
+const titleVal = document.getElementById('inputTitle').value || 'Member';
+localStorage.setItem('beanthere_profile_title', titleVal);
+if(document.querySelector('.ud-sub')) document.querySelector('.ud-sub').textContent = titleVal;
     e.preventDefault();
 
     let usernameVal = inputUsername.value || '';
