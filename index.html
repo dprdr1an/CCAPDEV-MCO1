@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bean There</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #efe8d6;
+      --sidebar: #5b5f10;
+      --accent: #7f7b2e;
+      --hero: #3e2b20;
+      --card-blue: #c6d9ff;
+      --muted: #bfb0a8;
+
+      --rounded: 22px;
+      --gap: 28px;
+
+      /* ⭐ shared content width */
+      --content-width: 1500px;
+    }
+
+    /* animation */
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-on-load{
+      opacity:0;
+      animation: floatUp 0.9s ease-out forwards;
+    }
+    .delay-1{animation-delay:0.15s}
+    .delay-2{animation-delay:0.35s}
+
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:Montserrat, system-ui, sans-serif;
+      background:var(--bg);
+      color:#2b2b2b;
+    }
+
+    /* ⭐ reusable alignment class */
+    .content-section{
+      max-width: var(--content-width);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .frame{
+      width:100%;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:260px 1fr;
+      height:100%;
+      column-gap:18px;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      background:var(--sidebar);
+      color:#fff;
+      padding:28px;
+      margin:18px 0 18px 18px;
+      border-radius:22px;
+      height:calc(100% - 36px);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .logo{
+      font-family:Lora, serif;
+      font-size:42px;
+      font-weight:700;
+      letter-spacing:1px;
+    }
+
+    .nav{
+      margin-top:36px;
+      display:flex;
+      flex-direction:column;
+      gap:26px;
+    }
+
+    .nav a{
+      color:#fff;
+      text-decoration:none;
+      font-size:20px;
+    }
+
+    .auth{font-size:20px}
+
+    .sidebar .nav a:hover {
+      color: #fa7a11;    
+      transition: 0.3s ease;
+    }
+
+    .sidebar .auth div:hover {
+      color: #fa7a11;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    /* MAIN */
+    .main{
+      height:calc(100% - 36px);
+      overflow-y:auto;
+      margin:18px 18px 0 0;
+      padding:32px 16px;
+      border:1.5px solid rgba(127,123,46,0.4);
+      border-radius:24px;
+    }
+
+    .search-wrap{
+      display:flex;
+      justify-content:center;
+    }
+
+    .search{
+      width:100%;
+      max-width:var(--content-width);
+      padding:14px 18px;
+      border-radius:40px;
+      border:1.5px solid rgba(127,123,46,0.4);
+      background:transparent;
+      display:flex;
+      align-items:center;
+    }
+
+    .search input{
+      flex:1;
+      border:0;
+      background:transparent;
+      outline:none;
+      font-size:18px;
+    }
+
+    .search button{
+      border:0;
+      background:transparent;
+      font-size:20px;
+      cursor: pointer;
+    }
+
+    /* HERO */
+    .hero{
+      background-color: #743014;
+      height:577px;
+      margin:24px auto;
+      border-radius:6px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#f3efe6;
+      padding:18px;
+    }
+
+    .hero .brand{
+      font-family:Lora, serif;
+      font-size:34px;
+    }
+
+    /* INFO CARDS */
+    .info-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin:18px auto;
+    }
+
+    .info{
+      background:var(--card-blue);
+      padding:22px;
+      border-radius:6px;
+      
+      height:300px;
+    }
+
+    .info h3{
+      color:#b33;
+      font-family:Lora, serif;
+      margin:0 0 10px;
+      font-size: 20px;
+    }
+
+    /* MOST VISITED CAROUSEL */
+    .most{
+      margin:26px auto;
+      background-color: #c3c071;
+      padding:40px 18px;
+      border-radius:6px;
+      height:650px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .most h4{
+      text-align:center;
+      margin:6px 0 30px;
+      font-family:Lora, serif;
+      font-size:30px;
+    }
+
+    .carousel-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* wrapper that we'll fade during transitions */
+    .carousel-wrapper {
+      height: 400px;
+      position: relative;
+      width: 100%;
+      margin: 0 auto;
+      transition: opacity 0.45s ease;
+      /* center content area for absolute cards */
+    }
+
+    .carousel-wrapper.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Make cards absolutely positioned so we can keep left/center/right positions and animate them gracefully */
+    .cafe-card {
+      background: #6f6f2b;
+      border-radius: 12px;
+      padding: 16px;
+      color: #fff;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.85);
+      transition: all 0.45s cubic-bezier(.22,.9,.32,1);
+      opacity: 0.6;
+    }
+
+    /* positions */
+    .pos-left {
+      left: 18%;
+      transform: translate(-50%, -50%) scale(0.85);
+      width: 280px;
+      opacity: 0.5;
+      z-index: 5;
+    }
+
+    .pos-center {
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      width: 450px;
+      opacity: 1;
+      z-index: 10;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .pos-right {
+      left: 82%;
+      transform: translate(-50%, -50%) scale(0.85);
+      width: 280px;
+      opacity: 0.5;
+      z-index: 5;
+    }
+
+    .cafe-card img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 8px;
+      display:block;
+    }
+
+    .cafe-card.pos-left img,
+    .cafe-card.pos-right img {
+      height: 200px;
+    }
+
+    .cafe-meta {
+      margin-top: 12px;
+    }
+
+    .cafe-meta strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .cafe-card.pos-center .cafe-meta strong {
+      font-size: 22px;
+    }
+
+    /* Navigation Controls */
+    .carousel-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .carousel-btn {
+      background: rgba(255,255,255,0.3);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      color: #2b2b2b;
+      transition: all 0.3s ease;
+      font-family: Montserrat, sans-serif;
+    }
+
+    .carousel-btn:hover {
+      background: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    .carousel-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Dots indicator */
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: #2b2b2b;
+      width: 12px;
+      height: 12px;
+    }
+
+    /* FOOTER */
+    .footer{
+      margin:26px auto;
+      background:var(--muted);
+      padding:26px;
+      border-radius:6px;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+      height:250px;
+    }
+
+    .footer h5{
+      font-family:Lora, serif;
+      color:#fa7a11;
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 20px;
+    }
+
+    /* MOBILE */
+    @media(max-width:880px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{order:2;height:auto}
+      .main{order:1}
+      .info-row{grid-template-columns:1fr}
+      .footer{grid-template-columns:1fr}
+      
+      .carousel-wrapper {
+        height: 350px;
+      }
+      
+      .cafe-card.pos-center {
+        width: 350px;
+      }
+      
+      .cafe-card.pos-left,
+      .cafe-card.pos-right {
+        width: 200px;
+      }
+
+      .pos-left { left: 12%; }
+      .pos-right { left: 88%; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="frame">
+    <div class="layout">
+
+      <aside class="sidebar animate-on-load delay-1">
+        <div>
+          <div class="logo">bean<br>there</div>
+          <nav class="nav">
+            <a href="index.html">Home</a>
+            <a href="profile.html">Profile</a>
+            <a href="tbv.html">TBV</a>
+            <a href="ratings/ratings.html">Ratings</a>
+          </nav>
+        </div>
+        <div class="auth">
+          <div style="margin-bottom:14px">Log in</div>
+          <div>Sign up</div>
+        </div>
+      </aside>
+
+      <main class="main animate-on-load delay-2">
+
+        <div class="search-wrap">
+          <div class="search">
+            <input id="q" placeholder="Search cafes, owners, tags..." />
+            <button id="searchBtn" type="button">🔍</button>
+          </div>
+        </div>
+
+        <div class="hero content-section">
+          <div class="brand">bean there — your coffee guide</div>
+        </div>
+
+        <div class="info-row content-section">
+          <div class="info">
+            <h3>Who We Are</h3>
+            <p style="text-align: justify;">Bean There is your go-to review platform for cafes. We help coffee lovers discover, rate, and share their favorite spots, making it easier to find the perfect cup every time.</p>
+          </div>
+          <div class="info">
+            <h3>Our Mission</h3>
+            <p style="text-align: justify;">Short mission statement.</p>
+          </div>
+        </div>
+
+        <section class="most content-section">
+          <h4>Most Visited Cafes This Week</h4>
+          
+          <div class="carousel-container">
+            <div class="carousel-wrapper" id="carousel"></div>
+            
+            <div class="carousel-controls">
+              <button class="carousel-btn" id="prevBtn">← Previous</button>
+              <div class="carousel-dots" id="dots"></div>
+              <button class="carousel-btn" id="nextBtn">Next →</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="footer content-section">
+          <div>
+            <h5>Support Us</h5>
+            <p>GCASH: 0966-745-4422</p>
+          </div>
+          <div>
+            <h5>Contact Us</h5>
+            <p><strong>Email:</strong><br>beanthere@gmail.com<br><br>
+            <strong>Instagram:</strong><br>@beantheredonethat</p>
+          </div>
+          <div>
+            <h5>Follow</h5>
+            <p>Instagram / Facebook</p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+const cafes = [
+  {name:"Coffee Nook", img:"https://picsum.photos/600/400?random=1", loc:"Taft Ave"},
+  {name:"GroupHug Cafe", img:"https://picsum.photos/600/400?random=2", loc:"Malate"},
+  {name:"Cooper's ATC Branch", img:"https://picsum.photos/600/400?random=3", loc:"Taft"},
+  {name:"Elsewhere Cafe", img:"https://picsum.photos/600/400?random=4", loc:"Makati"},
+  {name:"UNIT 605", img:"https://picsum.photos/600/400?random=5", loc:"QC"},
+  {name:"Brewtopia's Corner", img:"https://picsum.photos/600/400?random=6", loc:"BGC"},
+  {name:"Cafe Mocha", img:"https://picsum.photos/600/400?random=7", loc:"Quezon City"},
+];
+
+let activeCafes = [...cafes]; // <--- data source the carousel actually uses
+let currentIndex = 0;
+
+const carousel = document.getElementById("carousel");
+const dotsContainer = document.getElementById("dots");
+let isAnimating = false;
+let autoplay;
+
+/* ---------- helpers (use activeCafes) ---------- */
+function getIndex(i) {
+  const n = activeCafes.length || 1;
+  return ((i % n) + n) % n;
+}
+
+function buildCard(cafe, position) {
+  const card = document.createElement("div");
+  card.className = `cafe-card ${position}`;
+  card.innerHTML = `
+    <img src="${cafe.img}" alt="${cafe.name}">
+    <div class="cafe-meta">
+      <strong>${cafe.name}</strong>
+      <div class="location">${cafe.loc}</div>
+    </div>
+  `;
+  return card;
+}
+
+/* ---------- render (uses activeCafes) ---------- */
+function renderCarousel() {
+  carousel.innerHTML = "";
+
+  if (activeCafes.length === 0) {
+    // fallback: nothing to show
+    carousel.innerHTML = "<div style='text-align:center;padding:40px'>No cafes to show</div>";
+    dotsContainer.innerHTML = "";
+    return;
+  }
+
+  const left = getIndex(currentIndex - 1);
+  const center = getIndex(currentIndex);
+  const right = getIndex(currentIndex + 1);
+
+  const leftCard = buildCard(activeCafes[left], "pos-left");
+  const centerCard = buildCard(activeCafes[center], "pos-center");
+  const rightCard = buildCard(activeCafes[right], "pos-right");
+
+  // clicking side cards navigates
+  leftCard.onclick = () => slideTo(left);
+  rightCard.onclick = () => slideTo(right);
+
+  carousel.append(leftCard, centerCard, rightCard);
+  updateDots();
+}
+
+/* ---------- slide logic ---------- */
+function slideTo(target) {
+  // if there is only one item, target might equal currentIndex; bail out
+  if (isAnimating || target === currentIndex) return;
+  isAnimating = true;
+
+  currentIndex = getIndex(target);
+
+  // Let CSS handle the smooth transition
+  requestAnimationFrame(() => {
+    renderCarousel();
+    setTimeout(() => isAnimating = false, 450);
+  });
+}
+
+function nextSlide() {
+  slideTo(getIndex(currentIndex + 1));
+}
+
+function prevSlide() {
+  slideTo(getIndex(currentIndex - 1));
+}
+
+/* ---------- dots (uses activeCafes) ---------- */
+function createDots() {
+  dotsContainer.innerHTML = "";
+  activeCafes.forEach((_, i) => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.onclick = () => {
+      slideTo(i);
+    };
+    dotsContainer.appendChild(dot);
+  });
+}
+
+function updateDots() {
+  [...dotsContainer.children].forEach((dot, i) => {
+    dot.classList.toggle("active", i === currentIndex);
+  });
+}
+
+/* ---------- autoplay ---------- */
+function startAutoplay() {
+  stopAutoplay();
+  autoplay = setInterval(nextSlide, 3500);
+}
+
+function stopAutoplay() {
+  if (autoplay) clearInterval(autoplay);
+}
+
+/* ---------- SEARCH ---------- */
+const searchInput = document.getElementById("q");
+const searchBtn = document.getElementById("searchBtn");
+
+searchBtn.addEventListener("click", handleSearch);
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleSearch();
+  }
+});
+
+// Reset to full list if input cleared
+searchInput.addEventListener("input", () => {
+  if (searchInput.value.trim() === "") {
+    activeCafes = [...cafes];
+    currentIndex = 0;
+    createDots();
+    renderCarousel();
+  }
+});
+
+function handleSearch() {
+  const query = searchInput.value.toLowerCase().trim();
+
+  if (!query) {
+    // If empty, reset the carousel instead of alerting
+    activeCafes = [...cafes];
+    currentIndex = 0;
+    createDots();
+    renderCarousel();
+    return;
+  }
+
+  const results = cafes.filter(cafe =>
+    cafe.name.toLowerCase().includes(query) ||
+    cafe.loc.toLowerCase().includes(query)
+  );
+
+  if (results.length === 0) {
+    alert("No cafes found 😢");
+    // keep current view (or reset to full list) — here we'll reset
+    activeCafes = [...cafes];
+    currentIndex = 0;
+    createDots();
+    renderCarousel();
+    return;
+  }
+
+  // Use the filtered list as the active dataset (without mutating original)
+  activeCafes = results;
+  currentIndex = 0;
+  createDots();
+  renderCarousel();
+}
+
+/* ---------- events ---------- */
+document.getElementById("nextBtn").onclick = nextSlide;
+document.getElementById("prevBtn").onclick = prevSlide;
+
+carousel.addEventListener("mouseenter", stopAutoplay);
+carousel.addEventListener("mouseleave", startAutoplay);
+
+/* ---------- init ---------- */
+createDots();
+renderCarousel();
+startAutoplay();
+  </script>
+
+</body>
+</html>
