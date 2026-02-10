@@ -84,7 +84,7 @@
     .main{
       height:calc(100% - 36px);
       margin:18px 18px 0 0;
-      padding:32px 16px;
+      padding:20px 20px;
       border:1.5px solid rgba(127,123,46,0.4);
       border-radius:24px;
       overflow-y:auto;
@@ -95,15 +95,44 @@
       justify-content:center;
     }
 
+    #q{
+      font-family:Montserrat, system-ui, sans-serif;
+    }
+
     .search{
       width:100%;
       max-width:var(--content-width);
       padding:14px 18px;
       border-radius:40px;
       border:1.5px solid rgba(127,123,46,0.4);
-      background:transparent;
+      background:#eee0c5;
       display:flex;
       align-items:center;
+    }
+
+    .search input{
+      flex:1;
+      border:0;
+      background:transparent;
+      outline:none;
+      font-size:18px;
+      color:#6d6910;
+    }
+
+    .search input::placeholder{
+      color:#8a8f7a;
+    }
+
+    .search button{
+      border:0;
+      background:transparent;
+      cursor:pointer;
+    }
+
+    .search button img{
+      width: 18px;
+      height: 18px;
+      display: block;
     }
 
     /* REVIEWS */
@@ -122,6 +151,12 @@
       display: grid;
       grid-template-columns: 180px 1fr;
       gap: 22px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .review-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
     }
 
     .review-img {
@@ -191,21 +226,6 @@
       height: 14px;
     }
 
-    .search input{
-      flex:1;
-      border:0;
-      background:transparent;
-      outline:none;
-      font-size:18px;
-    }
-
-    .search button{
-      border:0;
-      background:transparent;
-      font-size:20px;
-      cursor:pointer;
-    }
-
     .rating {
       display: inline-flex;
       gap: 4px;
@@ -250,7 +270,9 @@
         <div class="search-wrap">
           <div class="search">
             <input id="q" placeholder="Search cafes, owners, tags..." />
-            <button id="searchBtn">🔍</button>
+            <button id="searchBtn">
+              <img src="icons/search.png" alt="search">
+            </button>
           </div>
         </div>
         
@@ -271,23 +293,23 @@
 
               <div class="review-tags">
                 <span class="tag">
-                  <img src="icons/ac.png" alt="">
+                  <img src="icons/ac.png" alt="ac">
                   Air-conditioned
                 </span>
 
                 <span class="tag">
-                  <img src="icons/socket.png" alt="">
+                  <img src="icons/socket.png" alt="socket">
                   Socket
                 </span>
 
                 <span class="tag">
-                  <img src="icons/wifi.png" alt="">
+                  <img src="icons/wifi.png" alt="wifi">
                   Wifi
                 </span>
 
                 <span class="tag">
-                  <img src="icons/oat.png" alt="">
-                  Sub Oat
+                  <img src="icons/oat.png" alt="milk">
+                  Alt Milk
                 </span>
             </div>
             </div>
@@ -338,13 +360,8 @@
                 </span>
 
                 <span class="tag">
-                  <img src="icons/wifi.png" alt="">
-                  Wifi
-                </span>
-
-                <span class="tag">
                   <img src="icons/oat.png" alt="">
-                  Sub Oat
+                  Alt Milk
                 </span>
             </div>
             </div>
@@ -400,7 +417,7 @@
 
                 <span class="tag">
                   <img src="icons/oat.png" alt="">
-                  Sub Oat
+                  Alt Milk
                 </span>
             </div>
             </div>
@@ -444,19 +461,10 @@
                 </span>
 
                 <span class="tag">
-                  <img src="icons/socket.png" alt="">
-                  Socket
-                </span>
-
-                <span class="tag">
                   <img src="icons/wifi.png" alt="">
                   Wifi
                 </span>
 
-                <span class="tag">
-                  <img src="icons/oat.png" alt="">
-                  Sub Oat
-                </span>
             </div>
             </div>
 
@@ -509,7 +517,7 @@
 
                 <span class="tag">
                   <img src="icons/oat.png" alt="">
-                  Sub Oat
+                  Alt Milk
                 </span>
             </div>
             </div>
