@@ -13,7 +13,7 @@
       --sidebar: #5b5f10;
       --accent: #7f7b2e;
       --muted: #bfb0a8;
-      --content-width: 1100px; /* reduced so search + avatar fit */
+      --content-width: 1500px;
     }
 
     *{box-sizing:border-box}
@@ -98,40 +98,46 @@
     .main{
       height:calc(100% - 36px);
       margin:18px 18px 0 0;
-      padding:32px 22px;
+      padding:20px 20px;
       border:1.5px solid rgba(127,123,46,0.4);
       border-radius:24px;
       overflow-y:auto;
       position:relative;
     }
 
-    /* search + mini avatar row */
-    .search-row{
-      display:flex;
-    justify-content:center;           /* center the whole search-area on page */
-    margin-bottom:26px;
-    }
     .search-area{
-    width:100%;
-    max-width:var(--content-width);   /* center area width (same as content) */
-    display:flex;
-    align-items:center;
-    justify-content:center;           /* will center children but we control widths */
-    gap:16px;
-    padding:0 12px;                   /* small padding to avoid edge touching */
-    position:relative;
+      flex: 1;          /* ⬅ THIS IS THE KEY */
+      display: flex;
+    }
+
+    .search-row{
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      max-width: var(--content-width);
+      margin: 0 auto;          /* center the whole row */
+      margin-bottom: 24px; 
+    }
+
+    .search-wrap{
+      flex: 1;                 /* ⬅ key line */
+      display: flex;
+    }
+
+    #q{
+      font-family:Montserrat, system-ui, sans-serif;
     }
 
     .search{
-    flex: 1 1 calc(100% - 84px);      /* leave ~84px for avatar + gap */
-    max-width: calc(var(--content-width) - 84px);
-    padding:14px 18px;
-    border-radius:40px;
-    border:1.5px solid rgba(127,123,46,0.4);
-    background:transparent;
-    display:flex;
-    align-items:center;
-    box-shadow: 0 2px 0 rgba(0,0,0,0.02) inset;
+      width:100%;
+      max-width:var(--content-width);
+      height: 50px;
+      padding: 0 16px;
+      border-radius:40px;
+      border:1.5px solid rgba(127,123,46,0.4);
+      background:#eee0c5;
+      display:flex;
+      align-items:center;
     }
 
     .search input{
@@ -140,14 +146,26 @@
       background:transparent;
       outline:none;
       font-size:18px;
+      line-height: 22px;
+      color:#6d6910;
+    }
+
+    .search input::placeholder{
+      color:#8a8f7a;
     }
 
     .search button{
       border:0;
       background:transparent;
-      font-size:20px;
       cursor:pointer;
     }
+
+    .search button img{
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
     /* modal avatar preview small tweaks */
 #modalAvatarPreview{ border-radius:50%; display:block; }
 #inputAvatar{ font-size:14px; }
@@ -177,22 +195,11 @@
 
 /* ensure form controls readable on small screens */
 @media(max-width:520px){
-  .modal-panel{ width: calc(100% - 32px); padding:14px; }
+  .modal-panel{ 
+    width: calc(100% - 32px); 
+    padding:14px; 
+  }
 }
-
-
-    /* small avatar in top-right of the content area */
-    .user-mini{
-      width:56px;
-    height:56px;
-    border-radius:50%;
-    overflow:hidden;
-    border:3px solid rgba(127,123,46,0.15);
-    background:#fff;
-    flex:0 0 56px;
-    display:block;
-    }
-    .user-mini img{ width:100%; height:100%; object-fit:cover; display:block; }
 
     /* PROFILE HEADER */
     .profile-header{
@@ -201,6 +208,10 @@
       gap:22px;
       max-width:var(--content-width);
       margin:6px auto 30px;
+    }
+
+    .profile-avatar{
+      flex:0 0 auto;
     }
 
     .avatar-large{
@@ -259,12 +270,33 @@
       letter-spacing:-0.3px;
     }
     /* ----- user dropdown ----- */
-.user-menu{ position:relative; display:inline-block; flex:0 0 auto; }
-.user-mini-btn{
-  width:56px; height:56px; border-radius:50%; padding:0; border:3px solid rgba(127,123,46,0.15);
-  background:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
-}
-.user-mini-btn img{ display:block; width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .user-menu{ 
+      position:relative; 
+      display:inline-block; 
+      flex:0 0 auto; 
+    }
+    .user-mini-btn{
+      width:50px;
+      height: 50px;
+      border-radius:50%;
+      padding:0;
+      border:5px solid rgba(127,123,46,0.15);
+      background:#fff;
+
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+
+      box-sizing:border-box;
+    }
+    .user-mini-btn img{ 
+      display:block;
+      width:100%; 
+      height:100%; 
+      object-fit:cover; 
+      border-radius:50%; 
+    }
 
 /* dropdown panel */
 .user-dropdown{
@@ -381,10 +413,10 @@
         <div>
           <div class="logo">bean<br>there</div>
           <nav class="nav">
-            <a href="/bean there/index.html">Home</a>
-            <a href="/bean there/profile.html">Profile</a>
-            <a href="/bean there/tbv.html">TBV</a>
-            <a href="/bean there/ratings.html">Ratings</a>
+            <a href="index.html">Home</a>
+            <a href="profile.html">Profile</a>
+            <a href="tbv.html">TBV</a>
+            <a href="ratings.html">Ratings</a>
           </nav>
         </div>
         <div class="auth">
@@ -400,7 +432,9 @@
   <div class="search-area" role="search" aria-label="Search cafes owners tags">
     <div class="search" aria-hidden="false">
       <input id="q" placeholder="Search cafes, owners, tags..." />
-      <button id="searchBtn" aria-label="Search">🔍</button>
+      <button id="searchBtn">
+        <img src="icons/search.png" alt="search">
+      </button>
     </div>
 
     <!-- mini avatar placed inline (no absolute positioning) -->
@@ -456,8 +490,8 @@
       <div style="display:flex;gap:14px;align-items:center;">
         <div style="flex:0 0 auto; text-align:center;">
           <div style="width:84px; height:84px; border-radius:50%; overflow:hidden; border:2px solid #e6eaea; display:inline-block;">
-  <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
-</div>
+            <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+          </div>
         </div>
 
         <div style="flex:1;">
@@ -474,8 +508,6 @@
       <!-- Username + Bio -->
       <label for="inputUsername" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Username</label>
       <input id="inputUsername" type="text" placeholder="@your_username" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;" required>
-      <label for="inputTitle" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Job Title</label>
-<input id="inputTitle" type="text" placeholder="Job Title" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;">
 
       <label for="inputBio" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Short bio</label>
       <textarea id="inputBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;"></textarea>
@@ -546,53 +578,27 @@
   const LS_BIO = 'beanthere_profile_bio';
   const LS_AVATAR = 'beanthere_profile_avatar'; // stores data URL
 
- // Update these two lines specifically
-const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
-const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
+  // default fallback src (update to match your original file if different)
+  const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
+  const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
   // Load saved values on startup (if any)
  function loadSaved(){
-    // Keys used in your Sign Up function
-    const LS_NAME   = 'beanthere_profile_fullname';
-    const LS_USER   = 'beanthere_profile_username';
-    const LS_BIO    = 'beanthere_profile_bio';
-    const LS_AVATAR = 'beanthere_profile_avatar';
-    const LS_TITLE = 'beanthere_profile_title';
-    const savedTitle = localStorage.getItem(LS_TITLE);
-
-    const savedName   = localStorage.getItem(LS_NAME);
-    const savedUser   = localStorage.getItem(LS_USER);
-    const savedBio    = localStorage.getItem(LS_BIO);
+    const savedUser = localStorage.getItem(LS_USER);
+    const savedBio = localStorage.getItem(LS_BIO);
     const savedAvatar = localStorage.getItem(LS_AVATAR);
 
-    const dropdownSub = document.querySelector('.ud-sub');
-    if(savedTitle && dropdownSub) {
-    dropdownSub.textContent = savedTitle;
-    }
-    // 1. Update Full Name (the <h1> tag)
-    const nameHeading = document.querySelector('.profile-meta h1');
-    if(savedName && nameHeading) {
-      nameHeading.textContent = savedName;
-      // Also update the greeting in the dropdown menu
-      const dropdownGreet = document.querySelector('.ud-greet');
-      if(dropdownGreet) dropdownGreet.textContent = `Hi, ${savedName}!`;
-    }
-
-    // 2. Update Username/Handle
     if(savedUser && handleText) handleText.textContent = savedUser;
-
-    // 3. Update Bio
     if(savedBio && bioText) bioText.textContent = savedBio;
 
-    // 4. Update Avatars
     if(savedAvatar && avatarLarge && avatarMini){
       avatarLarge.src = savedAvatar;
       avatarMini.src = savedAvatar;
-      if(modalPreview) modalPreview.src = savedAvatar;
+      modalPreview.src = savedAvatar;
     } else {
-      // Revert to default if no avatar is saved
-      if(avatarLarge) avatarLarge.src = DEFAULT_LARGE_SRC;
-      if(avatarMini)  avatarMini.src  = DEFAULT_MINI_SRC;
-      if(modalPreview) modalPreview.src = DEFAULT_LARGE_SRC;
+      // ensure preview shows current default
+      if(modalPreview && avatarLarge){
+        modalPreview.src = avatarLarge.src || DEFAULT_LARGE_SRC;
+      }
     }
   }
 
@@ -680,9 +686,7 @@ const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/
   // handle submit
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    const titleVal = document.getElementById('inputTitle').value || 'Member';
-    localStorage.setItem('beanthere_profile_title', titleVal);
-    if(document.querySelector('.ud-sub')) document.querySelector('.ud-sub').textContent = titleVal;
+
     let usernameVal = inputUsername.value || '';
     let bioVal = inputBio.value || '';
     usernameVal = normalizeUsername(usernameVal);
