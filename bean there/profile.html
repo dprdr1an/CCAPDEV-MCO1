@@ -111,9 +111,8 @@
     justify-content:center;           /* center the whole search-area on page */
     margin-bottom:26px;
     }
-    .search-area
-    {
-        width:100%;
+    .search-area{
+    width:100%;
     max-width:var(--content-width);   /* center area width (same as content) */
     display:flex;
     align-items:center;
@@ -124,7 +123,7 @@
     }
 
     .search{
-     flex: 1 1 calc(100% - 84px);      /* leave ~84px for avatar + gap */
+    flex: 1 1 calc(100% - 84px);      /* leave ~84px for avatar + gap */
     max-width: calc(var(--content-width) - 84px);
     padding:14px 18px;
     border-radius:40px;
@@ -408,7 +407,7 @@
     <!-- user menu: replace your old <a class="user-mini"> ... -->
 <div class="user-menu" id="userMenu">
   <button id="userMenuBtn" class="user-mini-btn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" title="Open account menu">
-    <img id="avatarMiniImg"src="/beanthere/icons/noprof.jpg" alt="profile mini">
+    <img id="avatarMiniImg"src="icons/noprof.jpg" alt="profile mini">
   </button>
 
   <div id="userDropdown" class="user-dropdown" role="menu" aria-labelledby="userMenuBtn" hidden>
@@ -439,7 +438,7 @@
         <!-- big profile header -->
         <div class="profile-header">
           <div class="avatar-large">
-  <img id="avatarLargeImg" src="/bean there/icons/noprof.jpg" alt="profile large">
+  <img id="avatarLargeImg" src="icons/noprof.jpg" alt="profile large">
 </div>
           <!-- Edit Profile Modal (paste after the profile header) -->
 <!-- Edit Profile Modal (with avatar upload) -->
@@ -457,8 +456,8 @@
       <div style="display:flex;gap:14px;align-items:center;">
         <div style="flex:0 0 auto; text-align:center;">
           <div style="width:84px; height:84px; border-radius:50%; overflow:hidden; border:2px solid #e6eaea; display:inline-block;">
-            <img id="modalAvatarPreview" src="/bean there/icons/noprof.jpg" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
-          </div>
+  <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+</div>
         </div>
 
         <div style="flex:1;">
@@ -547,9 +546,9 @@
   const LS_BIO = 'beanthere_profile_bio';
   const LS_AVATAR = 'beanthere_profile_avatar'; // stores data URL
 
-  // default fallback src (update to match your original file if different)
-  const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || '/beanthere/icons/noprof.jpg' : '/beanthere/icons/noprof.jpg';
-  const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || '/beanthere/icons/noprof.jpg' : '/beanthere/icons/noprof.jpg';
+ // Update these two lines specifically
+const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
+const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
   // Load saved values on startup (if any)
  function loadSaved(){
     // Keys used in your Sign Up function
