@@ -382,10 +382,10 @@
         <div>
           <div class="logo">bean<br>there</div>
           <nav class="nav">
-            <a href="index.html">Home</a>
-            <a href="profile.html">Profile</a>
-            <a href="tbv.html">TBV</a>
-            <a href="ratings.html">Ratings</a>
+            <a href="/bean there/index.html">Home</a>
+            <a href="/bean there/profile.html">Profile</a>
+            <a href="/bean there/tbv.html">TBV</a>
+            <a href="/bean there/ratings.html">Ratings</a>
           </nav>
         </div>
         <div class="auth">
@@ -408,7 +408,7 @@
     <!-- user menu: replace your old <a class="user-mini"> ... -->
 <div class="user-menu" id="userMenu">
   <button id="userMenuBtn" class="user-mini-btn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" title="Open account menu">
-    <img id="avatarMiniImg"src="/erylleimage/noprof.jpg" alt="profile mini">
+    <img id="avatarMiniImg"src="/beanthere/icons/noprof.jpg" alt="profile mini">
   </button>
 
   <div id="userDropdown" class="user-dropdown" role="menu" aria-labelledby="userMenuBtn" hidden>
@@ -439,7 +439,7 @@
         <!-- big profile header -->
         <div class="profile-header">
           <div class="avatar-large">
-  <img id="avatarLargeImg" src="/erylleimage/noprof.jpg" alt="profile large">
+  <img id="avatarLargeImg" src="/bean there/icons/noprof.jpg" alt="profile large">
 </div>
           <!-- Edit Profile Modal (paste after the profile header) -->
 <!-- Edit Profile Modal (with avatar upload) -->
@@ -457,7 +457,7 @@
       <div style="display:flex;gap:14px;align-items:center;">
         <div style="flex:0 0 auto; text-align:center;">
           <div style="width:84px; height:84px; border-radius:50%; overflow:hidden; border:2px solid #e6eaea; display:inline-block;">
-            <img id="modalAvatarPreview" src="/erylleimage/noprof.jpg" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <img id="modalAvatarPreview" src="/bean there/icons/noprof.jpg" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
           </div>
         </div>
 
@@ -475,6 +475,8 @@
       <!-- Username + Bio -->
       <label for="inputUsername" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Username</label>
       <input id="inputUsername" type="text" placeholder="@your_username" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;" required>
+      <label for="inputTitle" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Job Title</label>
+<input id="inputTitle" type="text" placeholder="Job Title" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;">
 
       <label for="inputBio" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Short bio</label>
       <textarea id="inputBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;"></textarea>
@@ -546,26 +548,52 @@
   const LS_AVATAR = 'beanthere_profile_avatar'; // stores data URL
 
   // default fallback src (update to match your original file if different)
-  const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || '/erylleimage/noprof.jpg' : '/erylleimage/noprof.jpg';
-  const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || '/erylleimage/noprof.jpg' : '/erylleimage/noprof.jpg';
+  const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || '/beanthere/icons/noprof.jpg' : '/beanthere/icons/noprof.jpg';
+  const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || '/beanthere/icons/noprof.jpg' : '/beanthere/icons/noprof.jpg';
   // Load saved values on startup (if any)
  function loadSaved(){
-    const savedUser = localStorage.getItem(LS_USER);
-    const savedBio = localStorage.getItem(LS_BIO);
+    // Keys used in your Sign Up function
+    const LS_NAME   = 'beanthere_profile_fullname';
+    const LS_USER   = 'beanthere_profile_username';
+    const LS_BIO    = 'beanthere_profile_bio';
+    const LS_AVATAR = 'beanthere_profile_avatar';
+    const LS_TITLE = 'beanthere_profile_title';
+    const savedTitle = localStorage.getItem(LS_TITLE);
+
+    const savedName   = localStorage.getItem(LS_NAME);
+    const savedUser   = localStorage.getItem(LS_USER);
+    const savedBio    = localStorage.getItem(LS_BIO);
     const savedAvatar = localStorage.getItem(LS_AVATAR);
 
+    const dropdownSub = document.querySelector('.ud-sub');
+    if(savedTitle && dropdownSub) {
+    dropdownSub.textContent = savedTitle;
+    }
+    // 1. Update Full Name (the <h1> tag)
+    const nameHeading = document.querySelector('.profile-meta h1');
+    if(savedName && nameHeading) {
+      nameHeading.textContent = savedName;
+      // Also update the greeting in the dropdown menu
+      const dropdownGreet = document.querySelector('.ud-greet');
+      if(dropdownGreet) dropdownGreet.textContent = `Hi, ${savedName}!`;
+    }
+
+    // 2. Update Username/Handle
     if(savedUser && handleText) handleText.textContent = savedUser;
+
+    // 3. Update Bio
     if(savedBio && bioText) bioText.textContent = savedBio;
 
+    // 4. Update Avatars
     if(savedAvatar && avatarLarge && avatarMini){
       avatarLarge.src = savedAvatar;
       avatarMini.src = savedAvatar;
-      modalPreview.src = savedAvatar;
+      if(modalPreview) modalPreview.src = savedAvatar;
     } else {
-      // ensure preview shows current default
-      if(modalPreview && avatarLarge){
-        modalPreview.src = avatarLarge.src || DEFAULT_LARGE_SRC;
-      }
+      // Revert to default if no avatar is saved
+      if(avatarLarge) avatarLarge.src = DEFAULT_LARGE_SRC;
+      if(avatarMini)  avatarMini.src  = DEFAULT_MINI_SRC;
+      if(modalPreview) modalPreview.src = DEFAULT_LARGE_SRC;
     }
   }
 
@@ -653,7 +681,9 @@
   // handle submit
   form.addEventListener('submit', function(e){
     e.preventDefault();
-
+    const titleVal = document.getElementById('inputTitle').value || 'Member';
+    localStorage.setItem('beanthere_profile_title', titleVal);
+    if(document.querySelector('.ud-sub')) document.querySelector('.ud-sub').textContent = titleVal;
     let usernameVal = inputUsername.value || '';
     let bioVal = inputBio.value || '';
     usernameVal = normalizeUsername(usernameVal);

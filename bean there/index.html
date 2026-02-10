@@ -110,6 +110,11 @@
       cursor: pointer;
       transition: 0.3s;
     }
+    /* Modal Styles */
+.modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
+.modal[hidden] { display: none; }
+.modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
+.modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
 
     /* MAIN */
     .main{
@@ -477,7 +482,52 @@
       </main>
     </div>
   </div>
+  <div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeSignUp"></div>
+  <div class="modal-panel" style="max-width: 450px; text-align: center;">
+    <button id="xSignUp" style="position:absolute; top:10px; right:15px; border:0; background:transparent; font-size:20px; cursor:pointer;">✕</button>
+    <h2 style="font-family:Lora, serif; margin-top:0;">Sign Up</h2>
+    
+    <form id="signUpForm" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regName">Name:</label>
+        <input id="regName" type="text" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regUser">Username:</label>
+        <input id="regUser" type="text" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
 
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regPass">Password:</label>
+        <input id="regPass" type="password" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regConfirm">Confirm Password:</label>
+        <input id="regConfirm" type="password" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label>Profile Picture:</label>
+        <input id="regAvatar" type="file" accept="image/*">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+  <label for="regTitle">Job Title:</label>
+  <input id="regTitle" type="text" placeholder="e.g. Associate for Talent Management" style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regBio">Bio:</label>
+        <input id="regBio" type="text" placeholder="not required" style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <button type="submit" style="margin-top:10px; padding:10px; border-radius:20px; border:1px solid var(--accent); background:transparent; font-weight:700; cursor:pointer; width:120px; align-self:center;">Save</button>
+    </form>
+  </div>
+</div>
   <script>
 const cafes = [
   {name:"Coffee Nook", img:"https://picsum.photos/600/400?random=1", loc:"Taft Ave"},
@@ -650,7 +700,44 @@ function handleSearch() {
   createDots();
   renderCarousel();
 }
+// Sign Up Logic
+const signupBtn = document.querySelector('.auth div:last-child'); // Selects "Sign up" in sidebar
+const signUpModal = document.getElementById('signUpModal');
+const signUpForm = document.getElementById('signUpForm');
 
+// Open/Close
+signupBtn.onclick = () => signUpModal.hidden = false;
+document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
+document.getElementById('xSignUp').onclick = () => signUpModal.hidden = true;
+
+signUpForm.onsubmit = function(e) {
+  e.preventDefault();
+  
+  if(document.getElementById('regPass').value !== document.getElementById('regConfirm').value) {
+    alert("Passwords do not match!");
+    return;
+  }
+
+  // Save Name and Bio
+  localStorage.setItem('beanthere_profile_fullname', document.getElementById('regName').value);
+  localStorage.setItem('beanthere_profile_username', '@' + document.getElementById('regUser').value.replace('@', ''));
+  localStorage.setItem('beanthere_profile_bio', document.getElementById('regBio').value || "No bio added yet.");
+  localStorage.setItem('beanthere_profile_title', document.getElementById('regTitle').value || "Member");
+  // Handle Avatar
+  const file = document.getElementById('regAvatar').files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      localStorage.setItem('beanthere_profile_avatar', ev.target.result);
+      window.location.href = 'profile.html';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // Default if no file chosen
+    localStorage.removeItem('beanthere_profile_avatar'); 
+    window.location.href = 'profile.html';
+  }
+};
 /* ---------- events ---------- */
 document.getElementById("nextBtn").onclick = nextSlide;
 document.getElementById("prevBtn").onclick = prevSlide;
