@@ -45,7 +45,7 @@
       color:#2b2b2b;
     }
 
-    /* ⭐ reusable alignment class */
+    /* reusable alignment class */
     .content-section{
       max-width: var(--content-width);
       margin-left: auto;
@@ -167,7 +167,7 @@
     .recent{
       max-width: var(--content-width);
       margin: 0 auto 8px;
-      background:#e35b2a;
+      background:#a43b1b;
       border-radius: 18px;
       padding: 18px;
     }
@@ -188,12 +188,14 @@
       overflow:hidden;
       height: 190px;
       background:#fff;
+      transition: transform .25s ease, box-shadow .25s ease;
     }
     .recent-card img{
       width:100%;
       height:100%;
       object-fit:cover;
       display:block;
+      transition: transform .35s ease, filter .35s ease;
     }
     .recent-overlay{
       position:absolute;
@@ -201,6 +203,7 @@
       padding: 10px 12px;
       color:#fff;
       background: linear-gradient(transparent, rgba(0,0,0,0.55));
+      transition: transform .25s ease, opacity .25s ease;
     }
     .recent-overlay .name{
       font-weight:700;
@@ -211,6 +214,19 @@
       opacity:0.9;
       font-size: 13px;
       margin-top: 2px;
+    }
+    .recent-card:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 14px 28px rgba(0,0,0,.25);
+    }
+
+    .recent-card:hover img{
+      transform: scale(1.06);
+      filter: saturate(1.1) contrast(1.05);
+    }
+
+    .recent-card:hover .recent-overlay{
+      transform: translateY(-4px);
     }
 
     /* Top Cities */
@@ -231,107 +247,235 @@
       justify-content:space-between;
       overflow:hidden;
     }
-    .city-photo{
-      height: 165px;
-      border-radius: 18px;
-      overflow:hidden;
-      background: rgba(255,255,255,0.08);
+
+   .city-photo{
+  position: relative;
+  height: 175px;
+  border-radius: 18px;
+  background: transparent;
     }
-    .city-photo img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      opacity:0.9;
-    }
-    .city-name{
+/* city photos animation  */
+
+/* Base stack container */
+.city-photo.stack{
+  position: relative;
+  height: 185px;
+  border-radius: 14px;
+  overflow: visible;          /* important so the tilt can stick out */
+  background: transparent;
+}
+
+/* the 3 stacked images */
+.city-photo.stack .p{
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 92%;
+  height: 185px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+  transform: translateX(-50%);
+}
+
+/* default look (not hovered) */
+.city-photo.stack .back{
+  transform: translateX(-50%) rotate(-10deg);
+  opacity: 0.35;
+  filter: saturate(0.95);
+}
+.city-photo.stack .mid{
+  transform: translateX(-50%) rotate(8deg);
+  opacity: 0.55;
+}
+.city-photo.stack .front{
+  transform: translateX(-50%) rotate(0deg);
+  opacity: 1;
+}
+
+/* We cycle by changing opacity of back/mid/front repeatedly while hovered */
+@keyframes fadeFront3 {
+  0%, 32%   { opacity: 1; }
+  33%, 100% { opacity: 0; }
+}
+@keyframes fadeMid3 {
+  0%, 32%   { opacity: 0; }
+  33%, 65%  { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+@keyframes fadeBack3 {
+  0%, 65%   { opacity: 0; }
+  66%, 100% { opacity: 1; }
+}
+
+/* Small "turn" motion for the front image while cycling */
+@keyframes turnCycle {
+  0%   { transform: translateX(-50%) rotate(0deg) rotateY(0deg); }
+  35%  { transform: translateX(-50%) rotate(0deg) rotateY(18deg); }
+  70%  { transform: translateX(-50%) rotate(0deg) rotateY(-16deg); }
+  100% { transform: translateX(-50%) rotate(0deg) rotateY(0deg); }
+}
+
+/* On hover: run the cycle (ONLY on hover) */
+.city-card:hover .city-photo.stack .front{
+  animation: turnCycle 1.2s ease-in-out infinite, fadeFront3 3s ease-in-out infinite;
+}
+.city-card:hover .city-photo.stack .mid{
+  animation: fadeMid3 3s ease-in-out infinite;
+}
+.city-card:hover .city-photo.stack .back{
+  animation: fadeBack3 3s ease-in-out infinite;
+}
+
+/* Keep the tilt positions even during animation */
+.city-card:hover .city-photo.stack .mid{
+  transform: translateX(-50%) rotate(8deg);
+}
+.city-card:hover .city-photo.stack .back{
+  transform: translateX(-50%) rotate(-10deg);
+}
+
+.city-name{
       text-align:center;
       font-weight: 800;
-      font-size: 44px;
-      letter-spacing: 1px;
+      font-size: 24px;
+      letter-spacing: 0.01px;
       color: #a7bde7;
       margin-top: 10px;
-    }
+}
 
-    /* All Listed TBVs */
+/* All Listed TBVs */
     .sub-title{
       font-family: Lora, serif;
       font-size: 44px;
       margin: 14px 0 12px;
       color:#4a4a3a;
     }
-    .tbv-grid{
-      max-width: var(--content-width);
-      margin: 0 auto 26px;
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-    .tbv-card{
-      background:#c7b073;
-      border-radius: 16px;
-      padding: 10px;
-      display:flex;
-      gap: 10px;
-      align-items:flex-start;
-      border: 1.5px solid rgba(127,123,46,0.25);
-      min-height: 92px;
-    }
-    .tbv-thumb{
-      width: 120px;
-      height: 72px;
-      border-radius: 12px;
-      overflow:hidden;
-      background:#fff;
-      flex: 0 0 auto;
-    }
-    .tbv-thumb img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    .tbv-info{ flex:1; min-width:0; }
-    .tbv-name{
-      font-weight: 800;
-      font-size: 20px;
-      color:#fff;
-      margin: 2px 0 2px;
-      line-height: 1.1;
-    }
-    .tbv-loc{
-      font-size: 12px;
-      color: rgba(255,255,255,0.9);
-      margin-bottom: 8px;
-    }
-    .tbv-meta{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .icon-row{
-      display:flex;
-      align-items:center;
-      gap: 6px;
-      background: rgba(255,255,255,0.22);
-      border-radius: 10px;
-      padding: 4px 6px;
-    }
-    .icon-row img{
-      width: 14px;
-      height: 14px;
-      object-fit: contain;
-      display:block;
-    }
-    .rating{
-      font-size: 12px;
-      color: rgba(255,255,255,0.95);
-      background: rgba(255,255,255,0.22);
-      border-radius: 10px;
-      padding: 4px 8px;
-      white-space: nowrap;
-    }
+
+/* TBV TBV TBV */
+/* All Listed TBVs */
+.tbv-grid{
+  max-width: var(--content-width);
+  margin: 0 auto 22px;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px; /* smaller spacing */
+}
+
+.tbv-card{
+  background:#c7b073;
+  border-radius: 16px;
+  padding: 10px;
+  display:flex;
+  gap: 10px;
+  align-items:stretch;
+  border: 1.5px solid rgba(127,123,46,0.25);
+  min-height: 130px;
+  cursor: pointer; /* clickable feel */
+  transition: transform .22s ease, box-shadow .22s ease, filter .22s ease; 
+}
+
+
+/* LEFT half (photo) */
+.tbv-thumb{
+  flex: 0 0 50%;      /* ✅ occupy half of the card */
+  height: 130px;       /* smaller image height */
+  border-radius: 12px;
+  overflow:hidden;
+  background:#fff;
+  transition: transform .35s ease, filter .35s ease;
+}
+
+.tbv-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* RIGHT half (info) */
+ .tbv-info{
+  flex: 1 1 50%;
+  min-width:0;
+
+  display:grid;
+  grid-template-rows: 1fr auto; /* top content + bottom pill */
+  row-gap: 18px;             
+}
+
+
+/* Beans + inclusions sit on the SAME bottom row */
+.tbv-bottom{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between; /*beans left, inclusions right */
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* Title + location */
+.tbv-name{
+  font-weight: 800;
+  font-size: 22px;    /* smaller */
+  color:#2b210c;
+  margin: 0;
+  line-height: 1.05;
+}
+
+.tbv-loc{
+  font-size: 13px;    /* smaller */
+  color: #524936;
+  margin-top: 3px;
+}
+
+/* Beans row */
+.tbv-beans-row{
+  display:flex;
+  align-items:center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+
+.tbv-beans{
+  display:flex;
+  align-items:center;
+  gap: 6px;           /* tighter */
+}
+
+.tbv-beans img{
+  width: 16px;        /* smaller icons */
+  height: 16px;
+  object-fit:contain;
+  display:block;
+}
+
+.tbv-half{
+  font-size: 13px;    /* smaller */
+  font-weight: 450;
+  color: #3a2a14;
+}
+
+/* Inclusions pill bottom-right */
+.tbv-inclusions{
+  justify-self: end;     /* right */
+  align-self: end;       /* bottom */
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.35);
+  transition: transform .22s ease, background .22s ease;
+}
+
+
+.tbv-inclusions img{
+  width: 16px;        /* smaller inclusion icons */
+  height: 16px;
+  object-fit:contain;
+  display:block;
+}
 
     /* MOBILE */
     @media(max-width:1100px){
@@ -346,6 +490,220 @@
       .main{order:1}
       .tbv-grid{ grid-template-columns: 1fr; }
     }
+
+
+  /* ===== TBV FILTER BAR ===== */
+.tbv-filterbar{
+  margin: 12px auto 14px;
+  padding: 14px 14px 12px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(127,123,46,0.25);
+  background: rgba(199,176,115,0.28);
+}
+
+.tbv-filter-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tbv-filter-title{
+  font-family: Lora, serif;
+  font-size: 22px;
+  color:#4a4a3a;
+}
+
+.tbv-sort{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.tbv-sort-label{
+  font-size: 14px;
+  color:#4a4a3a;
+  font-weight: 600;
+}
+
+.tbv-sort-select{
+  appearance: none;
+  padding: 7px 34px 7px 10px;   /* ⬅ smaller height */
+  border-radius: 999px;
+  border: 1.5px solid rgba(127,123,46,0.35);
+  background: rgba(255,255,255,0.45);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+
+/* small dropdown arrow */
+.tbv-sort{
+  position: relative;
+}
+
+.tbv-sort::after{
+  content:"▾";
+  position:absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-45%);
+  pointer-events:none;
+  color:#4a4a3a;
+  font-size: 13px;
+}
+
+.tbv-filter-groups{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+.tbv-filter-group{
+  display:flex;
+  align-items:flex-start;
+  gap: 12px;
+}
+
+.tbv-filter-label{
+  width: 140px;
+  flex: 0 0 140px;
+  font-weight: 700;
+  color:#4a4a3a;
+  font-size: 14px;
+  padding-top: 8px;
+}
+
+.tbv-filter-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 10px;
+}
+
+/* Hover: lift the card */
+.tbv-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 16px 28px rgba(0,0,0,0.18);
+}
+
+/* Hover: zoom the photo slightly + boost contrast */
+.tbv-card:hover .tbv-thumb img{
+  transform: scale(1.06);
+  filter: saturate(1.1) contrast(1.05);
+}
+
+/* Hover: make inclusions pill pop a bit */
+.tbv-card:hover .tbv-inclusions{
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.55);
+}
+
+/* Optional: keyboard focus (accessibility) */
+.tbv-card:focus-within{
+  outline: 2px solid rgba(127,123,46,0.55);
+  outline-offset: 3px;
+}
+
+/* pill base */
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.pill input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+
+.pill span{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;            /* ⬅ smaller height */
+  border-radius: 999px;
+  border: 1.5px solid rgba(127,123,46,0.35);
+  background: rgba(255,255,255,0.35);
+  color:#3a2a14;
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+/* hover */
+.pill:hover span{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.50);
+}
+
+/* checked state */
+.pill input:checked + span{
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(127,123,46,0.65);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.10);
+}
+
+/* icon pills */
+.pill-icon img{
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display:block;
+}
+
+/* actions row */
+.tbv-filter-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.tbv-filter-btn{
+  border: 1.5px solid rgba(127,123,46,0.35);
+  background: rgba(255,255,255,0.40);
+  padding: 6px 12px;            /* ⬅ smaller height */
+  border-radius: 999px;
+  cursor:pointer;
+  font-weight: 700;
+  font-size: 13px;
+  color:#4a4a3a;
+  transition: transform .18s ease, background .18s ease;
+}
+
+.tbv-filter-btn:hover{
+  background: rgba(255,255,255,0.55);
+  transform: translateY(-1px);
+}
+
+.tbv-filter-hint{
+  font-size: 12px;
+  color: rgba(74,74,58,0.85);
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .tbv-filter-group{
+    flex-direction:column;
+    gap: 8px;
+  }
+  .tbv-filter-label{
+    width:auto;
+    flex: none;
+    padding-top: 0;
+  }
+  .tbv-filter-top{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
   </style>
 </head>
 
@@ -376,31 +734,31 @@
           <h2>Recently Added</h2>
           <div class="recent-grid">
             <div class="recent-card">
-              <img src="cafe.jpg" alt="Cafe placeholder">
+              <img src="apdev-tbv/cafe1.jpg" alt="cafe1">
               <div class="recent-overlay">
-                <div class="name">Cafe Name</div>
-                <div class="loc">Location (City)</div>
+                <div class="name">Elsewhere</div>
+                <div class="loc">Malate, Manila</div>
               </div>
             </div>
             <div class="recent-card">
-              <img src="cafe.jpg" alt="Cafe placeholder">
+              <img src="apdev-tbv/cafe2.png" alt="cafe2">
               <div class="recent-overlay">
-                <div class="name">Cafe Name</div>
-                <div class="loc">Location (City)</div>
+                <div class="name">Sulok Coffee</div>
+                <div class="loc">Salcedo, Makati</div>
               </div>
             </div>
             <div class="recent-card">
-              <img src="cafe.jpg" alt="Cafe placeholder">
+              <img src="apdev-tbv/cafe3.jpg" alt="cafe3">
               <div class="recent-overlay">
-                <div class="name">Cafe Name</div>
-                <div class="loc">Location (City)</div>
+                <div class="name">La Josephina Coffee & Pastries</div>
+                <div class="loc">Amadeo, Cavite</div>
               </div>
             </div>
             <div class="recent-card">
-              <img src="cafe.jpg" alt="Cafe placeholder">
+              <img src="apdev-tbv/cafe4.jpg" alt="cafe4">
               <div class="recent-overlay">
-                <div class="name">Cafe Name</div>
-                <div class="loc">Location (City)</div>
+                <div class="name">Hatch + Hoolman Studio</div>
+                <div class="loc">Bayani Road, Taguig</div>
               </div>
             </div>
           </div>
@@ -410,15 +768,27 @@
         <h2 class="section-title content-section">Top 3 Cities On Your Coffee Radar</h2>
         <section class="cities-grid content-section">
           <div class="city-card">
-            <div class="city-photo"><img src="manila.jpg" alt="Manila"></div>
+           <div class="city-photo stack">
+              <img class="p back"  src="apdev-tbv/cm1.jpg" alt="">
+              <img class="p mid"   src="apdev-tbv/cm2.jpg" alt="">
+              <img class="p front" src="apdev-tbv/cm3.jpg" alt="">
+            </div>
             <div class="city-name">MANILA</div>
           </div>
           <div class="city-card">
-            <div class="city-photo"><img src="makati.jpg" alt="Makati"></div>
-            <div class="city-name">MAKATI</div>
+            <div class="city-photo stack">
+              <img class="p back"  src="apdev-tbv/cmk1.jpg" alt="">
+              <img class="p mid"   src="apdev-tbv/cmk2.jpg" alt="">
+              <img class="p front" src="apdev-tbv/cmk3.jpg" alt="">
+            </div>
+             <div class="city-name">MAKATI</div>
           </div>
           <div class="city-card">
-            <div class="city-photo"><img src="cavite.jpg" alt="Cavite"></div>
+             <div class="city-photo stack">
+              <img class="p back"  src="apdev-tbv/ccav1.jpg" alt="">
+              <img class="p mid"   src="apdev-tbv/ccav2.jpg" alt="">
+              <img class="p front" src="apdev-tbv/ccav3.jpg" alt="">
+            </div>
             <div class="city-name">CAVITE</div>
           </div>
         </section>
@@ -431,196 +801,340 @@
           </div>
         </div>
 
+        <!-- FILTER BAR (UI only for now) -->
+        <section class="tbv-filterbar content-section" aria-label="TBV filters">
+          <div class="tbv-filter-top">
+            <div class="tbv-filter-title">Filter & Sort</div>
+
+            <label class="tbv-sort">
+              <span class="tbv-sort-label">Sort by</span>
+              <select class="tbv-sort-select" name="sortBy">
+                <option value="recent" selected>Recently Added</option>
+                <option value="rated">Highest Rated</option>
+                <option value="reviewed">Most Reviewed</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="tbv-filter-groups">
+            <!-- CITY (multi-select) -->
+            <div class="tbv-filter-group">
+              <div class="tbv-filter-label">Cafes From</div>
+              <div class="tbv-filter-pills" role="group" aria-label="City">
+                <label class="pill">
+                  <input type="checkbox" name="city" value="manila">
+                  <span>Metro Manila</span>
+                </label>
+                <label class="pill">
+                  <input type="checkbox" name="city" value="makati">
+                  <span>South Luzon</span>
+                </label>
+                <label class="pill">
+                  <input type="checkbox" name="city" value="cavite">
+                  <span>North Luzon</span>
+                </label>
+                <label class="pill">
+                  <input type="checkbox" name="city" value="taguig">
+                  <span>Visayas</span>
+                </label>
+                <label class="pill">
+                  <input type="checkbox" name="city" value="qc">
+                  <span>Mindanao</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- MINIMUM RATING (single-select) -->
+            <div class="tbv-filter-group">
+              <div class="tbv-filter-label">Minimum Rating</div>
+              <div class="tbv-filter-pills" role="radiogroup" aria-label="Minimum Rating">
+                <label class="pill pill-radio">
+                  <input type="radio" name="minRating" value="3" checked>
+                  <span>3+</span>
+                </label>
+                <label class="pill pill-radio">
+                  <input type="radio" name="minRating" value="3.5">
+                  <span>3.5+</span>
+                </label>
+                <label class="pill pill-radio">
+                  <input type="radio" name="minRating" value="4">
+                  <span>4+</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- INCLUSIONS (multi-select) -->
+            <div class="tbv-filter-group">
+              <div class="tbv-filter-label">Inclusions</div>
+              <div class="tbv-filter-pills" role="group" aria-label="Inclusions">
+                <label class="pill pill-icon">
+                  <input type="checkbox" name="inc" value="aircon">
+                  <span><img src="icons/ac.png" alt="">Aircon</span>
+                </label>
+                <label class="pill pill-icon">
+                  <input type="checkbox" name="inc" value="wifi">
+                  <span><img src="icons/wifi.png" alt="">Wi-Fi</span>
+                </label>
+                <label class="pill pill-icon">
+                  <input type="checkbox" name="inc" value="socket">
+                  <span><img src="icons/socket.png" alt="">Socket</span>
+                </label>
+                <label class="pill pill-icon">
+                  <input type="checkbox" name="inc" value="milk">
+                  <span><img src="icons/oat.png" alt="">Milk</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="tbv-filter-actions">
+            <button type="button" class="tbv-filter-btn">Clear</button>
+            <div class="tbv-filter-hint">UI only (no filtering logic yet)</div>
+          </div>
+        </section>
+
         <!-- All Listed TBVs -->
         <h2 class="sub-title content-section">All Listed TBVs</h2>
 
         <section class="tbv-grid content-section">
           <!-- repeat cards as needed -->
           <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv1.jpg" alt="Cafe"></div>
             <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row" title="Amenities">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
+              <div class="tbv-top">
+                <div class="tbv-name">Soul Good</div>
+                <div class="tbv-loc">Greenfield, Mandaluyong</div>
+
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
                 </div>
               </div>
+
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/wifi.png" alt="WiFi">
+                <img src="icons/oat.png" alt="Milk">
+              </div>
             </div>
+
           </article>
 
           <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv2.jpg" alt="Cafe"></div>
             <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
+              <div class="tbv-top">
+                <div class="tbv-name">Dialog Cafe</div>
+                <div class="tbv-loc">UE Tech, Caloocan</div>
+
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
                 </div>
               </div>
+
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/socket.png" alt="Socket">
+                <img src="icons/wifi.png" alt="WiFi">
+                <img src="icons/oat.png" alt="Milk">
+              </div>
             </div>
+
           </article>
 
           <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv3.jpg" alt="Cafe"></div>
             <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
+              <div class="tbv-top">
+                <div class="tbv-name">Lmnop</div>
+                <div class="tbv-loc">Dos Castillas, San Juan</div>
+
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
+                  <div class="tbv-half">1/2</div>
                 </div>
               </div>
+
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/socket.png" alt="Socket">
+                <img src="icons/wifi.png" alt="WiFi">
+              </div>
             </div>
+
           </article>
 
           <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv4.jpg" alt="Cafe"></div>
             <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
+              <div class="tbv-top">
+                <div class="tbv-name">Sip Cafe</div>
+                <div class="tbv-loc">Escario, Cebu</div>
+
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
+                  <div class="tbv-half">1/2</div>
                 </div>
               </div>
+
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/socket.png" alt="Socket">
+                <img src="icons/wifi.png" alt="WiFi">
+                <img src="icons/oat.png" alt="Milk">
+              </div>
             </div>
+
+          </article>
+        <article class="tbv-card">
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv5.jpg" alt="Cafe"></div>
+          <div class="tbv-info">
+            <div class="tbv-top">
+              <div class="tbv-name">Clubhaus Coffee</div>
+              <div class="tbv-loc">Cebu</div>
+
+              <div class="tbv-beans-row">
+                <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                </div>
+                <div class="tbv-half">1/2</div>
+              </div>
+            </div>
+
+            <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/socket.png" alt="Socket">
+                <img src="icons/wifi.png" alt="WiFi">
+                <img src="icons/oat.png" alt="Milk">
+            </div>
+          </div>
+        </article>
+
+          <article class="tbv-card">
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv6.jpg" alt="Cafe"></div>
+            <div class="tbv-info">
+              <div class="tbv-top">
+                <div class="tbv-name">Cafe Maruja</div>
+                <div class="tbv-loc">Station 3, Boracay</div>
+
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
+                  <div class="tbv-half">1/2</div>
+                </div>
+              </div>
+
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/socket.png" alt="Socket">
+                <img src="icons/oat.png" alt="Milk">
+              </div>
+            </div>
+
           </article>
 
           <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv7.jpg" alt="Cafe"></div>
             <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
+              <div class="tbv-top">
+                <div class="tbv-name">Cafe Gervacios</div>
+                <div class="tbv-loc">Poblacion, Davao</div>
+
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
+                  <div class="tbv-half">1/2</div>
                 </div>
               </div>
+
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/socket.png" alt="Socket">
+                <img src="icons/wifi.png" alt="WiFi">
+                <img src="icons/oat.png" alt="Milk">
+              </div>
             </div>
+
           </article>
 
           <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv8.jpg" alt="Cafe"></div>
             <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
+              <div class="tbv-top">
+                <div class="tbv-name">Glasshouse Coffee</div>
+                <div class="tbv-loc">Poblacion, Davao</div>
+
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
                 </div>
               </div>
+
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/wifi.png" alt="WiFi">
+                <img src="icons/oat.png" alt="Milk">
+              </div>
             </div>
+
           </article>
 
           <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
+            <div class="tbv-thumb"><img src="apdev-tbv/tbv9.jpg" alt="Cafe"></div>
             <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
-                </div>
-              </div>
-            </div>
-          </article>
+              <div class="tbv-top">
+                <div class="tbv-name">Happy Valley Cafe</div>
+                <div class="tbv-loc">Matina, Davao</div>
 
-          <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
-            <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
+                <div class="tbv-beans-row">
+                  <div class="tbv-beans">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                    <img src="icons/bean.png" alt="bean">
+                  </div>
+                  <div class="tbv-half">1/2</div>
                 </div>
               </div>
-            </div>
-          </article>
 
-          <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
-            <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
-                </div>
+              <div class="tbv-inclusions" aria-label="Inclusions">
+                <img src="icons/ac.png" alt="Aircon">
+                <img src="icons/wifi.png" alt="WiFi">
+                <img src="icons/oat.png" alt="Milk">
               </div>
             </div>
-          </article>
 
-          <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
-            <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="tbv-card">
-            <div class="tbv-thumb"><img src="cafe.jpg" alt="Cafe"></div>
-            <div class="tbv-info">
-              <div class="tbv-name">Cafe Name</div>
-              <div class="tbv-loc">Location (City)</div>
-              <div class="tbv-meta">
-                <div class="icon-row">
-                  <img src="beans.jpg" alt="Beans">
-                  <img src="socket.jpg" alt="Socket">
-                  <img src="wifi.jpg" alt="WiFi">
-                  <img src="milk.jpg" alt="Milk">
-                  <img src="aircondition.jpg" alt="Aircondition">
-                </div>
-              </div>
-            </div>
           </article>
         </section>
 
