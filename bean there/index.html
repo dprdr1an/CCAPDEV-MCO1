@@ -503,6 +503,27 @@
       </main>
     </div>
   </div>
+  <div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeLogIn"></div>
+  <div class="modal-panel" style="max-width: 400px; text-align: left; padding: 40px;">
+    <button id="xLogIn" style="position:absolute; top:10px; right:15px; border:0; background:transparent; font-size:24px; cursor:pointer;">✕</button>
+    <h2 style="font-family:Lora, serif; margin-top:0; text-align: center; font-size: 32px;">Log in</h2>
+    
+    <form id="logInForm" style="display: flex; flex-direction: column; gap: 20px; margin-top: 30px;">
+      <div style="display:grid; grid-template-columns: 1fr 2fr; align-items: center;">
+        <label for="loginUser" style="font-size: 18px;">Username:</label>
+        <input id="loginUser" type="text" required style="padding:8px; border:0; border-bottom:1px solid #ccc; outline:none;">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 2fr; align-items: center;">
+        <label for="loginPass" style="font-size: 18px;">Password:</label>
+        <input id="loginPass" type="password" required style="padding:8px; border:0; border-bottom:1px solid #ccc; outline:none;">
+      </div>
+
+      <button type="submit" style="margin-top:20px; padding:8px 40px; border-radius:30px; border:1.5px solid #5b5f10; background:transparent; font-weight:700; cursor:pointer; font-size: 18px; width: fit-content; align-self:center;">Done</button>
+    </form>
+  </div>
+</div>
 <div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" id="closeSignUp"></div>
   <div class="modal-panel" style="max-width: 450px; text-align: center;">
@@ -721,29 +742,42 @@ function handleSearch() {
   renderCarousel();
 }
 // Sign Up Logic
-const signupBtn = document.querySelector('.auth div:last-child'); // Selects "Sign up" in sidebar
+// Auth Selectors
+const loginBtn = document.querySelector('.auth div:first-child');
+const signupBtn = document.querySelector('.auth div:last-child');
+const logInModal = document.getElementById('logInModal');
 const signUpModal = document.getElementById('signUpModal');
+const logInForm = document.getElementById('logInForm');
 const signUpForm = document.getElementById('signUpForm');
 
-// Open/Close
+// Modal Controls
+loginBtn.onclick = () => logInModal.hidden = false;
 signupBtn.onclick = () => signUpModal.hidden = false;
+
+document.getElementById('closeLogIn').onclick = () => logInModal.hidden = true;
+document.getElementById('xLogIn').onclick = () => logInModal.hidden = true;
 document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
 document.getElementById('xSignUp').onclick = () => signUpModal.hidden = true;
 
+// --- SIGN UP LOGIC ---
 signUpForm.onsubmit = function(e) {
   e.preventDefault();
   
-  if(document.getElementById('regPass').value !== document.getElementById('regConfirm').value) {
+  const pass = document.getElementById('regPass').value;
+  const confirm = document.getElementById('regConfirm').value;
+
+  if(pass !== confirm) {
     alert("Passwords do not match!");
     return;
   }
 
-  // Save Name and Bio
+  // Store data (Including the password now so we can check it later)
   localStorage.setItem('beanthere_profile_fullname', document.getElementById('regName').value);
   localStorage.setItem('beanthere_profile_username', '@' + document.getElementById('regUser').value.replace('@', ''));
+  localStorage.setItem('beanthere_profile_password', pass); // Store for login verify
   localStorage.setItem('beanthere_profile_bio', document.getElementById('regBio').value || "No bio added yet.");
   localStorage.setItem('beanthere_profile_title', document.getElementById('regTitle').value || "Member");
-  // Handle Avatar
+
   const file = document.getElementById('regAvatar').files[0];
   if (file) {
     const reader = new FileReader();
@@ -753,9 +787,25 @@ signUpForm.onsubmit = function(e) {
     };
     reader.readAsDataURL(file);
   } else {
-    // Default if no file chosen
-    localStorage.removeItem('beanthere_profile_avatar'); 
     window.location.href = 'profile.html';
+  }
+};
+
+// --- LOG IN LOGIC ---
+logInForm.onsubmit = function(e) {
+  e.preventDefault();
+
+  const enteredUser = '@' + document.getElementById('loginUser').value.replace('@', '');
+  const enteredPass = document.getElementById('loginPass').value;
+
+  const storedUser = localStorage.getItem('beanthere_profile_username');
+  const storedPass = localStorage.getItem('beanthere_profile_password');
+
+  if (enteredUser === storedUser && enteredPass === storedPass) {
+    alert("Login successful! Welcome back.");
+    window.location.href = 'profile.html';
+  } else {
+    alert("Invalid username or password. Please try again.");
   }
 };
 

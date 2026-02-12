@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Bean There – Profile</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -14,6 +14,8 @@
       --accent: #7f7b2e;
       --muted: #bfb0a8;
       --content-width: 1500px;
+      --review-bg: #dce6f7; /* Light blue from the image */
+      --review-title: #d35f0f; /* Orange cafe name color */
     }
 
     *{box-sizing:border-box}
@@ -93,6 +95,30 @@
 
 .delay-1 { animation-delay: 0.15s; }
 .delay-2 { animation-delay: 0.35s; }
+
+/* Ensure both containers share the same base layout */
+#reviewContainer, #repliesContainer {
+  display: flex;
+  width: 100%;
+  min-height: 220px; /* Aligns height better with the review card */
+}
+
+/* Specific fix for the replies container to match the blue box */
+/* Force the replies carousel to match the main review carousel exactly */
+#repliesContainer {
+  background-color: #dce6f7 !important;
+  min-height: 180px;
+  padding: 0; /* Remove padding so the card inside touches the edges if needed */
+  display: flex;
+  align-items: stretch; /* Ensures the card fills the height */
+}
+
+/* Ensure the review card inside the replies container doesn't add extra margin */
+#repliesContainer .review-card {
+  width: 100%;
+  box-shadow: none; /* Optional: remove shadow if it looks too 'heavy' inside the blue box */
+  margin: 0;
+}
 
     /* MAIN */
     .main{
@@ -262,12 +288,12 @@
     .section{
       max-width:var(--content-width);
       margin:28px auto;
-      text-align:center;
     }
     .section h2{
       font-size:32px;
       margin:0 0 18px;
       letter-spacing:-0.3px;
+      text-align: center;
     }
     /* ----- user dropdown ----- */
     .user-menu{ 
@@ -355,45 +381,195 @@
 }
 
 
-    /* carousel placeholder */
-    .carousel{
-      background: #cfe0ff;
-      border-radius:16px;
-      padding:28px;
-      position:relative;
-      height:110px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin:0 48px;
+    /* carousel styles */
+    .carousel-wrapper{
+      position: relative;
+      padding: 0 48px; /* space for arrows */
     }
 
-    .carousel .arrow{
-      position:absolute;
-      width:44px;
-      height:44px;
-      border-radius:50%;
-      background:#ee6a45;
-      color:#fff;
+    .carousel{
+      /* Removed fixed background and height to accommodate review card */
+      position:relative;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-weight:700;
-      cursor:pointer;
-      top:50%;
-      transform:translateY(-50%);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+      width: 100%;
     }
-    .carousel .arrow.left{ left: -22px; }
-    .carousel .arrow.right{ right: -22px; }
+
+    /* FIXED: Changed selector from .carousel .arrow to .carousel-wrapper .arrow */
+    /* FIXED: Solid Orange Arrows */
+    .carousel-wrapper .arrow {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ee6a45 !important; /* Solid orange from your design */
+      color: #fff !important;
+      opacity: 1 !important; /* Forces the arrow to be fully opaque */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      cursor: pointer;
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 20; /* Ensures arrows stay above the blue box */
+      font-size: 24px;
+      border: none;
+    }
+
+    /* FIXED: Solid Blue Review Container */
+    .carousel {
+      position: relative;
+      display: flex;
+      width: 100%;
+      background-color: #dce6f7 !important; /* Solid light blue */
+      border-radius: 20px;
+      overflow: hidden;
+      opacity: 1 !important; /* Removes the washed-out look */
+      min-height: 180px;
+    }
+    .carousel-wrapper .arrow.left{ left: 0px; }
+    .carousel-wrapper .arrow.right{ right: 0px; }
 
     /* replies carousel larger height */
-    .carousel.large{ height:150px; }
+    .carousel.large{ 
+        background: #cfe0ff;
+        border-radius:16px;
+        padding:28px;
+        height:150px; 
+    }
+
+    /* --- NEW REVIEW CARD STYLES --- */
+    .review-card {
+      background-color: var(--review-bg);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      text-align: left;
+      position: relative; /* For edit button positioning */
+    }
+
+    .review-img {
+      width: 180px;
+      height: 180px;
+      border-radius: 16px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .review-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #4a5568;
+    }
+
+    .review-user {
+      font-weight: 700;
+      color: #2d3748;
+      font-size: 16px;
+    }
+
+    .review-date {
+      display: block;
+      font-size: 13px;
+    }
+    
+    .edited-label {
+        font-size: 11px;
+        color: #718096;
+        font-style: italic;
+    }
+
+    .amenities-list {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      color: #4a5568;
+    }
+
+    .amenity-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .cafe-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .cafe-name {
+      font-family: Lora, serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--review-title);
+      margin: 0;
+    }
+
+    .rating-beans {
+        font-size: 20px;
+        letter-spacing: 2px;
+    }
+
+    .cafe-address {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2d3748;
+      margin-bottom: 12px;
+    }
+
+    .review-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #4a5568;
+      margin: 0 0 20px 0; /* Bottom margin for button space */
+      flex-grow: 1;
+    }
+
+    .edit-review-btn-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: auto;
+    }
+
+    .btn-edit-review {
+      background: transparent;
+      border: 1.5px solid #2d3748;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-edit-review:hover {
+        background: rgba(0,0,0,0.05);
+    }
+
 
     @media(max-width:980px){
     :root{ --content-width: 820px; }
     .search{ flex:1 1 calc(100% - 64px); max-width: calc(var(--content-width) - 64px); }
     .user-mini{ width:48px; height:48px; flex:0 0 48px; }
+    .review-card { flex-direction: column; }
+    .review-img { width: 100%; height: 200px; }
+    .review-header { flex-direction: column; gap: 10px; }
   }
 
   @media(max-width:760px){
@@ -401,7 +577,92 @@
     .sidebar{order:2;height:auto}
     .main{order:1}
     .user-mini{ display:none; } /* hide mini on very small screens */
+    .carousel-wrapper { padding: 0; }
+    /* FIXED: Updated selector here too */
+    .carousel-wrapper .arrow { display: none; /* hide arrows on mobile, maybe use swipe later */ }
   }
+  /* --- NEW: Edit Review Modal Specific Styles --- */
+    .edit-review-panel {
+      background-color: #f8f5ee; /* Light beige background from image */
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: min(480px, calc(100% - 32px)); /* Fixed width, responsive */
+      text-align: center;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .edit-review-header {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .edit-review-header h3 {
+      font-family: 'Lora', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #4a3f35; /* Dark brown color */
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .edit-review-header h3 span {
+      display: block;
+      font-size: 24px;
+      margin-top: 5px;
+    }
+
+    .modal-close-review {
+      position: absolute;
+      top: -20px;
+      right: -15px;
+      background: transparent;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #4a3f35;
+      padding: 5px;
+    }
+
+    #editReviewText {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      color: #7f7a75; /* Text color from image */
+      resize: none; /* Disable resize handle */
+      outline: none;
+      text-align: center;
+      min-height: 120px;
+    }
+
+    #editReviewText::placeholder {
+      color: #b0aba5;
+    }
+
+    .edit-review-footer {
+      margin-top: 30px;
+    }
+
+    .btn-save-review {
+      background-color: transparent;
+      color: #4a3f35;
+      border: 2px solid #4a3f35; /* Dark brown border */
+      border-radius: 30px;
+      padding: 10px 50px;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-save-review:hover {
+      background-color: #4a3f35;
+      color: #fff;
+    }
   </style>
 </head>
 
@@ -427,7 +688,6 @@
 
       <main class="main animate-on-load delay-2">
 
-        <!-- search row + small profile pic on the top-right -->
         <div class="search-row">
   <div class="search-area" role="search" aria-label="Search cafes owners tags">
     <div class="search" aria-hidden="false">
@@ -437,9 +697,7 @@
       </button>
     </div>
 
-    <!-- mini avatar placed inline (no absolute positioning) -->
-    <!-- user menu: replace your old <a class="user-mini"> ... -->
-<div class="user-menu" id="userMenu">
+    <div class="user-menu" id="userMenu">
   <button id="userMenuBtn" class="user-mini-btn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" title="Open account menu">
     <img id="avatarMiniImg"src="icons/noprof.jpg" alt="profile mini">
   </button>
@@ -469,14 +727,11 @@
   </div>
 </div>
 
-        <!-- big profile header -->
         <div class="profile-header">
           <div class="avatar-large">
   <img id="avatarLargeImg" src="icons/noprof.jpg" alt="profile large">
 </div>
-          <!-- Edit Profile Modal (paste after the profile header) -->
-<!-- Edit Profile Modal (with avatar upload) -->
-<div id="editProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+          <div id="editProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
   <div class="modal-backdrop" data-close></div>
 
   <div class="modal-panel" role="document">
@@ -486,7 +741,6 @@
     </header>
 
     <form id="editProfileForm" style="margin-top:14px;">
-      <!-- Avatar upload row -->
       <div style="display:flex;gap:14px;align-items:center;">
         <div style="flex:0 0 auto; text-align:center;">
           <div style="width:84px; height:84px; border-radius:50%; overflow:hidden; border:2px solid #e6eaea; display:inline-block;">
@@ -505,7 +759,6 @@
         </div>
       </div>
 
-      <!-- Username + Bio -->
       <label for="inputUsername" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Username</label>
       <input id="inputUsername" type="text" placeholder="@your_username" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;" required>
 
@@ -524,8 +777,7 @@
 
 
 
-          <!-- REPLACE your existing .profile-meta block with this -->
-<div class="profile-meta">
+          <div class="profile-meta">
   <h1>Erylle Galinato</h1>
   <div id="handleText" class="handle">@erylle_g</div>
   <p id="bioText">Placeholder for short bio — add a couple of lines about yourself here.</p>
@@ -534,31 +786,48 @@
 
         </div>
 
-        <!-- Content sections -->
         <section class="section">
           <h2>My reviews</h2>
-          <div class="carousel" aria-hidden="false">
-            <div class="arrow left" onclick="alert('prev')">‹</div>
-            <div class="arrow right" onclick="alert('next')">›</div>
-            <!-- placeholder content -->
-            <div style="opacity:.9; font-weight:600; color:#123456;">(Your reviews will appear here)</div>
+          <div class="carousel-wrapper">
+            <div class="arrow left" id="prevReviewBtn">‹</div>
+            <div class="arrow right" id="nextReviewBtn">›</div>
+            
+            <div class="carousel" aria-hidden="false" id="reviewContainer">
+                </div>
           </div>
         </section>
 
-        <section class="section">
-          <h2>Replies to other reviews</h2>
-          <div class="carousel large" aria-hidden="false">
-            <div class="arrow left" onclick="alert('prev')">‹</div>
-            <div class="arrow right" onclick="alert('next')">›</div>
-            <div style="opacity:.9; font-weight:600; color:#123456;">(Replies and interactions appear here)</div>
-          </div>
-        </section>
+        <section class="section" style="margin-top: 40px;">
+  <h2>Replies to other reviews</h2>
+  <div class="carousel-wrapper">
+    <div class="arrow left" id="prevReplyBtn">‹</div>
+    <div class="arrow right" id="nextReplyBtn">›</div>
+    
+    <div class="carousel" id="repliesContainer">
+    </div>
+  </div>
+</section>
 
       </main>
 
     </div>
   </div>
 
+  <div id="editReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
+    <div class="modal-backdrop" data-close-review></div>
+    <div class="modal-panel edit-review-panel">
+      <header class="edit-review-header">
+        <h3 id="editReviewTitle">Edit Review</h3>
+        <button class="modal-close-review" aria-label="Close" data-close-review>✕</button>
+      </header>
+      <form id="editReviewForm">
+        <textarea id="editReviewText" rows="6" placeholder="Write your edit here.."></textarea>
+        <div class="edit-review-footer">
+          <button type="submit" class="btn-save-review">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <script>
     (function(){
   const editBtn = document.getElementById('editProfileBtn');
@@ -835,6 +1104,315 @@ if(document.querySelector('.ud-sub')) document.querySelector('.ud-sub').textCont
       }
     });
   })();
+  </script>
+
+  <script>
+    (function(){
+        // Sample Data for Reviews
+        let reviewsData = [
+            {
+                id: 513111, // Changed ID to match your image example
+                cafeName: "Yardstick",
+                address: "Universal LMS Building, 106 Esteban, Makati City, Metro Manila",
+                rating: 4,
+                date: "February 28, 2026",
+                editedOn: null,
+                text: "Bro, what do you mean you haven't tried Yardstick? Sa bagay, if you know, you know lang naman. Solid talaga yung beans nila! Balanced, hindi maasim, hindi rin flat. Perfect for people who actually taste their coffee and not just drink it for caffeine. Perfect for quiet conversations or just zoning out with a cup. Definitely a go-to if you're serious about coffee like me.",
+                image: "apdev-tbv/cafe4.jpg", 
+                amenities: { ac: true, socket: true, wifi: true, altMilk: true }
+            },
+            {
+                id: 2,
+                cafeName: "The Spotted Pig",
+                address: "Salcedo Village, Makati",
+                rating: 5,
+                date: "January 15, 2026",
+                editedOn: "January 16, 2026 at 10:30am",
+                text: "Absolutely love this spot. The vibe is immaculate, and the pour-over selection is top-tier. It gets a bit crowded on weekends, but worth the wait.",
+                image: "apdev-tbv/thespottedpig.jpeg",
+                amenities: { ac: true, socket: false, wifi: true, altMilk: true }
+            },
+            {
+                id: 3,
+                cafeName: "Daily Dose",
+                address: "Ortigas Center, Pasig",
+                rating: 3,
+                date: "December 10, 2025",
+                editedOn: null,
+                text: "Decent coffee for a quick fix, but nothing mind-blowing. Good for working as they have lots of outlets.",
+                image: "apdev-tbv/dailydose.jpg",
+                amenities: { ac: true, socket: true, wifi: true, altMilk: false }
+            }
+        ];
+        // --- NEW: Sample Data for Replies ---
+        // --- UPDATED: Sample Data for Replies ---
+        // --- UPDATED: Sample Data for Replies ---
+        const repliesData = [
+            {
+                id: 901,
+                replyToUser: "Mark S.",
+                cafeName: "Yardstick",
+                date: "March 2, 2026",
+                text: "Hey Mark! Totally agree about Yardsrick's iced latte. It's my go-to on a hot afternoon. Have you tried their pastries? The croissants are surprisingly good!",
+                image: "apdev-tbv/cafe4.jpg"
+            },
+            {
+                id: 902,
+                replyToUser: "CoffeeCat_99",
+                cafeName: "The Spotted Pig",
+                date: "February 25, 2026",
+                text: "I had the same experience! The queue was long, but that hazelnut hot chocolate made it all worth it. Did you find it too noisy for working, though?",
+                image: "apdev-tbv/thespottedpig.jpeg"
+            },
+            {
+                id: 903,
+                replyToUser: "Juan Dela Cruz",
+                cafeName: "Daily Dose",
+                date: "February 10, 2026",
+                text: "This branch is definitely the best for people-watching. I haven't tried the ice cream sandwiches yet—adding that to my list for next time!",
+                image: "apdev-tbv/dailydose.jpg"
+            }
+        ];
+
+        // --- FIXED: Select the Reply Buttons ---
+        const repliesContainer = document.getElementById('repliesContainer');
+        const prevReplyBtn = document.getElementById('prevReplyBtn');
+        const nextReplyBtn = document.getElementById('nextReplyBtn');
+        let currentReplyIndex = 0; 
+
+        function renderSampleReplies() {
+            const reply = repliesData[currentReplyIndex];
+            const username = getCurrentUsername();
+
+            const replyHtml = `
+                <div class="review-card" style="box-shadow: none; width: 100%;">
+                  <img src="${reply.image}" alt="${reply.cafeName}" class="review-img">
+                  <div class="review-content">
+                    <div class="review-header" style="margin-bottom: 4px;">
+                      <div>
+                        <span class="review-user">${username.replace('@', '')}</span>
+                        <span style="color: var(--muted); font-size: 14px;"> replying to </span>
+                        <span class="review-user">${reply.replyToUser}</span>
+                        <span class="review-date" style="margin-top: 4px;">${reply.date}</span>
+                      </div>
+                    </div>
+                    
+                    <div class="cafe-title-row">
+                        <h3 class="cafe-name" style="font-size: 24px;">${reply.cafeName}</h3>
+                    </div>
+                    <p class="review-text" style="margin-top: 12px;">${reply.text}</p>
+                  </div>
+                </div>
+            `;
+            repliesContainer.innerHTML = replyHtml;
+
+            // --- FIXED: Update Arrow Visibility ---
+            // If we are at the start, dim the left arrow
+            prevReplyBtn.style.opacity = currentReplyIndex === 0 ? "0.5" : "1";
+            prevReplyBtn.style.cursor = currentReplyIndex === 0 ? "default" : "pointer";
+            
+            // If we are at the end, dim the right arrow
+            nextReplyBtn.style.opacity = currentReplyIndex === repliesData.length - 1 ? "0.5" : "1";
+            nextReplyBtn.style.cursor = currentReplyIndex === repliesData.length - 1 ? "default" : "pointer";
+        }
+
+        // --- FIXED: Add Click Listeners ---
+        prevReplyBtn.addEventListener('click', () => {
+            if (currentReplyIndex > 0) {
+                currentReplyIndex--;
+                renderSampleReplies();
+            }
+        });
+
+        nextReplyBtn.addEventListener('click', () => {
+            if (currentReplyIndex < repliesData.length - 1) {
+                currentReplyIndex++;
+                renderSampleReplies();
+            }
+        });
+
+        // Call the initial render
+        renderSampleReplies();
+
+        let currentReviewIndex = 0;
+        const reviewContainer = document.getElementById('reviewContainer');
+        const prevBtn = document.getElementById('prevReviewBtn');
+        const nextBtn = document.getElementById('nextReviewBtn');
+
+        // --- NEW: Edit Review Modal Elements ---
+        const editReviewModal = document.getElementById('editReviewModal');
+        const editReviewForm = document.getElementById('editReviewForm');
+        const editReviewText = document.getElementById('editReviewText');
+        const editReviewTitle = document.getElementById('editReviewTitle');
+        const closeReviewTriggers = document.querySelectorAll('[data-close-review]');
+        let reviewIdToEdit = null;
+
+
+        // Helper to get current username from localStorage
+        function getCurrentUsername() {
+            const storedUser = localStorage.getItem('beanthere_profile_username');
+            return storedUser ? storedUser : '@erylle_g'; 
+        }
+
+        // Helper to generate bean rating icons
+        function getBeanRatingHtml(rating) {
+            let beansHtml = '';
+            for (let i = 0; i < 5; i++) {
+                beansHtml += i < rating ? '☕' : '<span style="opacity:0.3; filter:grayscale(1)">☕</span>';
+            }
+            return beansHtml;
+        }
+
+        // Helper to generate amenities icons
+        function getAmenitiesHtml(amenities) {
+            let html = '';
+            if (amenities.ac) html += '<div class="amenity-item">❄️ Air-conditioned</div>';
+            if (amenities.socket) html += '<div class="amenity-item">🔌 Socket</div>';
+            if (amenities.wifi) html += '<div class="amenity-item">🛜 Wifi</div>';
+            if (amenities.altMilk) html += '<div class="amenity-item">🥛 Alt Milk</div>';
+            return html;
+        }
+
+        function renderReview(index) {
+            if (index < 0 || index >= reviewsData.length) return;
+            
+            const review = reviewsData[index];
+            const username = getCurrentUsername();
+            const beansHtml = getBeanRatingHtml(review.rating);
+            const amenitiesHtml = getAmenitiesHtml(review.amenities);
+
+            let editedHtml = '';
+            if (review.editedOn) {
+                // The date string is now pre-formatted
+                editedHtml = `<span class="edited-label">edited on ${review.editedOn}</span>`;
+            }
+
+            const reviewHtml = `
+                <div class="review-card" data-id="${review.id}">
+                  <img src="${review.image}" alt="${review.cafeName}" class="review-img">
+                  <div class="review-content">
+                    <div class="review-header">
+                      <div>
+                        <div class="review-user">${username.replace('@', '')}</div>
+                        <span class="review-date">${review.date}</span>
+                        ${editedHtml}
+                      </div>
+                      <div class="amenities-list">
+                        ${amenitiesHtml}
+                      </div>
+                    </div>
+                    
+                    <div class="cafe-title-row">
+                        <h3 class="cafe-name">${review.cafeName}</h3>
+                        <span class="rating-beans">${beansHtml}</span>
+                    </div>
+                    <div class="cafe-address">${review.address}</div>
+                    <p class="review-text">${review.text}</p>
+                    
+                    <div class="edit-review-btn-container">
+                        <button class="btn-edit-review" id="editReviewBtn-${review.id}">Edit Review</button>
+                    </div>
+                  </div>
+                </div>
+            `;
+
+            reviewContainer.innerHTML = reviewHtml;
+
+            document.getElementById(`editReviewBtn-${review.id}`).addEventListener('click', function() {
+                openReviewModal(review.id);
+            });
+        }
+
+        // --- NEW: Modal Functions ---
+        function openReviewModal(reviewId) {
+            const review = reviewsData.find(r => r.id === reviewId);
+            if (!review) return;
+
+            reviewIdToEdit = reviewId;
+            editReviewText.value = review.text;
+            // Update the title with the review ID
+            // Just set the title text without the ID
+            editReviewTitle.textContent = "Edit Review";
+            
+            editReviewModal.hidden = false;
+            // Small delay to ensure focus works
+            setTimeout(() => editReviewText.focus(), 50);
+        }
+
+        function closeReviewModal() {
+            editReviewModal.hidden = true;
+            reviewIdToEdit = null;
+            editReviewText.value = ''; // Clear textarea
+        }
+
+        // Event listeners for closing the modal (X button and backdrop)
+        closeReviewTriggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeReviewModal();
+            });
+        });
+        
+        // Close on Escape key
+        document.addEventListener('keydown', function(e){
+            if(e.key === 'Escape' && !editReviewModal.hidden) {
+                closeReviewModal();
+            }
+        });
+
+        // Handle form submission (Save button)
+        editReviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (reviewIdToEdit === null) return;
+
+            const newText = editReviewText.value.trim();
+            const reviewIndex = reviewsData.findIndex(r => r.id === reviewIdToEdit);
+
+            // Only update if the text has actually changed
+            if (reviewIndex !== -1 && newText !== reviewsData[reviewIndex].text) {
+                // Update text
+                reviewsData[reviewIndex].text = newText;
+                
+                // Format current date and time for "Edited on"
+                const now = new Date();
+                const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+                const datePart = now.toLocaleDateString('en-US', dateOptions);
+                
+                // Format time like 7:23pm
+                let hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'pm' : 'am';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                const timeString = `${hours}:${minutes}${ampm}`;
+                
+                reviewsData[reviewIndex].editedOn = `${datePart} at ${timeString}`;
+                
+                // Re-render the review card to show changes
+                renderReview(currentReviewIndex);
+            }
+            // Close the modal after saving
+            closeReviewModal();
+        });
+
+        // Carousel Navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentReviewIndex > 0) {
+                currentReviewIndex--;
+                renderReview(currentReviewIndex);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentReviewIndex < reviewsData.length - 1) {
+                currentReviewIndex++;
+                renderReview(currentReviewIndex);
+            }
+        });
+
+        // Initial Render
+        renderReview(currentReviewIndex);
+    })();
   </script>
 </body>
 </html>
