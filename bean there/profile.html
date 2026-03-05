@@ -60,6 +60,114 @@
       letter-spacing:1px;
     }
 
+    /* Floating + button */
+/*.fab{
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: #ee6a45;
+  color: #fff;
+  font-size: 40px;
+  line-height: 64px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 2000;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.20);
+}
+.fab:hover{ transform: translateY(-1px); }
+.fab:active{ transform: translateY(0px); } */
+#addReviewFab {
+  position: fixed;   /* makes it stick to the screen */
+  bottom: 30px;      /* distance from bottom */
+  right: 30px;       /* distance from right */
+
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+
+  background-color: #ee6a45;
+  color: white;
+  font-size: 36px;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  z-index: 9999;     /* keeps it above everything */
+}
+
+/* Write Review modal styling */
+.write-review-panel{
+  background-color: #f8f5ee;
+  border-radius: 20px;
+  padding: 30px 26px;
+  width: min(520px, calc(100% - 32px));
+  position: relative;
+}
+
+.write-review-title{
+  font-family: 'Lora', serif;
+  font-size: 34px;
+  margin: 0 0 18px;
+  text-align: center;
+  color: #4a3f35;
+}
+
+.wr-row{ display:flex; align-items:center; gap:14px; margin: 12px 0; }
+.wr-row label{ width: 120px; font-weight: 700; color:#4a3f35; }
+
+#wrcafe, #wrCafe, #wrText{
+  font-family: Montserrat, system-ui, sans-serif;
+}
+
+#wrCafe{
+  flex:1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  background: #fff;
+}
+
+#wrText{
+  flex:1;
+  min-height: 120px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  padding: 14px;
+  resize: none;
+}
+
+.wr-stars{ display:flex; gap:8px; }
+.wr-star{
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #7f7b2e;
+  background: transparent;
+  cursor: pointer;
+}
+.wr-star.filled{ background:#7f7b2e; }
+
+.wr-tags{ justify-content:center; flex-wrap:wrap; }
+.wr-tag{
+  border: 1.5px solid rgba(0,0,0,0.35);
+  background: transparent;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.wr-tag.active{
+  background: rgba(127,123,46,0.14);
+  border-color: rgba(127,123,46,0.7);
+}
+
+.wr-actions{ display:flex; justify-content:center; margin-top: 18px; }
     .nav{
       margin-top:36px;
       display:flex;
@@ -612,17 +720,21 @@
       margin-top: 5px;
     }
 
-    .modal-close-review {
-      position: absolute;
-      top: -20px;
-      right: -15px;
-      background: transparent;
-      border: none;
-      font-size: 28px;
-      cursor: pointer;
-      color: #4a3f35;
-      padding: 5px;
-    }
+    .modal-close-review{
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  font-size: 28px;
+  color: #4a3f35;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close-review:hover{
+  opacity: 0.7;
+}
 
     #editReviewText {
       width: 100%;
@@ -808,10 +920,65 @@
   </div>
 </section>
 
+<!-- Floating + button -->
+<button id="addReviewFab" class="fab" aria-label="Write a review" title="Write a review">
+  +
+</button>
       </main>
 
     </div>
   </div>
+  <!-- Write Review Modal -->
+<div id="writeReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" data-close-write></div>
+
+  <div class="modal-panel write-review-panel" role="document">
+    <button class="modal-close-review" aria-label="Close" data-close-write>✕</button>
+
+    <h3 class="write-review-title">Write a review:</h3>
+
+    <form id="writeReviewForm">
+      <div class="wr-row">
+        <label for="wrCafe">Select cafe:</label>
+        <select id="wrCafe" required>
+          <option value="" selected disabled>Select…</option>
+          <option value="Yardstick">Yardstick</option>
+          <option value="The Spotted Pig">The Spotted Pig</option>
+          <option value="Daily Dose">Daily Dose</option>
+        </select>
+      </div>
+
+      <div class="wr-row">
+        <label>Stars:</label>
+        <div class="wr-stars" id="wrStars" aria-label="Star rating">
+          <!-- we’ll fill this with JS -->
+        </div>
+        <input type="hidden" id="wrRating" value="0" required>
+      </div>
+
+      <div class="wr-row">
+        <label for="wrText">Review:</label>
+        <textarea id="wrText" placeholder="write your review here" required></textarea>
+      </div>
+
+      <div class="wr-row wr-tags">
+        <button type="button" class="wr-tag" data-tag="ac">Air-conditioned</button>
+        <button type="button" class="wr-tag" data-tag="socket">Socket</button>
+        <button type="button" class="wr-tag" data-tag="wifi">Wi-Fi</button>
+        <button type="button" class="wr-tag" data-tag="more">More</button>
+      </div>
+
+      <div class="wr-row">
+        <label>Add photo/s</label>
+        <input id="wrPhoto" type="file" accept="image/*">
+      </div>
+
+      <div class="wr-actions">
+        <button type="submit" class="btn-save-review">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
 
   <div id="editReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
     <div class="modal-backdrop" data-close-review></div>
@@ -1414,5 +1581,79 @@ if(document.querySelector('.ud-sub')) document.querySelector('.ud-sub').textCont
         renderReview(currentReviewIndex);
     })();
   </script>
+  <script>
+(function(){
+  const fab = document.getElementById('addReviewFab');
+  const modal = document.getElementById('writeReviewModal');
+  const form = document.getElementById('writeReviewForm');
+
+  const starsWrap = document.getElementById('wrStars');
+  const ratingInput = document.getElementById('wrRating');
+
+  const tagButtons = Array.from(document.querySelectorAll('.wr-tag'));
+
+  function openModal(){
+    modal.hidden = false;
+    // reset
+    form.reset();
+    setRating(0);
+    tagButtons.forEach(b => b.classList.remove('active'));
+  }
+
+  function closeModal(){
+    modal.hidden = true;
+    fab.focus();
+  }
+
+  // open/close
+  fab.addEventListener('click', openModal);
+
+  modal.addEventListener('click', (e)=>{
+    if(e.target.matches('[data-close-write]')) closeModal();
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  // Stars (5 dots)
+  function setRating(n){
+    ratingInput.value = String(n);
+    const btns = starsWrap.querySelectorAll('.wr-star');
+    btns.forEach((b, i)=>{
+      b.classList.toggle('filled', i < n);
+    });
+  }
+
+  // build star buttons
+  starsWrap.innerHTML = '';
+  for(let i=1;i<=5;i++){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'wr-star';
+    b.setAttribute('aria-label', `${i} stars`);
+    b.addEventListener('click', ()=> setRating(i));
+    starsWrap.appendChild(b);
+  }
+
+  // tags toggle
+  tagButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      btn.classList.toggle('active');
+    });
+  });
+
+  // submit (UI-only for now)
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+
+    // For now: just confirm it worked.
+    // Next step: we can push into reviewsData and re-render,
+    // OR POST to Node.js route for MCO2.
+    alert('Saved! (UI only — not yet connected to database)');
+    closeModal();
+  });
+})();
+</script>
 </body>
 </html>
