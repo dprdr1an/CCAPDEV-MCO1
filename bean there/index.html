@@ -91,6 +91,92 @@
       flex-direction:column;
       gap:26px;
     }
+    /* Custom Login Modal Styles */
+.login-custom-panel {
+  max-width: 480px;
+  width: 90%;
+  border-radius: 20px;
+  padding: 40px !important;
+}
+
+.modal-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+  color: #333;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 15px;
+}
+
+.input-group label {
+  font-size: 20px;
+  min-width: 110px;
+}
+
+.input-group input {
+  flex: 1;
+  padding: 5px;
+  border: 0;
+  border-bottom: 1px solid #ccc;
+  font-size: 18px;
+  outline: none;
+}
+
+.login-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Styling the Checkbox to match the olive theme */
+.remember-me input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--sidebar);
+  cursor: pointer;
+}
+
+.done-btn {
+  padding: 6px 35px;
+  border-radius: 25px;
+  border: 1.5px solid var(--sidebar);
+  background: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.done-btn:hover {
+  background: #f8f8f0;
+}
 
     .nav a{
       color:#fff;
@@ -505,22 +591,28 @@
   </div>
   <div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" id="closeLogIn"></div>
-  <div class="modal-panel" style="max-width: 400px; text-align: left; padding: 40px;">
-    <button id="xLogIn" style="position:absolute; top:10px; right:15px; border:0; background:transparent; font-size:24px; cursor:pointer;">✕</button>
-    <h2 style="font-family:Lora, serif; margin-top:0; text-align: center; font-size: 32px;">Log in</h2>
+  <div class="modal-panel login-custom-panel">
+    <button id="xLogIn" class="modal-close-btn">✕</button>
+    <h2 class="modal-title">Log in</h2>
     
-    <form id="logInForm" style="display: flex; flex-direction: column; gap: 20px; margin-top: 30px;">
-      <div style="display:grid; grid-template-columns: 1fr 2fr; align-items: center;">
-        <label for="loginUser" style="font-size: 18px;">Username:</label>
-        <input id="loginUser" type="text" required style="padding:8px; border:0; border-bottom:1px solid #ccc; outline:none;">
+    <form id="logInForm">
+      <div class="input-group">
+        <label for="loginUser">Username:</label>
+        <input id="loginUser" type="text" required>
       </div>
 
-      <div style="display:grid; grid-template-columns: 1fr 2fr; align-items: center;">
-        <label for="loginPass" style="font-size: 18px;">Password:</label>
-        <input id="loginPass" type="password" required style="padding:8px; border:0; border-bottom:1px solid #ccc; outline:none;">
+      <div class="input-group">
+        <label for="loginPass">Password:</label>
+        <input id="loginPass" type="password" required>
       </div>
 
-      <button type="submit" style="margin-top:20px; padding:8px 40px; border-radius:30px; border:1.5px solid #5b5f10; background:transparent; font-weight:700; cursor:pointer; font-size: 18px; width: fit-content; align-self:center;">Done</button>
+      <div class="login-footer">
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe">
+          <span>Remember Me</span>
+        </label>
+        <button type="submit" class="done-btn">Done</button>
+      </div>
     </form>
   </div>
 </div>
@@ -569,258 +661,200 @@
     </form>
   </div>
 </div>
-  <script>
-const cafes = [
-  {name:"Coffee Nook", img:"https://picsum.photos/600/400?random=1", loc:"Taft Ave"},
-  {name:"GroupHug Cafe", img:"https://picsum.photos/600/400?random=2", loc:"Malate"},
-  {name:"Cooper's ATC Branch", img:"https://picsum.photos/600/400?random=3", loc:"Taft"},
-  {name:"Elsewhere Cafe", img:"https://picsum.photos/600/400?random=4", loc:"Makati"},
-  {name:"UNIT 605", img:"https://picsum.photos/600/400?random=5", loc:"QC"},
-  {name:"Brewtopia's Corner", img:"https://picsum.photos/600/400?random=6", loc:"BGC"},
-  {name:"Cafe Mocha", img:"https://picsum.photos/600/400?random=7", loc:"Quezon City"},
-];
+ <script>
+  // --- 1. SELECTORS ---
+  const logInModal = document.getElementById('logInModal');
+  const signUpModal = document.getElementById('signUpModal');
+  const logInForm = document.getElementById('logInForm');
+  const signUpForm = document.getElementById('signUpForm');
+  
+  // Navigation buttons in the sidebar
+  const loginBtn = document.querySelector('.auth div:first-child');
+  const signupBtn = document.querySelector('.auth div:last-child');
 
-let activeCafes = [...cafes]; // <--- data source the carousel actually uses
-let currentIndex = 0;
+  // --- 2. MODAL CONTROLS ---
+  loginBtn.onclick = () => logInModal.hidden = false;
+  signupBtn.onclick = () => signUpModal.hidden = false;
 
-const carousel = document.getElementById("carousel");
-const dotsContainer = document.getElementById("dots");
-let isAnimating = false;
-let autoplay;
+  document.getElementById('closeLogIn').onclick = () => logInModal.hidden = true;
+  document.getElementById('xLogIn').onclick = () => logInModal.hidden = true;
+  document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
+  document.getElementById('xSignUp').onclick = () => signUpModal.hidden = true;
 
-/* ---------- helpers (use activeCafes) ---------- */
-function getIndex(i) {
-  const n = activeCafes.length || 1;
-  return ((i % n) + n) % n;
-}
+  // --- 3. "REMEMBER ME" LOGIC ---
+  const THREE_WEEKS_MS = 3 * 7 * 24 * 60 * 60 * 1000;
 
-function buildCard(cafe, position) {
-  const card = document.createElement("div");
-  card.className = `cafe-card ${position}`;
-  card.innerHTML = `
-    <img src="${cafe.img}" alt="${cafe.name}">
-    <div class="cafe-meta">
-      <strong>${cafe.name}</strong>
-      <div class="location">${cafe.loc}</div>
-    </div>
-  `;
-  return card;
-}
-
-/* ---------- render (uses activeCafes) ---------- */
-function renderCarousel() {
-  carousel.innerHTML = "";
-
-  if (activeCafes.length === 0) {
-    // fallback: nothing to show
-    carousel.innerHTML = "<div style='text-align:center;padding:40px'>No cafes to show</div>";
-    dotsContainer.innerHTML = "";
-    return;
+  function checkAndExtendSession() {
+    const expiry = localStorage.getItem('beanthere_remember_expiry');
+    if (expiry) {
+      const now = Date.now();
+      if (now < parseInt(expiry)) {
+        const newExpiry = now + THREE_WEEKS_MS;
+        localStorage.setItem('beanthere_remember_expiry', newExpiry.toString());
+        console.log("Session extended until: " + new Date(newExpiry).toLocaleDateString());
+      } else {
+        localStorage.removeItem('beanthere_remember_expiry');
+      }
+    }
   }
+  checkAndExtendSession();
 
-  const left = getIndex(currentIndex - 1);
-  const center = getIndex(currentIndex);
-  const right = getIndex(currentIndex + 1);
-
-  const leftCard = buildCard(activeCafes[left], "pos-left");
-  const centerCard = buildCard(activeCafes[center], "pos-center");
-  const rightCard = buildCard(activeCafes[right], "pos-right");
-
-  // clicking side cards navigates
-  leftCard.onclick = () => slideTo(left);
-  rightCard.onclick = () => slideTo(right);
-
-  carousel.append(leftCard, centerCard, rightCard);
-  updateDots();
-}
-
-/* ---------- slide logic ---------- */
-function slideTo(target) {
-  // if there is only one item, target might equal currentIndex; bail out
-  if (isAnimating || target === currentIndex) return;
-  isAnimating = true;
-
-  currentIndex = getIndex(target);
-
-  // Let CSS handle the smooth transition
-  requestAnimationFrame(() => {
-    renderCarousel();
-    setTimeout(() => isAnimating = false, 450);
-  });
-}
-
-function nextSlide() {
-  slideTo(getIndex(currentIndex + 1));
-}
-
-function prevSlide() {
-  slideTo(getIndex(currentIndex - 1));
-}
-
-/* ---------- dots (uses activeCafes) ---------- */
-function createDots() {
-  dotsContainer.innerHTML = "";
-  activeCafes.forEach((_, i) => {
-    const dot = document.createElement("div");
-    dot.className = "dot";
-    dot.onclick = () => {
-      slideTo(i);
-    };
-    dotsContainer.appendChild(dot);
-  });
-}
-
-function updateDots() {
-  [...dotsContainer.children].forEach((dot, i) => {
-    dot.classList.toggle("active", i === currentIndex);
-  });
-}
-
-/* ---------- autoplay ---------- */
-function startAutoplay() {
-  stopAutoplay();
-  autoplay = setInterval(nextSlide, 3500);
-}
-
-function stopAutoplay() {
-  if (autoplay) clearInterval(autoplay);
-}
-
-/* ---------- SEARCH ---------- */
-const searchInput = document.getElementById("q");
-const searchBtn = document.getElementById("searchBtn");
-
-searchBtn.addEventListener("click", handleSearch);
-searchInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
+  // --- 4. AUTH FORM HANDLERS ---
+  
+  // Log In Handler
+  logInForm.onsubmit = function(e) {
     e.preventDefault();
-    handleSearch();
-  }
-});
 
-// Reset to full list if input cleared
-searchInput.addEventListener("input", () => {
-  if (searchInput.value.trim() === "") {
-    activeCafes = [...cafes];
+    const enteredUser = '@' + document.getElementById('loginUser').value.replace('@', '');
+    const enteredPass = document.getElementById('loginPass').value;
+    const isRemembered = document.getElementById('rememberMe').checked;
+
+    const storedUser = localStorage.getItem('beanthere_profile_username');
+    const storedPass = localStorage.getItem('beanthere_profile_password');
+
+    if (enteredUser === storedUser && enteredPass === storedPass) {
+      if (isRemembered) {
+        localStorage.setItem('beanthere_remember_expiry', (Date.now() + THREE_WEEKS_MS).toString());
+      } else {
+        localStorage.removeItem('beanthere_remember_expiry');
+      }
+
+      alert("Login successful! Welcome back.");
+      window.location.href = 'profile.html';
+    } else {
+      alert("Invalid username or password.");
+    }
+  };
+
+  // Sign Up Handler
+  signUpForm.onsubmit = function(e) {
+    e.preventDefault();
+    const pass = document.getElementById('regPass').value;
+    const confirm = document.getElementById('regConfirm').value;
+
+    if(pass !== confirm) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    localStorage.setItem('beanthere_profile_fullname', document.getElementById('regName').value);
+    localStorage.setItem('beanthere_profile_username', '@' + document.getElementById('regUser').value.replace('@', ''));
+    localStorage.setItem('beanthere_profile_password', pass);
+    localStorage.setItem('beanthere_profile_bio', document.getElementById('regBio').value || "No bio added yet.");
+    localStorage.setItem('beanthere_profile_title', document.getElementById('regTitle').value || "Member");
+
+    const file = document.getElementById('regAvatar').files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        localStorage.setItem('beanthere_profile_avatar', ev.target.result);
+        window.location.href = 'profile.html';
+      };
+      reader.readAsDataURL(file);
+    } else {
+      window.location.href = 'profile.html';
+    }
+  };
+
+  // --- 5. CAROUSEL & SEARCH LOGIC ---
+  const cafes = [
+    {name:"Coffee Nook", img:"https://picsum.photos/600/400?random=1", loc:"Taft Ave"},
+    {name:"GroupHug Cafe", img:"https://picsum.photos/600/400?random=2", loc:"Malate"},
+    {name:"Cooper's ATC Branch", img:"https://picsum.photos/600/400?random=3", loc:"Taft"},
+    {name:"Elsewhere Cafe", img:"https://picsum.photos/600/400?random=4", loc:"Makati"},
+    {name:"UNIT 605", img:"https://picsum.photos/600/400?random=5", loc:"QC"},
+    {name:"Brewtopia's Corner", img:"https://picsum.photos/600/400?random=6", loc:"BGC"},
+    {name:"Cafe Mocha", img:"https://picsum.photos/600/400?random=7", loc:"Quezon City"},
+  ];
+
+  let activeCafes = [...cafes];
+  let currentIndex = 0;
+  const carousel = document.getElementById("carousel");
+  const dotsContainer = document.getElementById("dots");
+  let isAnimating = false;
+  let autoplay;
+
+  function getIndex(i) {
+    const n = activeCafes.length || 1;
+    return ((i % n) + n) % n;
+  }
+
+  function buildCard(cafe, position) {
+    const card = document.createElement("div");
+    card.className = `cafe-card ${position}`;
+    card.innerHTML = `<img src="${cafe.img}" alt="${cafe.name}"><div class="cafe-meta"><strong>${cafe.name}</strong><div class="location">${cafe.loc}</div></div>`;
+    return card;
+  }
+
+  function renderCarousel() {
+    carousel.innerHTML = "";
+    if (activeCafes.length === 0) {
+      carousel.innerHTML = "<div style='text-align:center;padding:40px'>No cafes found</div>";
+      dotsContainer.innerHTML = "";
+      return;
+    }
+    const left = getIndex(currentIndex - 1);
+    const center = getIndex(currentIndex);
+    const right = getIndex(currentIndex + 1);
+    const leftCard = buildCard(activeCafes[left], "pos-left");
+    const centerCard = buildCard(activeCafes[center], "pos-center");
+    const rightCard = buildCard(activeCafes[right], "pos-right");
+    leftCard.onclick = () => slideTo(left);
+    rightCard.onclick = () => slideTo(right);
+    carousel.append(leftCard, centerCard, rightCard);
+    updateDots();
+  }
+
+  function slideTo(target) {
+    if (isAnimating || target === currentIndex) return;
+    isAnimating = true;
+    currentIndex = getIndex(target);
+    requestAnimationFrame(() => {
+      renderCarousel();
+      setTimeout(() => isAnimating = false, 450);
+    });
+  }
+
+  function createDots() {
+    dotsContainer.innerHTML = "";
+    activeCafes.forEach((_, i) => {
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dot.onclick = () => slideTo(i);
+      dotsContainer.appendChild(dot);
+    });
+  }
+
+  function updateDots() {
+    [...dotsContainer.children].forEach((dot, i) => dot.classList.toggle("active", i === currentIndex));
+  }
+
+  function startAutoplay() { stopAutoplay(); autoplay = setInterval(() => slideTo(getIndex(currentIndex + 1)), 3500); }
+  function stopAutoplay() { if (autoplay) clearInterval(autoplay); }
+
+  // Search Logic
+  const searchInput = document.getElementById("q");
+  const searchBtn = document.getElementById("searchBtn");
+  searchBtn.addEventListener("click", handleSearch);
+  searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") handleSearch(); });
+  
+  function handleSearch() {
+    const query = searchInput.value.toLowerCase().trim();
+    activeCafes = query ? cafes.filter(c => c.name.toLowerCase().includes(query) || c.loc.toLowerCase().includes(query)) : [...cafes];
     currentIndex = 0;
     createDots();
     renderCarousel();
   }
-});
 
-function handleSearch() {
-  const query = searchInput.value.toLowerCase().trim();
-
-  if (!query) {
-    // If empty, reset the carousel instead of alerting
-    activeCafes = [...cafes];
-    currentIndex = 0;
-    createDots();
-    renderCarousel();
-    return;
-  }
-
-  const results = cafes.filter(cafe =>
-    cafe.name.toLowerCase().includes(query) ||
-    cafe.loc.toLowerCase().includes(query)
-  );
-
-  if (results.length === 0) {
-    alert("No cafes found 😢");
-    // keep current view (or reset to full list) — here we'll reset
-    activeCafes = [...cafes];
-    currentIndex = 0;
-    createDots();
-    renderCarousel();
-    return;
-  }
-
-  // Use the filtered list as the active dataset (without mutating original)
-  activeCafes = results;
-  currentIndex = 0;
+  // --- 6. INITIALIZATION ---
+  document.getElementById("nextBtn").onclick = () => slideTo(getIndex(currentIndex + 1));
+  document.getElementById("prevBtn").onclick = () => slideTo(getIndex(currentIndex - 1));
+  carousel.addEventListener("mouseenter", stopAutoplay);
+  carousel.addEventListener("mouseleave", startAutoplay);
   createDots();
   renderCarousel();
-}
-// Sign Up Logic
-// Auth Selectors
-const loginBtn = document.querySelector('.auth div:first-child');
-const signupBtn = document.querySelector('.auth div:last-child');
-const logInModal = document.getElementById('logInModal');
-const signUpModal = document.getElementById('signUpModal');
-const logInForm = document.getElementById('logInForm');
-const signUpForm = document.getElementById('signUpForm');
-
-// Modal Controls
-loginBtn.onclick = () => logInModal.hidden = false;
-signupBtn.onclick = () => signUpModal.hidden = false;
-
-document.getElementById('closeLogIn').onclick = () => logInModal.hidden = true;
-document.getElementById('xLogIn').onclick = () => logInModal.hidden = true;
-document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
-document.getElementById('xSignUp').onclick = () => signUpModal.hidden = true;
-
-// --- SIGN UP LOGIC ---
-signUpForm.onsubmit = function(e) {
-  e.preventDefault();
-  
-  const pass = document.getElementById('regPass').value;
-  const confirm = document.getElementById('regConfirm').value;
-
-  if(pass !== confirm) {
-    alert("Passwords do not match!");
-    return;
-  }
-
-  // Store data (Including the password now so we can check it later)
-  localStorage.setItem('beanthere_profile_fullname', document.getElementById('regName').value);
-  localStorage.setItem('beanthere_profile_username', '@' + document.getElementById('regUser').value.replace('@', ''));
-  localStorage.setItem('beanthere_profile_password', pass); // Store for login verify
-  localStorage.setItem('beanthere_profile_bio', document.getElementById('regBio').value || "No bio added yet.");
-  localStorage.setItem('beanthere_profile_title', document.getElementById('regTitle').value || "Member");
-
-  const file = document.getElementById('regAvatar').files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      localStorage.setItem('beanthere_profile_avatar', ev.target.result);
-      window.location.href = 'profile.html';
-    };
-    reader.readAsDataURL(file);
-  } else {
-    window.location.href = 'profile.html';
-  }
-};
-
-// --- LOG IN LOGIC ---
-logInForm.onsubmit = function(e) {
-  e.preventDefault();
-
-  const enteredUser = '@' + document.getElementById('loginUser').value.replace('@', '');
-  const enteredPass = document.getElementById('loginPass').value;
-
-  const storedUser = localStorage.getItem('beanthere_profile_username');
-  const storedPass = localStorage.getItem('beanthere_profile_password');
-
-  if (enteredUser === storedUser && enteredPass === storedPass) {
-    alert("Login successful! Welcome back.");
-    window.location.href = 'profile.html';
-  } else {
-    alert("Invalid username or password. Please try again.");
-  }
-};
-
-/* ---------- events ---------- */
-document.getElementById("nextBtn").onclick = nextSlide;
-document.getElementById("prevBtn").onclick = prevSlide;
-
-carousel.addEventListener("mouseenter", stopAutoplay);
-carousel.addEventListener("mouseleave", startAutoplay);
-
-/* ---------- init ---------- */
-createDots();
-renderCarousel();
-startAutoplay();
-  </script>
+  startAutoplay();
+</script>
 
 </body>
 </html>
