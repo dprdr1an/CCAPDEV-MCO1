@@ -942,7 +942,7 @@
         <label for="wrCafe">Select cafe:</label>
         <select id="wrCafe" required>
           <option value="" selected disabled>Select…</option>
-          <option value="Yardstick">Yardstick</option>
+          <option value="Yardstick Coffee">Yardstick Coffee</option>
           <option value="The Spotted Pig">The Spotted Pig</option>
           <option value="Daily Dose">Daily Dose</option>
         </select>
@@ -996,7 +996,7 @@
     </div>
   </div>
   <script>
-    (function(){
+(function(){
   const editBtn = document.getElementById('editProfileBtn');
   const modal = document.getElementById('editProfileModal');
   const closeTriggers = modal ? modal.querySelectorAll('[data-close]') : [];
@@ -1005,76 +1005,84 @@
   const inputBio = document.getElementById('inputBio');
   const handleText = document.getElementById('handleText');
   const bioText = document.getElementById('bioText');
-// AVATAR ELEMENTS
-  const modalPreview = document.getElementById('modalAvatarPreview'); // preview inside modal
+
+  const modalPreview = document.getElementById('modalAvatarPreview');
   const inputAvatar = document.getElementById('inputAvatar');
   const removeAvatarBtn = document.getElementById('removeAvatarBtn');
-  const avatarLarge = document.getElementById('avatarLargeImg'); // big avatar on page
+  const avatarLarge = document.getElementById('avatarLargeImg');
   const avatarMini = document.getElementById('avatarMiniImg');
-  // Helpers for localStorage keys
+
   const LS_USER = 'beanthere_profile_username';
   const LS_BIO = 'beanthere_profile_bio';
-  const LS_AVATAR = 'beanthere_profile_avatar'; // stores data URL
+  const LS_AVATAR = 'beanthere_profile_avatar';
 
-  // default fallback src (update to match your original file if different)
   const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
   const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
-  // Load saved values on startup (if any)
- function loadSaved(){
-    // Keys used in your Sign Up function
+
+  async function checkSession() {
+    try {
+      const response = await fetch('/session-user');
+      const result = await response.json();
+
+      if (!response.ok || !result.loggedIn) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+      localStorage.setItem('beanthere_profile_username', result.user.username || '');
+      localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+      localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+      localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+    } catch (err) {
+      console.error(err);
+      window.location.href = 'index.html';
+    }
+  }
+
+  function loadSaved(){
     const LS_NAME   = 'beanthere_profile_fullname';
     const LS_USER   = 'beanthere_profile_username';
     const LS_BIO    = 'beanthere_profile_bio';
     const LS_AVATAR = 'beanthere_profile_avatar';
-  // Add these lines to your loadSaved() in profile.html
-    const LS_TITLE = 'beanthere_profile_title';
-    const savedTitle = localStorage.getItem(LS_TITLE);
+    const LS_TITLE  = 'beanthere_profile_title';
 
+    const savedTitle = localStorage.getItem(LS_TITLE);
     const dropdownSub = document.querySelector('.ud-sub');
     if(savedTitle && dropdownSub) {
-    dropdownSub.textContent = savedTitle;
+      dropdownSub.textContent = savedTitle;
     }
+
     const savedName   = localStorage.getItem(LS_NAME);
     const savedUser   = localStorage.getItem(LS_USER);
     const savedBio    = localStorage.getItem(LS_BIO);
     const savedAvatar = localStorage.getItem(LS_AVATAR);
 
-    // 1. Update Full Name (the <h1> tag)
     const nameHeading = document.querySelector('.profile-meta h1');
     if(savedName && nameHeading) {
       nameHeading.textContent = savedName;
-      // Also update the greeting in the dropdown menu
       const dropdownGreet = document.querySelector('.ud-greet');
       if(dropdownGreet) dropdownGreet.textContent = `Hi, ${savedName}!`;
     }
 
-    // 2. Update Username/Handle
     if(savedUser && handleText) handleText.textContent = savedUser;
-
-    // 3. Update Bio
     if(savedBio && bioText) bioText.textContent = savedBio;
 
-    // 4. Update Avatars
     if(savedAvatar && avatarLarge && avatarMini){
       avatarLarge.src = savedAvatar;
       avatarMini.src = savedAvatar;
       if(modalPreview) modalPreview.src = savedAvatar;
     } else {
-      // Revert to default if no avatar is saved
       if(avatarLarge) avatarLarge.src = DEFAULT_LARGE_SRC;
       if(avatarMini)  avatarMini.src  = DEFAULT_MINI_SRC;
       if(modalPreview) modalPreview.src = DEFAULT_LARGE_SRC;
     }
   }
 
-  loadSaved();
-
-  // fill modal inputs with current values before opening
   function openModal(){
     if(!modal) return;
     inputUsername.value = (handleText && handleText.textContent) ? handleText.textContent : '';
     inputBio.value = (bioText && bioText.textContent) ? bioText.textContent : '';
-    // preview should already be set from loadSaved
     modal.hidden = false;
     setTimeout(()=> inputUsername.focus(), 30);
   }
@@ -1083,7 +1091,6 @@
     if(!modal) return;
     modal.hidden = true;
     editBtn.focus();
-    // clear file input selection (not the preview)
     if(inputAvatar) inputAvatar.value = '';
   }
 
@@ -1094,14 +1101,13 @@
     if(val.charAt(0) !== '@') return '@' + val;
     return val;
   }
-   // file validation and preview
+
   if(inputAvatar){
-    inputAvatar.addEventListener('change', function(e){
+    inputAvatar.addEventListener('change', function(){
       const file = inputAvatar.files && inputAvatar.files[0];
       if(!file) return;
 
-      // validate type (image) and size (limit: 3 MB)
-      const maxBytes = 3 * 1024 * 1024; // 3 MB
+      const maxBytes = 3 * 1024 * 1024;
       if(!file.type.startsWith('image/')){
         alert('Please choose an image file (png, jpg, gif).');
         inputAvatar.value = '';
@@ -1116,543 +1122,470 @@
       const reader = new FileReader();
       reader.onload = function(ev){
         const dataUrl = ev.target.result;
-        // show modal preview immediately
         if(modalPreview) modalPreview.src = dataUrl;
-        // optionally autosave preview to localStorage? we'll save on form submit
       };
       reader.readAsDataURL(file);
     });
   }
- if(removeAvatarBtn){
+
+  if(removeAvatarBtn){
     removeAvatarBtn.addEventListener('click', function(e){
       e.preventDefault();
-      // clear saved avatar in localStorage
       try{ localStorage.removeItem(LS_AVATAR); } catch(err){ console.warn(err); }
-      // revert images to original defaults
       if(avatarLarge) avatarLarge.src = DEFAULT_LARGE_SRC;
       if(avatarMini) avatarMini.src = DEFAULT_MINI_SRC;
       if(modalPreview) modalPreview.src = DEFAULT_LARGE_SRC;
-      // also clear file selection
       if(inputAvatar) inputAvatar.value = '';
       alert('Profile photo removed (reverted to default).');
     });
   }
 
-  // Event bindings
-   editBtn.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
-  closeTriggers.forEach(btn => btn.addEventListener('click', function(e){ e.preventDefault(); closeModal(); }));
+  editBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    openModal();
+  });
+
+  closeTriggers.forEach(btn => btn.addEventListener('click', function(e){
+    e.preventDefault();
+    closeModal();
+  }));
+
   modal.addEventListener('click', function(e){
     if(e.target === modal.querySelector('.modal-backdrop')) closeModal();
   });
-  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !modal.hidden) closeModal(); });
 
-  
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !modal.hidden) closeModal();
+  });
 
-  // handle submit
   form.addEventListener('submit', function(e){
-    // Add this inside the submit event listener
-const titleVal = document.getElementById('inputTitle').value || 'Member';
-localStorage.setItem('beanthere_profile_title', titleVal);
-if(document.querySelector('.ud-sub')) document.querySelector('.ud-sub').textContent = titleVal;
+    const titleVal = document.getElementById('inputTitle').value || 'Member';
+    localStorage.setItem('beanthere_profile_title', titleVal);
+    if(document.querySelector('.ud-sub')) document.querySelector('.ud-sub').textContent = titleVal;
+
     e.preventDefault();
 
     let usernameVal = inputUsername.value || '';
     let bioVal = inputBio.value || '';
     usernameVal = normalizeUsername(usernameVal);
+
     if(usernameVal.length < 2){
       alert('Please enter a valid username (e.g. @erylle_g).');
       inputUsername.focus();
       return;
     }
-    // update DOM
-     if(handleText) handleText.textContent = usernameVal;
+
+    if(handleText) handleText.textContent = usernameVal;
     if(bioText) bioText.textContent = bioVal;
 
-    // Save username + bio
     try{
       localStorage.setItem(LS_USER, usernameVal);
       localStorage.setItem(LS_BIO, bioVal);
-    }catch(err){ console.warn('Could not save to localStorage:', err); }
-     const file = inputAvatar.files && inputAvatar.files[0];
+    }catch(err){
+      console.warn('Could not save to localStorage:', err);
+    }
+
+    const file = inputAvatar.files && inputAvatar.files[0];
     if(file){
       const reader = new FileReader();
       reader.onload = function(ev){
         const dataUrl = ev.target.result;
-        // Update both avatar images
         if(avatarLarge) avatarLarge.src = dataUrl;
         if(avatarMini) avatarMini.src = dataUrl;
         if(modalPreview) modalPreview.src = dataUrl;
-        // save to localStorage
         try{ localStorage.setItem(LS_AVATAR, dataUrl); } catch(err){ console.warn(err); }
       };
       reader.readAsDataURL(file);
     }
-    
+
     closeModal();
   });
-  window.addEventListener('DOMContentLoaded', loadSaved);
+
+  window.addEventListener('DOMContentLoaded', async function () {
+    await checkSession();
+    loadSaved();
+  });
 })();
-    // example: keep search click working (you can add real search logic)
-    document.getElementById('searchBtn').addEventListener('click', function () {
-      const q = document.getElementById('q').value.trim();
-      alert(q ? 'Searching for: ' + q : 'Please type a search term');
-    });
-    (function(){
-    const btn = document.getElementById('userMenuBtn');
-    const panel = document.getElementById('userDropdown');
 
-    function openPanel(){ 
-      panel.hidden = false; 
-      btn.setAttribute('aria-expanded','true');
-      // put focus on first menu element for keyboard users
-      const first = panel.querySelector('[role="menuitem"]');
-      if(first) first.focus();
+// search button
+document.getElementById('searchBtn').addEventListener('click', function () {
+  const q = document.getElementById('q').value.trim();
+  alert(q ? 'Searching for: ' + q : 'Please type a search term');
+});
+
+(function(){
+  const btn = document.getElementById('userMenuBtn');
+  const panel = document.getElementById('userDropdown');
+
+  function openPanel(){
+    panel.hidden = false;
+    btn.setAttribute('aria-expanded','true');
+    const first = panel.querySelector('[role="menuitem"]');
+    if(first) first.focus();
+  }
+
+  function closePanel(){
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded','false');
+    btn.focus();
+  }
+
+  function togglePanel(){
+    if(panel.hidden) openPanel(); else closePanel();
+  }
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    togglePanel();
+  });
+
+  document.addEventListener('click', function(e){
+    if(!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)){
+      closePanel();
     }
-    function closePanel(){ 
-      panel.hidden = true; 
-      btn.setAttribute('aria-expanded','false'); 
-      btn.focus();
-    }
-    function togglePanel(){
-      if(panel.hidden) openPanel(); else closePanel();
-    }
+  });
 
-    // toggle when clicking the avatar button
-    btn.addEventListener('click', function(e){
-      e.stopPropagation();
-      togglePanel();
-    });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !panel.hidden){ closePanel(); }
+  });
 
-    // Close on outside click
-    document.addEventListener('click', function(e){
-      if(!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)){
-        closePanel();
-      }
-    });
+  panel.addEventListener('click', function(e){
+    const actionBtn = e.target.closest('button[data-action]');
+    if(!actionBtn) return;
+    const action = actionBtn.getAttribute('data-action');
 
-    // Close on Escape key
-    document.addEventListener('keydown', function(e){
-      if(e.key === 'Escape' && !panel.hidden){ closePanel(); }
-    });
-
-    // handle menu actions
-    panel.addEventListener('click', function(e){
-      const actionBtn = e.target.closest('button[data-action]');
-      if(!actionBtn) return;
-      const action = actionBtn.getAttribute('data-action');
-
-      if(action === 'profile') {
-        window.location.href = 'profile.html';
-      } else if(action === 'contact') {
-        window.location.href = 'contact.html'; // change target if you have a different page
-      } else if(action === 'support') {
-        window.location.href = 'support.html'; // change target as needed
-      } else if(action === 'signout') {
-        // sign out -> redirect to homepage (index.html)
+    if(action === 'profile') {
+      window.location.href = 'profile.html';
+    } else if(action === 'contact') {
+      window.location.href = 'contact.html';
+    } else if(action === 'support') {
+      window.location.href = 'support.html';
+    } else if(action === 'signout') {
+      fetch('/logout', {
+        method: 'POST'
+      })
+      .then(() => {
+        localStorage.removeItem('beanthere_profile_fullname');
+        localStorage.removeItem('beanthere_profile_username');
+        localStorage.removeItem('beanthere_profile_bio');
+        localStorage.removeItem('beanthere_profile_title');
+        localStorage.removeItem('beanthere_profile_avatar');
         window.location.href = 'index.html';
-      }
-    });
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error logging out');
+      });
+    }
+  });
 
-    // allow keyboard activation of button (space/enter is default for button)
-    // optional: trap focus inside dropdown while open (simple approach)
-    panel.addEventListener('keydown', function(e){
-      const focusable = Array.from(panel.querySelectorAll('[role="menuitem"]'));
-      if(!focusable.length) return;
+  panel.addEventListener('keydown', function(e){
+    const focusable = Array.from(panel.querySelectorAll('[role="menuitem"]'));
+    if(!focusable.length) return;
 
-      const idx = focusable.indexOf(document.activeElement);
-      if(e.key === 'ArrowDown'){
-        e.preventDefault();
-        const next = focusable[(idx + 1) % focusable.length];
-        next.focus();
-      } else if(e.key === 'ArrowUp'){
-        e.preventDefault();
-        const prev = focusable[(idx - 1 + focusable.length) % focusable.length];
-        prev.focus();
-      }
-    });
-  })();
-  </script>
+    const idx = focusable.indexOf(document.activeElement);
+    if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      const next = focusable[(idx + 1) % focusable.length];
+      next.focus();
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      const prev = focusable[(idx - 1 + focusable.length) % focusable.length];
+      prev.focus();
+    }
+  });
+})();
+</script>
 
-  <script>
-    (function(){
-        // Sample Data for Reviews
-        let reviewsData = [
-            {
-                id: 513111, // Changed ID to match your image example
-                cafeName: "Yardstick",
-                address: "Universal LMS Building, 106 Esteban, Makati City, Metro Manila",
-                rating: 4,
-                date: "February 28, 2026",
-                editedOn: null,
-                text: "Bro, what do you mean you haven't tried Yardstick? Sa bagay, if you know, you know lang naman. Solid talaga yung beans nila! Balanced, hindi maasim, hindi rin flat. Perfect for people who actually taste their coffee and not just drink it for caffeine. Perfect for quiet conversations or just zoning out with a cup. Definitely a go-to if you're serious about coffee like me.",
-                image: "apdev-tbv/cafe4.jpg", 
-                amenities: { ac: true, socket: true, wifi: true, altMilk: true }
-            },
-            {
-                id: 2,
-                cafeName: "The Spotted Pig",
-                address: "Salcedo Village, Makati",
-                rating: 5,
-                date: "January 15, 2026",
-                editedOn: "January 16, 2026 at 10:30am",
-                text: "Absolutely love this spot. The vibe is immaculate, and the pour-over selection is top-tier. It gets a bit crowded on weekends, but worth the wait.",
-                image: "apdev-tbv/thespottedpig.jpeg",
-                amenities: { ac: true, socket: false, wifi: true, altMilk: true }
-            },
-            {
-                id: 3,
-                cafeName: "Daily Dose",
-                address: "Ortigas Center, Pasig",
-                rating: 3,
-                date: "December 10, 2025",
-                editedOn: null,
-                text: "Decent coffee for a quick fix, but nothing mind-blowing. Good for working as they have lots of outlets.",
-                image: "apdev-tbv/dailydose.jpg",
-                amenities: { ac: true, socket: true, wifi: true, altMilk: false }
-            }
-        ];
-        // --- NEW: Sample Data for Replies ---
-        // --- UPDATED: Sample Data for Replies ---
-        // --- UPDATED: Sample Data for Replies ---
-        const repliesData = [
-            {
-                id: 901,
-                replyToUser: "Mark S.",
-                cafeName: "Yardstick",
-                date: "March 2, 2026",
-                text: "Hey Mark! Totally agree about Yardsrick's iced latte. It's my go-to on a hot afternoon. Have you tried their pastries? The croissants are surprisingly good!",
-                image: "apdev-tbv/cafe4.jpg"
-            },
-            {
-                id: 902,
-                replyToUser: "CoffeeCat_99",
-                cafeName: "The Spotted Pig",
-                date: "February 25, 2026",
-                text: "I had the same experience! The queue was long, but that hazelnut hot chocolate made it all worth it. Did you find it too noisy for working, though?",
-                image: "apdev-tbv/thespottedpig.jpeg"
-            },
-            {
-                id: 903,
-                replyToUser: "Juan Dela Cruz",
-                cafeName: "Daily Dose",
-                date: "February 10, 2026",
-                text: "This branch is definitely the best for people-watching. I haven't tried the ice cream sandwiches yet—adding that to my list for next time!",
-                image: "apdev-tbv/dailydose.jpg"
-            }
-        ];
-
-        // --- FIXED: Select the Reply Buttons ---
-        const repliesContainer = document.getElementById('repliesContainer');
-        const prevReplyBtn = document.getElementById('prevReplyBtn');
-        const nextReplyBtn = document.getElementById('nextReplyBtn');
-        let currentReplyIndex = 0; 
-
-        function renderSampleReplies() {
-            const reply = repliesData[currentReplyIndex];
-            const username = getCurrentUsername();
-
-            const replyHtml = `
-                <div class="review-card" style="box-shadow: none; width: 100%;">
-                  <img src="${reply.image}" alt="${reply.cafeName}" class="review-img">
-                  <div class="review-content">
-                    <div class="review-header" style="margin-bottom: 4px;">
-                      <div>
-                        <span class="review-user">${username.replace('@', '')}</span>
-                        <span style="color: var(--muted); font-size: 14px;"> replying to </span>
-                        <span class="review-user">${reply.replyToUser}</span>
-                        <span class="review-date" style="margin-top: 4px;">${reply.date}</span>
-                      </div>
-                    </div>
-                    
-                    <div class="cafe-title-row">
-                        <h3 class="cafe-name" style="font-size: 24px;">${reply.cafeName}</h3>
-                    </div>
-                    <p class="review-text" style="margin-top: 12px;">${reply.text}</p>
-                  </div>
-                </div>
-            `;
-            repliesContainer.innerHTML = replyHtml;
-
-            // --- FIXED: Update Arrow Visibility ---
-            // If we are at the start, dim the left arrow
-            prevReplyBtn.style.opacity = currentReplyIndex === 0 ? "0.5" : "1";
-            prevReplyBtn.style.cursor = currentReplyIndex === 0 ? "default" : "pointer";
-            
-            // If we are at the end, dim the right arrow
-            nextReplyBtn.style.opacity = currentReplyIndex === repliesData.length - 1 ? "0.5" : "1";
-            nextReplyBtn.style.cursor = currentReplyIndex === repliesData.length - 1 ? "default" : "pointer";
-        }
-
-        // --- FIXED: Add Click Listeners ---
-        prevReplyBtn.addEventListener('click', () => {
-            if (currentReplyIndex > 0) {
-                currentReplyIndex--;
-                renderSampleReplies();
-            }
-        });
-
-        nextReplyBtn.addEventListener('click', () => {
-            if (currentReplyIndex < repliesData.length - 1) {
-                currentReplyIndex++;
-                renderSampleReplies();
-            }
-        });
-
-        // Call the initial render
-        renderSampleReplies();
-
-        let currentReviewIndex = 0;
-        const reviewContainer = document.getElementById('reviewContainer');
-        const prevBtn = document.getElementById('prevReviewBtn');
-        const nextBtn = document.getElementById('nextReviewBtn');
-
-        // --- NEW: Edit Review Modal Elements ---
-        const editReviewModal = document.getElementById('editReviewModal');
-        const editReviewForm = document.getElementById('editReviewForm');
-        const editReviewText = document.getElementById('editReviewText');
-        const editReviewTitle = document.getElementById('editReviewTitle');
-        const closeReviewTriggers = document.querySelectorAll('[data-close-review]');
-        let reviewIdToEdit = null;
-
-
-        // Helper to get current username from localStorage
-        function getCurrentUsername() {
-            const storedUser = localStorage.getItem('beanthere_profile_username');
-            return storedUser ? storedUser : '@erylle_g'; 
-        }
-
-        // Helper to generate bean rating icons
-        function getBeanRatingHtml(rating) {
-            let beansHtml = '';
-            for (let i = 0; i < 5; i++) {
-                beansHtml += i < rating ? '☕' : '<span style="opacity:0.3; filter:grayscale(1)">☕</span>';
-            }
-            return beansHtml;
-        }
-
-        // Helper to generate amenities icons
-        function getAmenitiesHtml(amenities) {
-            let html = '';
-            if (amenities.ac) html += '<div class="amenity-item">❄️ Air-conditioned</div>';
-            if (amenities.socket) html += '<div class="amenity-item">🔌 Socket</div>';
-            if (amenities.wifi) html += '<div class="amenity-item">🛜 Wifi</div>';
-            if (amenities.altMilk) html += '<div class="amenity-item">🥛 Alt Milk</div>';
-            return html;
-        }
-
-        function renderReview(index) {
-            if (index < 0 || index >= reviewsData.length) return;
-            
-            const review = reviewsData[index];
-            const username = getCurrentUsername();
-            const beansHtml = getBeanRatingHtml(review.rating);
-            const amenitiesHtml = getAmenitiesHtml(review.amenities);
-
-            let editedHtml = '';
-            if (review.editedOn) {
-                // The date string is now pre-formatted
-                editedHtml = `<span class="edited-label">edited on ${review.editedOn}</span>`;
-            }
-
-            const reviewHtml = `
-                <div class="review-card" data-id="${review.id}">
-                  <img src="${review.image}" alt="${review.cafeName}" class="review-img">
-                  <div class="review-content">
-                    <div class="review-header">
-                      <div>
-                        <div class="review-user">${username.replace('@', '')}</div>
-                        <span class="review-date">${review.date}</span>
-                        ${editedHtml}
-                      </div>
-                      <div class="amenities-list">
-                        ${amenitiesHtml}
-                      </div>
-                    </div>
-                    
-                    <div class="cafe-title-row">
-                        <h3 class="cafe-name">${review.cafeName}</h3>
-                        <span class="rating-beans">${beansHtml}</span>
-                    </div>
-                    <div class="cafe-address">${review.address}</div>
-                    <p class="review-text">${review.text}</p>
-                    
-                    <div class="edit-review-btn-container">
-                        <button class="btn-edit-review" id="editReviewBtn-${review.id}">Edit Review</button>
-                    </div>
-                  </div>
-                </div>
-            `;
-
-            reviewContainer.innerHTML = reviewHtml;
-
-            document.getElementById(`editReviewBtn-${review.id}`).addEventListener('click', function() {
-                openReviewModal(review.id);
-            });
-        }
-
-        // --- NEW: Modal Functions ---
-        function openReviewModal(reviewId) {
-            const review = reviewsData.find(r => r.id === reviewId);
-            if (!review) return;
-
-            reviewIdToEdit = reviewId;
-            editReviewText.value = review.text;
-            // Update the title with the review ID
-            // Just set the title text without the ID
-            editReviewTitle.textContent = "Edit Review";
-            
-            editReviewModal.hidden = false;
-            // Small delay to ensure focus works
-            setTimeout(() => editReviewText.focus(), 50);
-        }
-
-        function closeReviewModal() {
-            editReviewModal.hidden = true;
-            reviewIdToEdit = null;
-            editReviewText.value = ''; // Clear textarea
-        }
-
-        // Event listeners for closing the modal (X button and backdrop)
-        closeReviewTriggers.forEach(trigger => {
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                closeReviewModal();
-            });
-        });
-        
-        // Close on Escape key
-        document.addEventListener('keydown', function(e){
-            if(e.key === 'Escape' && !editReviewModal.hidden) {
-                closeReviewModal();
-            }
-        });
-
-        // Handle form submission (Save button)
-        editReviewForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (reviewIdToEdit === null) return;
-
-            const newText = editReviewText.value.trim();
-            const reviewIndex = reviewsData.findIndex(r => r.id === reviewIdToEdit);
-
-            // Only update if the text has actually changed
-            if (reviewIndex !== -1 && newText !== reviewsData[reviewIndex].text) {
-                // Update text
-                reviewsData[reviewIndex].text = newText;
-                
-                // Format current date and time for "Edited on"
-                const now = new Date();
-                const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-                const datePart = now.toLocaleDateString('en-US', dateOptions);
-                
-                // Format time like 7:23pm
-                let hours = now.getHours();
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                const ampm = hours >= 12 ? 'pm' : 'am';
-                hours = hours % 12;
-                hours = hours ? hours : 12; // the hour '0' should be '12'
-                const timeString = `${hours}:${minutes}${ampm}`;
-                
-                reviewsData[reviewIndex].editedOn = `${datePart} at ${timeString}`;
-                
-                // Re-render the review card to show changes
-                renderReview(currentReviewIndex);
-            }
-            // Close the modal after saving
-            closeReviewModal();
-        });
-
-        // Carousel Navigation
-        prevBtn.addEventListener('click', () => {
-            if (currentReviewIndex > 0) {
-                currentReviewIndex--;
-                renderReview(currentReviewIndex);
-            }
-        });
-
-        nextBtn.addEventListener('click', () => {
-            if (currentReviewIndex < reviewsData.length - 1) {
-                currentReviewIndex++;
-                renderReview(currentReviewIndex);
-            }
-        });
-
-        // Initial Render
-        renderReview(currentReviewIndex);
-    })();
-  </script>
   <script>
 (function(){
-  const fab = document.getElementById('addReviewFab');
-  const modal = document.getElementById('writeReviewModal');
-  const form = document.getElementById('writeReviewForm');
+    let reviewsData = [];
 
-  const starsWrap = document.getElementById('wrStars');
-  const ratingInput = document.getElementById('wrRating');
+    async function loadReviewsFromDB() {
+        try {
+            const response = await fetch('/reviews');
+            const dbReviews = await response.json();
 
-  const tagButtons = Array.from(document.querySelectorAll('.wr-tag'));
+            reviewsData = dbReviews.map((review, index) => ({
+                id: review._id || index + 1,
+                cafeName: review.establishmentName,
+                address: "Address unavailable",
+                rating: review.rating,
+                date: review.datePosted || "No date",
+                editedOn: null,
+                text: review.reviewText,
+                image: "apdev-tbv/cafe4.jpg",
+                amenities: {
+                    ac: review.tags?.includes("Air-conditioned") || false,
+                    socket: review.tags?.includes("Socket") || false,
+                    wifi: review.tags?.includes("Wi-Fi") || false,
+                    altMilk: review.tags?.includes("Alt Milk") || false
+                }
+            }));
 
-  function openModal(){
-    modal.hidden = false;
-    // reset
-    form.reset();
-    setRating(0);
-    tagButtons.forEach(b => b.classList.remove('active'));
-  }
+            currentReviewIndex = 0;
+            renderReview(currentReviewIndex);
+            updateReviewArrows();
+        } catch (err) {
+            console.error("Failed to load reviews:", err);
+        }
+    }
 
-  function closeModal(){
-    modal.hidden = true;
-    fab.focus();
-  }
+    const repliesData = [
+        {
+            id: 901,
+            replyToUser: "Mark S.",
+            cafeName: "Yardstick",
+            date: "March 2, 2026",
+            text: "Hey Mark! Totally agree about Yardsrick's iced latte. It's my go-to on a hot afternoon. Have you tried their pastries? The croissants are surprisingly good!",
+            image: "apdev-tbv/cafe4.jpg"
+        },
+        {
+            id: 902,
+            replyToUser: "CoffeeCat_99",
+            cafeName: "The Spotted Pig",
+            date: "February 25, 2026",
+            text: "I had the same experience! The queue was long, but that hazelnut hot chocolate made it all worth it. Did you find it too noisy for working, though?",
+            image: "apdev-tbv/thespottedpig.jpeg"
+        },
+        {
+            id: 903,
+            replyToUser: "Juan Dela Cruz",
+            cafeName: "Daily Dose",
+            date: "February 10, 2026",
+            text: "This branch is definitely the best for people-watching. I haven't tried the ice cream sandwiches yet—adding that to my list for next time!",
+            image: "apdev-tbv/dailydose.jpg"
+        }
+    ];
 
-  // open/close
-  fab.addEventListener('click', openModal);
+    const repliesContainer = document.getElementById('repliesContainer');
+    const prevReplyBtn = document.getElementById('prevReplyBtn');
+    const nextReplyBtn = document.getElementById('nextReplyBtn');
+    let currentReplyIndex = 0;
 
-  modal.addEventListener('click', (e)=>{
-    if(e.target.matches('[data-close-write]')) closeModal();
-  });
+    function renderSampleReplies() {
+        const reply = repliesData[currentReplyIndex];
+        const username = getCurrentUsername();
 
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape' && !modal.hidden) closeModal();
-  });
+        const replyHtml = `
+            <div class="review-card" style="box-shadow: none; width: 100%;">
+              <img src="${reply.image}" alt="${reply.cafeName}" class="review-img">
+              <div class="review-content">
+                <div class="review-header" style="margin-bottom: 4px;">
+                  <div>
+                    <span class="review-user">${username.replace('@', '')}</span>
+                    <span style="color: var(--muted); font-size: 14px;"> replying to </span>
+                    <span class="review-user">${reply.replyToUser}</span>
+                    <span class="review-date" style="margin-top: 4px;">${reply.date}</span>
+                  </div>
+                </div>
 
-  // Stars (5 dots)
-  function setRating(n){
-    ratingInput.value = String(n);
-    const btns = starsWrap.querySelectorAll('.wr-star');
-    btns.forEach((b, i)=>{
-      b.classList.toggle('filled', i < n);
+                <div class="cafe-title-row">
+                    <h3 class="cafe-name" style="font-size: 24px;">${reply.cafeName}</h3>
+                </div>
+                <p class="review-text" style="margin-top: 12px;">${reply.text}</p>
+              </div>
+            </div>
+        `;
+        repliesContainer.innerHTML = replyHtml;
+
+        prevReplyBtn.style.opacity = currentReplyIndex === 0 ? "0.5" : "1";
+        prevReplyBtn.style.cursor = currentReplyIndex === 0 ? "default" : "pointer";
+
+        nextReplyBtn.style.opacity = currentReplyIndex === repliesData.length - 1 ? "0.5" : "1";
+        nextReplyBtn.style.cursor = currentReplyIndex === repliesData.length - 1 ? "default" : "pointer";
+    }
+
+    prevReplyBtn.addEventListener('click', () => {
+        if (currentReplyIndex > 0) {
+            currentReplyIndex--;
+            renderSampleReplies();
+        }
     });
-  }
 
-  // build star buttons
-  starsWrap.innerHTML = '';
-  for(let i=1;i<=5;i++){
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'wr-star';
-    b.setAttribute('aria-label', `${i} stars`);
-    b.addEventListener('click', ()=> setRating(i));
-    starsWrap.appendChild(b);
-  }
-
-  // tags toggle
-  tagButtons.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      btn.classList.toggle('active');
+    nextReplyBtn.addEventListener('click', () => {
+        if (currentReplyIndex < repliesData.length - 1) {
+            currentReplyIndex++;
+            renderSampleReplies();
+        }
     });
-  });
 
-  // submit (UI-only for now)
-  form.addEventListener('submit', (e)=>{
-    e.preventDefault();
+    renderSampleReplies();
 
-    // For now: just confirm it worked.
-    // Next step: we can push into reviewsData and re-render,
-    // OR POST to Node.js route for MCO2.
-    alert('Saved! (UI only — not yet connected to database)');
-    closeModal();
-  });
+    let currentReviewIndex = 0;
+    const reviewContainer = document.getElementById('reviewContainer');
+    const prevBtn = document.getElementById('prevReviewBtn');
+    const nextBtn = document.getElementById('nextReviewBtn');
+
+    const editReviewModal = document.getElementById('editReviewModal');
+    const editReviewForm = document.getElementById('editReviewForm');
+    const editReviewText = document.getElementById('editReviewText');
+    const editReviewTitle = document.getElementById('editReviewTitle');
+    const closeReviewTriggers = document.querySelectorAll('[data-close-review]');
+    let reviewIdToEdit = null;
+
+    function getCurrentUsername() {
+        const storedUser = localStorage.getItem('beanthere_profile_username');
+        return storedUser ? storedUser : '@erylle_g';
+    }
+
+    function getBeanRatingHtml(rating) {
+        let beansHtml = '';
+        for (let i = 0; i < 5; i++) {
+            beansHtml += i < rating ? '☕' : '<span style="opacity:0.3; filter:grayscale(1)">☕</span>';
+        }
+        return beansHtml;
+    }
+
+    function getAmenitiesHtml(amenities) {
+        let html = '';
+        if (amenities.ac) html += '<div class="amenity-item">❄️ Air-conditioned</div>';
+        if (amenities.socket) html += '<div class="amenity-item">🔌 Socket</div>';
+        if (amenities.wifi) html += '<div class="amenity-item">🛜 Wifi</div>';
+        if (amenities.altMilk) html += '<div class="amenity-item">🥛 Alt Milk</div>';
+        return html;
+    }
+
+    function renderReview(index) {
+        if (reviewsData.length === 0) {
+            reviewContainer.innerHTML = `<p style="text-align:center; color:#666;">No reviews yet.</p>`;
+            return;
+        }
+
+        if (index < 0 || index >= reviewsData.length) return;
+
+        const review = reviewsData[index];
+        const username = getCurrentUsername();
+        const beansHtml = getBeanRatingHtml(review.rating);
+        const amenitiesHtml = getAmenitiesHtml(review.amenities);
+
+        let editedHtml = '';
+        if (review.editedOn) {
+            editedHtml = `<span class="edited-label">edited on ${review.editedOn}</span>`;
+        }
+
+        const reviewHtml = `
+            <div class="review-card" data-id="${review.id}">
+              <img src="${review.image}" alt="${review.cafeName}" class="review-img">
+              <div class="review-content">
+                <div class="review-header">
+                  <div>
+                    <div class="review-user">${username.replace('@', '')}</div>
+                    <span class="review-date">${review.date}</span>
+                    ${editedHtml}
+                  </div>
+                  <div class="amenities-list">
+                    ${amenitiesHtml}
+                  </div>
+                </div>
+
+                <div class="cafe-title-row">
+                    <h3 class="cafe-name">${review.cafeName}</h3>
+                    <span class="rating-beans">${beansHtml}</span>
+                </div>
+                <div class="cafe-address">${review.address}</div>
+                <p class="review-text">${review.text}</p>
+
+                <div class="edit-review-btn-container">
+                    <button class="btn-edit-review" id="editReviewBtn-${review.id}">Edit Review</button>
+                </div>
+              </div>
+            </div>
+        `;
+
+        reviewContainer.innerHTML = reviewHtml;
+
+        document.getElementById(`editReviewBtn-${review.id}`).addEventListener('click', function() {
+            openReviewModal(review.id);
+        });
+    }
+
+    function updateReviewArrows() {
+        prevBtn.style.opacity = currentReviewIndex === 0 ? "0.5" : "1";
+        prevBtn.style.cursor = currentReviewIndex === 0 ? "default" : "pointer";
+
+        nextBtn.style.opacity = currentReviewIndex === reviewsData.length - 1 ? "0.5" : "1";
+        nextBtn.style.cursor = currentReviewIndex === reviewsData.length - 1 ? "default" : "pointer";
+    }
+
+    function openReviewModal(reviewId) {
+        const review = reviewsData.find(r => r.id === reviewId);
+        if (!review) return;
+
+        reviewIdToEdit = reviewId;
+        editReviewText.value = review.text;
+        editReviewTitle.textContent = "Edit Review";
+
+        editReviewModal.hidden = false;
+        setTimeout(() => editReviewText.focus(), 50);
+    }
+
+    function closeReviewModal() {
+        editReviewModal.hidden = true;
+        reviewIdToEdit = null;
+        editReviewText.value = '';
+    }
+
+    closeReviewTriggers.forEach(trigger => {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeReviewModal();
+        });
+    });
+
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && !editReviewModal.hidden) {
+            closeReviewModal();
+        }
+    });
+
+    editReviewForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (reviewIdToEdit === null) return;
+
+        const newText = editReviewText.value.trim();
+        const reviewIndex = reviewsData.findIndex(r => r.id === reviewIdToEdit);
+
+        if (reviewIndex !== -1 && newText !== reviewsData[reviewIndex].text) {
+            reviewsData[reviewIndex].text = newText;
+
+            const now = new Date();
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const datePart = now.toLocaleDateString('en-US', dateOptions);
+
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const timeString = `${hours}:${minutes}${ampm}`;
+
+            reviewsData[reviewIndex].editedOn = `${datePart} at ${timeString}`;
+
+            renderReview(currentReviewIndex);
+            updateReviewArrows();
+        }
+
+        closeReviewModal();
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentReviewIndex > 0) {
+            currentReviewIndex--;
+            renderReview(currentReviewIndex);
+            updateReviewArrows();
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentReviewIndex < reviewsData.length - 1) {
+            currentReviewIndex++;
+            renderReview(currentReviewIndex);
+            updateReviewArrows();
+        }
+    });
+
+    loadReviewsFromDB();
 })();
 </script>
 </body>

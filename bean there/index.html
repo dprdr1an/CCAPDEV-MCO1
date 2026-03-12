@@ -667,8 +667,7 @@
   const signUpModal = document.getElementById('signUpModal');
   const logInForm = document.getElementById('logInForm');
   const signUpForm = document.getElementById('signUpForm');
-  
-  // Navigation buttons in the sidebar
+
   const loginBtn = document.querySelector('.auth div:first-child');
   const signupBtn = document.querySelector('.auth div:last-child');
 
@@ -681,82 +680,142 @@
   document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
   document.getElementById('xSignUp').onclick = () => signUpModal.hidden = true;
 
-  // --- 3. "REMEMBER ME" LOGIC ---
-  const THREE_WEEKS_MS = 3 * 7 * 24 * 60 * 60 * 1000;
+  function normalizeUsername(username) {
+    username = username.trim();
+    if (!username.startsWith('@')) {
+      username = '@' + username;
+    }
+    return username;
+  }
 
-  function checkAndExtendSession() {
-    const expiry = localStorage.getItem('beanthere_remember_expiry');
-    if (expiry) {
-      const now = Date.now();
-      if (now < parseInt(expiry)) {
-        const newExpiry = now + THREE_WEEKS_MS;
-        localStorage.setItem('beanthere_remember_expiry', newExpiry.toString());
-        console.log("Session extended until: " + new Date(newExpiry).toLocaleDateString());
-      } else {
-        localStorage.removeItem('beanthere_remember_expiry');
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) {
+        resolve("");
+        return;
       }
+
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // --- 3. CHECK EXISTING SESSION ---
+  async function checkSessionOnLoad() {
+    try {
+      const response = await fetch('/session-user');
+      if (!response.ok) return;
+
+      const result = await response.json();
+      if (result.loggedIn) {
+        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', result.user.username || '');
+        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+      }
+    } catch (err) {
+      console.error('No active session found.');
     }
   }
-  checkAndExtendSession();
 
-  // --- 4. AUTH FORM HANDLERS ---
-  
-  // Log In Handler
-  logInForm.onsubmit = function(e) {
+  checkSessionOnLoad();
+
+  // --- 4. LOGIN HANDLER ---
+  logInForm.onsubmit = async function(e) {
     e.preventDefault();
 
-    const enteredUser = '@' + document.getElementById('loginUser').value.replace('@', '');
-    const enteredPass = document.getElementById('loginPass').value;
-    const isRemembered = document.getElementById('rememberMe').checked;
+    const username = normalizeUsername(document.getElementById('loginUser').value);
+    const password = document.getElementById('loginPass').value.trim();
+    const rememberMe = document.getElementById('rememberMe').checked;
 
-    const storedUser = localStorage.getItem('beanthere_profile_username');
-    const storedPass = localStorage.getItem('beanthere_profile_password');
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          password,
+          rememberMe
+        })
+      });
 
-    if (enteredUser === storedUser && enteredPass === storedPass) {
-      if (isRemembered) {
-        localStorage.setItem('beanthere_remember_expiry', (Date.now() + THREE_WEEKS_MS).toString());
+      const result = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', result.user.username || '');
+        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+
+        alert("Login successful! Welcome back.");
+        window.location.href = 'profile.html';
       } else {
-        localStorage.removeItem('beanthere_remember_expiry');
+        alert(result.message || "Invalid username or password.");
       }
-
-      alert("Login successful! Welcome back.");
-      window.location.href = 'profile.html';
-    } else {
-      alert("Invalid username or password.");
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
     }
   };
 
-  // Sign Up Handler
-  signUpForm.onsubmit = function(e) {
+  // --- 5. SIGNUP HANDLER ---
+  signUpForm.onsubmit = async function(e) {
     e.preventDefault();
-    const pass = document.getElementById('regPass').value;
-    const confirm = document.getElementById('regConfirm').value;
 
-    if(pass !== confirm) {
+    const fullName = document.getElementById('regName').value.trim();
+    const username = normalizeUsername(document.getElementById('regUser').value);
+    const password = document.getElementById('regPass').value;
+    const confirm = document.getElementById('regConfirm').value;
+    const bio = document.getElementById('regBio').value.trim() || "No bio added yet.";
+    const title = document.getElementById('regTitle').value.trim() || "Member";
+    const avatarFile = document.getElementById('regAvatar').files[0];
+
+    if (password !== confirm) {
       alert("Passwords do not match!");
       return;
     }
 
-    localStorage.setItem('beanthere_profile_fullname', document.getElementById('regName').value);
-    localStorage.setItem('beanthere_profile_username', '@' + document.getElementById('regUser').value.replace('@', ''));
-    localStorage.setItem('beanthere_profile_password', pass);
-    localStorage.setItem('beanthere_profile_bio', document.getElementById('regBio').value || "No bio added yet.");
-    localStorage.setItem('beanthere_profile_title', document.getElementById('regTitle').value || "Member");
+    try {
+      const avatar = await fileToDataURL(avatarFile);
 
-    const file = document.getElementById('regAvatar').files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        localStorage.setItem('beanthere_profile_avatar', ev.target.result);
-        window.location.href = 'profile.html';
-      };
-      reader.readAsDataURL(file);
-    } else {
-      window.location.href = 'profile.html';
+      const response = await fetch('/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fullName,
+          username,
+          password,
+          bio,
+          title,
+          avatar
+        })
+      });
+
+      const result = await response.text();
+
+      if (response.ok) {
+        alert("Signup successful! You can now log in.");
+        signUpForm.reset();
+        signUpModal.hidden = true;
+        logInModal.hidden = false;
+      } else {
+        alert(result);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
     }
   };
 
-  // --- 5. CAROUSEL & SEARCH LOGIC ---
+  // --- 6. CAROUSEL & SEARCH LOGIC ---
   const cafes = [
     {name:"Coffee Nook", img:"https://picsum.photos/600/400?random=1", loc:"Taft Ave"},
     {name:"GroupHug Cafe", img:"https://picsum.photos/600/400?random=2", loc:"Malate"},
@@ -829,24 +888,34 @@
     [...dotsContainer.children].forEach((dot, i) => dot.classList.toggle("active", i === currentIndex));
   }
 
-  function startAutoplay() { stopAutoplay(); autoplay = setInterval(() => slideTo(getIndex(currentIndex + 1)), 3500); }
-  function stopAutoplay() { if (autoplay) clearInterval(autoplay); }
+  function startAutoplay() {
+    stopAutoplay();
+    autoplay = setInterval(() => slideTo(getIndex(currentIndex + 1)), 3500);
+  }
 
-  // Search Logic
+  function stopAutoplay() {
+    if (autoplay) clearInterval(autoplay);
+  }
+
   const searchInput = document.getElementById("q");
   const searchBtn = document.getElementById("searchBtn");
+
   searchBtn.addEventListener("click", handleSearch);
-  searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") handleSearch(); });
-  
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleSearch();
+  });
+
   function handleSearch() {
     const query = searchInput.value.toLowerCase().trim();
-    activeCafes = query ? cafes.filter(c => c.name.toLowerCase().includes(query) || c.loc.toLowerCase().includes(query)) : [...cafes];
+    activeCafes = query
+      ? cafes.filter(c => c.name.toLowerCase().includes(query) || c.loc.toLowerCase().includes(query))
+      : [...cafes];
     currentIndex = 0;
     createDots();
     renderCarousel();
   }
 
-  // --- 6. INITIALIZATION ---
+  // --- 7. INITIALIZATION ---
   document.getElementById("nextBtn").onclick = () => slideTo(getIndex(currentIndex + 1));
   document.getElementById("prevBtn").onclick = () => slideTo(getIndex(currentIndex - 1));
   carousel.addEventListener("mouseenter", stopAutoplay);
