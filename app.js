@@ -23,10 +23,10 @@ app.use(session({
 }));
 
 // serve your frontend
-app.use(express.static("CCAPDEV-MCO1/bean there"));
+app.use(express.static("bean there"));
 
 app.get("/", (req, res) => {
-  res.sendFile("index.html", { root: "CCAPDEV-MCO1/bean there" });
+  res.sendFile("index.html", { root: "bean there" });
 });
 
 /* =========================
@@ -53,7 +53,7 @@ app.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
-    res.send("Signup successful");
+    res.send("Sign up successful");
   } catch (err) {
     console.error(err);
     res.status(500).send("Error signing up");

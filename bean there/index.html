@@ -91,92 +91,93 @@
       flex-direction:column;
       gap:26px;
     }
+
     /* Custom Login Modal Styles */
-.login-custom-panel {
-  max-width: 480px;
-  width: 90%;
-  border-radius: 20px;
-  padding: 40px !important;
-}
+    .login-custom-panel {
+      max-width: 480px;
+      width: 90%;
+      border-radius: 20px;
+      padding: 40px !important;
+    }
 
-.modal-title {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 32px;
-  text-align: center;
-  margin-bottom: 40px;
-}
+    .modal-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
 
-.modal-close-btn {
-  position: absolute;
-  top: 20px;
-  right: 25px;
-  border: 0;
-  background: transparent;
-  font-size: 28px;
-  cursor: pointer;
-  color: #333;
-}
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      border: 0;
+      background: transparent;
+      font-size: 28px;
+      cursor: pointer;
+      color: #333;
+    }
 
-.input-group {
-  display: flex;
-  align-items: center;
-  margin-bottom: 25px;
-  gap: 15px;
-}
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      gap: 15px;
+    }
 
-.input-group label {
-  font-size: 20px;
-  min-width: 110px;
-}
+    .input-group label {
+      font-size: 20px;
+      min-width: 110px;
+    }
 
-.input-group input {
-  flex: 1;
-  padding: 5px;
-  border: 0;
-  border-bottom: 1px solid #ccc;
-  font-size: 18px;
-  outline: none;
-}
+    .input-group input {
+      flex: 1;
+      padding: 5px;
+      border: 0;
+      border-bottom: 1px solid #ccc;
+      font-size: 18px;
+      outline: none;
+    }
 
-.login-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 30px;
-}
+    .login-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+    }
 
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 18px;
-}
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 18px;
+    }
 
-/* Styling the Checkbox to match the olive theme */
-.remember-me input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--sidebar);
-  cursor: pointer;
-}
+    /* Styling the Checkbox to match the olive theme */
+    .remember-me input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--sidebar);
+      cursor: pointer;
+    }
 
-.done-btn {
-  padding: 6px 35px;
-  border-radius: 25px;
-  border: 1.5px solid var(--sidebar);
-  background: #fff;
-  font-weight: 700;
-  font-size: 18px;
-  cursor: pointer;
-  transition: 0.2s;
-}
+    .done-btn {
+      padding: 6px 35px;
+      border-radius: 25px;
+      border: 1.5px solid var(--sidebar);
+      background: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
 
-.done-btn:hover {
-  background: #f8f8f0;
-}
+    .done-btn:hover {
+      background: #f8f8f0;
+    }
 
     .nav a{
       color:#fff;
@@ -198,10 +199,10 @@
     }
 
     /* Modal Styles */
-.modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
-.modal[hidden] { display: none; }
-.modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
-.modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
+    .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal[hidden] { display: none; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
+    .modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
     /* MAIN */
     .main{
       height:calc(100% - 36px);
@@ -524,9 +525,13 @@
             <a href="ratings.html">Ratings</a>
           </nav>
         </div>
-        <div class="auth">
-          <div style="margin-bottom:14px">Log in</div>
-          <div>Sign up</div>
+        <div class="auth" id="authSection">
+          <div id="loginBtn" style="margin-bottom:14px">Log in</div>
+          <div id="signupBtn">Sign up</div>
+        </div>
+        <div class="auth" id="userSection" style="display:none;">
+          <div id="welcomeUser" style="margin-bottom:14px"></div>
+          <div id="logoutBtn">Log out</div>
         </div>
       </aside>
 
@@ -662,14 +667,58 @@
   </div>
 </div>
  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+
   // --- 1. SELECTORS ---
   const logInModal = document.getElementById('logInModal');
   const signUpModal = document.getElementById('signUpModal');
   const logInForm = document.getElementById('logInForm');
   const signUpForm = document.getElementById('signUpForm');
 
-  const loginBtn = document.querySelector('.auth div:first-child');
-  const signupBtn = document.querySelector('.auth div:last-child');
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+
+  console.log(loginBtn);
+
+  // --- AUTH UI ---
+  const authSection = document.getElementById("authSection");
+  const userSection = document.getElementById("userSection");
+  const welcomeUser = document.getElementById("welcomeUser");
+  const logoutBtn = document.getElementById("logoutBtn");
+  
+  welcomeUser.onclick = () => {
+    window.location.href = "profile.html";
+  };
+
+  function updateUI() {
+    const username = localStorage.getItem("beanthere_profile_username");
+
+    if (username) {
+      authSection.style.display = "none";
+      userSection.style.display = "block";
+      welcomeUser.textContent = username;
+    } else {
+      authSection.style.display = "block";
+      userSection.style.display = "none";
+    }
+  }
+
+  // run on load
+  updateUI();
+
+    logoutBtn.onclick = async () => {
+    try {
+      await fetch('/logout', { method: 'POST' });
+
+      localStorage.clear();
+      updateUI();
+
+      alert("Logged out");
+    } catch (err) {
+      console.error(err);
+      alert("Error logging out");
+    }
+  };
 
   // --- 2. MODAL CONTROLS ---
   loginBtn.onclick = () => logInModal.hidden = false;
@@ -752,6 +801,8 @@
         localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
         localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
         localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+        
+        updateUI();
 
         alert("Login successful! Welcome back.");
         window.location.href = 'profile.html';
@@ -923,6 +974,7 @@
   createDots();
   renderCarousel();
   startAutoplay();
+});
 </script>
 
 </body>
