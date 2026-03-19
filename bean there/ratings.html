@@ -84,7 +84,9 @@
       font-size:20px;
     }
 
-    .auth{font-size:20px}
+    .auth{
+      font-size:20px;
+    }
 
     .sidebar .nav a:hover,
     .sidebar .auth div:hover{
@@ -92,7 +94,118 @@
       cursor:pointer;
       transition:0.3s;
     }
+    
+    /* Custom Login Modal Styles */
+    .login-custom-panel {
+      max-width: 480px;
+      width: 90%;
+      border-radius: 20px;
+      padding: 40px !important;
+    }
 
+    .modal-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      border: 0;
+      background: transparent;
+      font-size: 28px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      gap: 15px;
+    }
+
+    .input-group label {
+      font-size: 20px;
+      min-width: 110px;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 5px;
+      border: 0;
+      border-bottom: 1px solid #ccc;
+      font-size: 18px;
+      outline: none;
+    }
+
+    .login-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    /* Styling the Checkbox to match the olive theme */
+    .remember-me input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--sidebar);
+      cursor: pointer;
+    }
+
+    .done-btn {
+      padding: 6px 35px;
+      border-radius: 25px;
+      border: 1.5px solid var(--sidebar);
+      background: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .done-btn:hover {
+      background: #f8f8f0;
+    }
+
+    .nav a{
+      color:#fff;
+      text-decoration:none;
+      font-size:20px;
+    }
+
+    .auth{font-size:20px}
+
+    .sidebar .nav a:hover {
+      color: #fa7a11;    
+      transition: 0.3s ease;
+    }
+
+    .sidebar .auth div:hover {
+      color: #fa7a11;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    /* Modal Styles */
+    .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal[hidden] { display: none; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
+    .modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
     /* MAIN */
     .main{
       height:calc(100% - 36px);
@@ -274,9 +387,13 @@
             <a href="ratings.html">Ratings</a>
           </nav>
         </div>
-        <div class="auth">
-          <div style="margin-bottom:14px">Log in</div>
-          <div>Sign up</div>
+        <div class="auth" id="authSection">
+          <div id="loginBtn" style="margin-bottom:14px">Log in</div>
+          <div id="signupBtn">Sign up</div>
+        </div>
+        <div class="auth" id="userSection" style="display:none;">
+          <div id="welcomeUser" style="margin-bottom:14px"></div>
+          <div id="logoutBtn">Log out</div>
         </div>
       </aside>
 
@@ -290,7 +407,7 @@
           </div>
         </div>
         
-        <div class="reviews">
+        <div class="reviews" id="reviewsContainer">
 
         <!-- Rating 1 -->
         <div class="review-card">
@@ -560,5 +677,417 @@
 
     </div>
   </div>
+<div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeLogIn"></div>
+  <div class="modal-panel login-custom-panel">
+    <button id="xLogIn" class="modal-close-btn">✕</button>
+    <h2 class="modal-title">Log in</h2>
+    
+    <form id="logInForm">
+      <div class="input-group">
+        <label for="loginUser">Username:</label>
+        <input id="loginUser" type="text" required>
+      </div>
+
+      <div class="input-group">
+        <label for="loginPass">Password:</label>
+        <input id="loginPass" type="password" required>
+      </div>
+
+      <div class="login-footer">
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe">
+          <span>Remember Me</span>
+        </label>
+        <button type="submit" class="done-btn">Done</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeSignUp"></div>
+  <div class="modal-panel" style="max-width: 450px; text-align: center;">
+    <button id="xSignUp" style="position:absolute; top:10px; right:15px; border:0; background:transparent; font-size:20px; cursor:pointer;">✕</button>
+    <h2 style="font-family:Lora, serif; margin-top:0;">Sign Up</h2>
+    
+    <form id="signUpForm" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regName">Name:</label>
+        <input id="regName" type="text" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regUser">Username:</label>
+        <input id="regUser" type="text" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regPass">Password:</label>
+        <input id="regPass" type="password" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regConfirm">Confirm Password:</label>
+        <input id="regConfirm" type="password" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label>Profile Picture:</label>
+        <input id="regAvatar" type="file" accept="image/*">
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+  <label for="regTitle">Job Title:</label>
+  <input id="regTitle" type="text" placeholder="e.g. Associate for Talent Management" style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+</div>
+      <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
+        <label for="regBio">Bio:</label>
+        <input id="regBio" type="text" placeholder="not required" style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+      </div>
+
+      <button type="submit" style="margin-top:10px; padding:10px; border-radius:20px; border:1px solid var(--accent); background:transparent; font-weight:700; cursor:pointer; width:120px; align-self:center;">Save</button>
+    </form>
+  </div>
+</div>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+
+  // --- 1. SELECTORS ---
+  const logInModal = document.getElementById('logInModal');
+  const signUpModal = document.getElementById('signUpModal');
+  const logInForm = document.getElementById('logInForm');
+  const signUpForm = document.getElementById('signUpForm');
+
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+
+  console.log(loginBtn);
+
+  // --- AUTH UI ---
+  const authSection = document.getElementById("authSection");
+  const userSection = document.getElementById("userSection");
+  const welcomeUser = document.getElementById("welcomeUser");
+  const logoutBtn = document.getElementById("logoutBtn");
+  
+  welcomeUser.onclick = () => {
+    window.location.href = "profile.html";
+  };
+
+  function updateUI() {
+    const username = localStorage.getItem("beanthere_profile_username");
+
+    if (username) {
+      authSection.style.display = "none";
+      userSection.style.display = "block";
+      welcomeUser.textContent = username;
+    } else {
+      authSection.style.display = "block";
+      userSection.style.display = "none";
+    }
+  }
+
+  // run on load
+  updateUI();
+
+    logoutBtn.onclick = async () => {
+    try {
+      await fetch('/logout', { method: 'POST' });
+
+      localStorage.clear();
+      updateUI();
+
+      alert("Logged out");
+    } catch (err) {
+      console.error(err);
+      alert("Error logging out");
+    }
+  };
+
+  // --- 2. MODAL CONTROLS ---
+  loginBtn.onclick = () => logInModal.hidden = false;
+  signupBtn.onclick = () => signUpModal.hidden = false;
+
+  document.getElementById('closeLogIn').onclick = () => logInModal.hidden = true;
+  document.getElementById('xLogIn').onclick = () => logInModal.hidden = true;
+  document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
+  document.getElementById('xSignUp').onclick = () => signUpModal.hidden = true;
+
+  function normalizeUsername(username) {
+    username = username.trim();
+    if (!username.startsWith('@')) {
+      username = '@' + username;
+    }
+    return username;
+  }
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) {
+        resolve("");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // --- 3. CHECK EXISTING SESSION ---
+  async function checkSessionOnLoad() {
+    try {
+      const response = await fetch('/session-user');
+      if (!response.ok) return;
+
+      const result = await response.json();
+      if (result.loggedIn) {
+        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', result.user.username || '');
+        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+      }
+    } catch (err) {
+      console.error('No active session found.');
+    }
+  }
+
+  checkSessionOnLoad();
+
+  // --- 4. LOGIN HANDLER ---
+  logInForm.onsubmit = async function(e) {
+    e.preventDefault();
+
+    const username = normalizeUsername(document.getElementById('loginUser').value);
+    const password = document.getElementById('loginPass').value.trim();
+    const rememberMe = document.getElementById('rememberMe').checked;
+
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          password,
+          rememberMe
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', result.user.username || '');
+        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+        
+        updateUI();
+
+        alert("Login successful! Welcome back.");
+        window.location.href = 'profile.html';
+      } else {
+        alert(result.message || "Invalid username or password.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    }
+  };
+
+  // --- 5. SIGNUP HANDLER ---
+  signUpForm.onsubmit = async function(e) {
+    e.preventDefault();
+
+    const fullName = document.getElementById('regName').value.trim();
+    const username = normalizeUsername(document.getElementById('regUser').value);
+    const password = document.getElementById('regPass').value;
+    const confirm = document.getElementById('regConfirm').value;
+    const bio = document.getElementById('regBio').value.trim() || "No bio added yet.";
+    const title = document.getElementById('regTitle').value.trim() || "Member";
+    const avatarFile = document.getElementById('regAvatar').files[0];
+
+    if (password !== confirm) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const avatar = await fileToDataURL(avatarFile);
+
+      const response = await fetch('/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fullName,
+          username,
+          password,
+          bio,
+          title,
+          avatar
+        })
+      });
+
+      const result = await response.text();
+
+      if (response.ok) {
+        alert("Signup successful! You can now log in.");
+        signUpForm.reset();
+        signUpModal.hidden = true;
+        logInModal.hidden = false;
+      } else {
+        alert(result);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    }
+  };
+});
+</script>
+
+<script>
+let allReviews = [];
+
+
+const tagIcons = {
+  "Air-conditioned": "icons/ac.png",
+  "Socket": "icons/socket.png",
+  "Wi-Fi": "icons/wifi.png",
+  "Alt Milk": "icons/oat.png"
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const container = document.getElementById("reviewsContainer");
+
+  async function loadReviews() {
+    try {
+      const res = await fetch('/reviews');
+      allReviews = await res.json();
+
+      if (!allReviews.length) {
+        container.innerHTML = "<p>No reviews yet.</p>";
+        return;
+      }
+
+      renderReviews(allReviews);
+
+      
+
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = "<p>Error loading reviews.</p>";
+    }
+  }
+
+  loadReviews();
+
+});
+function renderReviews(data) {
+  const container = document.getElementById("reviewsContainer");
+
+  if (!data.length) {
+    container.innerHTML = "<p>No reviews found.</p>";
+    return;
+  }
+
+  const tagIcons = {
+    "Air-conditioned": "icons/ac.png",
+    "Socket": "icons/socket.png",
+    "Wi-Fi": "icons/wifi.png",
+    "Alt Milk": "icons/oat.png"
+  };
+
+  container.innerHTML = data.map(review => {
+
+    const beans = Array.from({ length: 5 }, (_, i) => {
+      return i < (review.rating || 0)
+        ? `<img src="icons/bean.png">`
+        : `<img src="icons/bean.png" style="opacity:0.3; filter:grayscale(1)">`;
+    }).join("");
+
+    const tags = (review.tags || []).map(tag => {
+      const icon = tagIcons[tag];
+      return `
+        <span class="tag">
+          ${icon ? `<img src="${icon}">` : ""}
+          ${tag}
+        </span>
+      `;
+    }).join("");
+
+    return `
+      <div class="review-card">
+        <div class="review-img">
+          <img src="apdev-tbv/cafe4.jpg">
+        </div>
+
+        <div class="review-content">
+          <div class="review-top">
+            <div>
+              <strong>${review.username}</strong><br>
+              ${review.datePosted || ""}
+            </div>
+            <div class="review-tags">${tags}</div>
+          </div>
+
+          <div class="review-title">
+            ${review.establishmentName}
+            <span class="rating">${beans}</span>
+          </div>
+
+          <div class="review-location">
+            ${review.location || ""}
+          </div>
+
+          <div class="review-text">
+            ${review.reviewText}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+const searchInput = document.getElementById("q");
+const searchBtn = document.getElementById("searchBtn");
+
+function handleSearch() {
+  const query = searchInput.value.toLowerCase().trim();
+
+  if (!query) {
+    renderReviews(allReviews);
+    return;
+  }
+
+  const filtered = allReviews.filter(review => {
+    return (
+      review.establishmentName?.toLowerCase().includes(query) ||
+      review.username?.toLowerCase().includes(query) ||
+      review.reviewText?.toLowerCase().includes(query) ||
+      review.location?.toLowerCase().includes(query) ||
+      (review.tags || []).some(tag =>
+        tag.toLowerCase().includes(query)
+      )
+    );
+  });
+
+  renderReviews(filtered);
+}
+
+searchBtn.addEventListener("click", handleSearch);
+
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") handleSearch();
+});
+
+searchInput.addEventListener("input", handleSearch);
+</script>
 </body>
 </html>
