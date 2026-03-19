@@ -18,7 +18,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 // 1 day default
+    httpOnly: true
   }
 }));
 
@@ -82,7 +82,8 @@ app.post("/login", async (req, res) => {
     if (rememberMe) {
       req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 21; // 3 weeks
     } else {
-      req.session.cookie.maxAge = 1000 * 60 * 60 * 24; // 1 day
+      req.session.cookie.expires = false;
+      req.session.cookie.maxAge = null;
     }
 
     res.json({
@@ -135,13 +136,33 @@ app.get("/reviews", async (req, res) => {
   }
 });
 
+app.get("/my-reviews", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
+
+    const reviews = await Review.find({
+      username: req.session.user.username
+    });
+
+    res.json(reviews);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching user reviews");
+  }
+});
 // ADD REVIEW
 app.post("/add-review", async (req, res) => {
   try {
-    const { username, establishmentName, rating, reviewText, tags, datePosted } = req.body;
+    if (!req.session.user) {
+      return res.status(401).send("Not logged in");
+    }
+
+    const { establishmentName, rating, reviewText, tags, datePosted } = req.body;
 
     const newReview = new Review({
-      username,
+      username: req.session.user.username,
       establishmentName,
       rating,
       reviewText,
@@ -161,7 +182,97 @@ app.post("/add-review", async (req, res) => {
     res.status(500).send("Error adding review");
   }
 });
+app.post("/edit-review", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
 
+    const { reviewId, reviewText, rating, tags } = req.body;
+
+    const updatedReview = await Review.findOneAndUpdate(
+      {
+        _id: reviewId,
+        username: req.session.user.username
+      },
+      {
+        reviewText,
+        rating,
+        tags: Array.isArray(tags) ? tags : []
+      },
+      { new: true }
+    );
+
+    if (!updatedReview) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    res.json({
+      message: "Review updated successfully",
+      review: updatedReview
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating review" });
+  }
+});
+
+app.post("/update-profile", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
+
+    const { username, bio, title, avatar } = req.body;
+
+    const normalizedUsername = username && username.startsWith("@")
+      ? username
+      : `@${(username || "").replace(/^@/, "")}`;
+
+    // check if another user already uses this username
+    const existingUser = await User.findOne({
+      username: normalizedUsername,
+      _id: { $ne: req.session.user.id }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Username already exists." });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.session.user.id,
+      {
+        username: normalizedUsername,
+        bio: bio || "",
+        title: title || "Member",
+        ...(avatar ? { avatar } : {})
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // update session too
+    req.session.user = {
+      id: updatedUser._id,
+      fullName: updatedUser.fullName,
+      username: updatedUser.username,
+      bio: updatedUser.bio,
+      title: updatedUser.title,
+      avatar: updatedUser.avatar
+    };
+
+    res.json({
+      message: "Profile updated successfully",
+      user: req.session.user
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating profile" });
+  }
+});
 const PORT = 3000;
 
 // start server after DB connection

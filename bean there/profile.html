@@ -208,17 +208,17 @@
 #reviewContainer, #repliesContainer {
   display: flex;
   width: 100%;
-  min-height: 220px; /* Aligns height better with the review card */
+  min-height: 220px;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Specific fix for the replies container to match the blue box */
 /* Force the replies carousel to match the main review carousel exactly */
 #repliesContainer {
   background-color: #dce6f7 !important;
-  min-height: 180px;
-  padding: 0; /* Remove padding so the card inside touches the edges if needed */
-  display: flex;
-  align-items: stretch; /* Ensures the card fills the height */
+  min-height: 220px;
+  padding: 0;
 }
 
 /* Ensure the review card inside the replies container doesn't add extra margin */
@@ -503,6 +503,11 @@
       font-weight:600;
     }
 
+    .edit-tag {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+    }
     /* Sections */
     .section{
       max-width:var(--content-width);
@@ -848,19 +853,36 @@
 }
 
     #editReviewText {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      background: transparent;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 18px;
-      color: #7f7a75; /* Text color from image */
-      resize: none; /* Disable resize handle */
-      outline: none;
-      text-align: center;
-      min-height: 120px;
-    }
+  flex: 1;
+  min-height: 120px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  padding: 14px;
+  resize: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  color: #4a3f35;
+  background: #fff;
+  outline: none;
+  text-align: left;
+}
+#editReviewTags {
+  position: relative;
+  z-index: 4;
+}
 
+#editReviewForm .wr-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 12px 0;
+}
+
+#editReviewForm .wr-row label {
+  width: 120px;
+  font-weight: 700;
+  color: #4a3f35;
+}
     #editReviewText::placeholder {
       color: #b0aba5;
     }
@@ -886,6 +908,14 @@
       background-color: #4a3f35;
       color: #fff;
     }
+    .wr-tag{
+  border: 1.5px solid rgba(0,0,0,0.35);
+  background: transparent;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  pointer-events: auto;
+}
   </style>
 </head>
 
@@ -1174,35 +1204,67 @@
 </div>
 
   <div id="editReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
-    <div class="modal-backdrop" data-close-review></div>
-    <div class="modal-panel edit-review-panel">
-      <header class="edit-review-header">
-        <h3 id="editReviewTitle">Edit Review</h3>
-        <button class="modal-close-review" aria-label="Close" data-close-review>✕</button>
-      </header>
-      <form id="editReviewForm">
+  <div class="modal-backdrop" data-close-review></div>
+  <div class="modal-panel edit-review-panel">
+    <header class="edit-review-header">
+      <h3 id="editReviewTitle">Edit Review</h3>
+      <button class="modal-close-review" aria-label="Close" data-close-review>✕</button>
+    </header>
+
+    <form id="editReviewForm">
+      <div class="wr-row">
+        <label>Stars:</label>
+        <div class="wr-stars" id="editReviewStars"></div>
+        <input type="hidden" id="editReviewRating" value="0">
+      </div>
+
+      <div class="wr-row">
+        <label for="editReviewText">Review:</label>
         <textarea id="editReviewText" rows="6" placeholder="Write your edit here.."></textarea>
-        <div class="edit-review-footer">
-          <button type="submit" class="btn-save-review">Save</button>
-        </div>
-      </form>
-    </div>
+      </div>
+
+      <div class="wr-row wr-tags" id="editReviewTags">
+        <button type="button" class="wr-tag edit-tag">Air-conditioned</button>
+        <button type="button" class="wr-tag edit-tag">Socket</button>
+        <button type="button" class="wr-tag edit-tag">Wi-Fi</button>
+        <button type="button" class="wr-tag edit-tag">More</button>
+      </div>
+
+           <div class="edit-review-footer">
+        <button type="submit" class="btn-save-review">Save</button>
+      </div>
+    </form>
   </div>
+</div>
 
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
-  // --- 1. SELECTORS ---
   const logInModal = document.getElementById('logInModal');
   const signUpModal = document.getElementById('signUpModal');
   const logInForm = document.getElementById('logInForm');
   const signUpForm = document.getElementById('signUpForm');
 
+  const userMenuBtn = document.getElementById('userMenuBtn');
+  const panel = document.getElementById('userDropdown');
+  const editBtn = document.getElementById('editProfileBtn');
+  const modal = document.getElementById('editProfileModal');
+  const closeTriggers = modal ? modal.querySelectorAll('[data-close]') : [];
+  const form = document.getElementById('editProfileForm');
+  const inputUsername = document.getElementById('inputUsername');
+  const inputBio = document.getElementById('inputBio');
+  const handleText = document.getElementById('handleText');
+  const bioText = document.getElementById('bioText');
+
+  const inputAvatar = document.getElementById('inputAvatar');
+  const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+  const avatarLarge = document.getElementById('avatarLargeImg');
+  const avatarMini = document.getElementById('avatarMiniImg');
+
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
 
   console.log(loginBtn);
-
   // --- AUTH UI ---
   const authSection = document.getElementById("authSection");
   const userSection = document.getElementById("userSection");
@@ -1420,31 +1482,55 @@
       alert("Error connecting to server.");
     }
   };
+
+     if (panel) {
+    panel.addEventListener('keydown', function(e){
+      const focusable = Array.from(panel.querySelectorAll('[role="menuitem"]'));
+      if(!focusable.length) return;
+
+      const idx = focusable.indexOf(document.activeElement);
+      if(e.key === 'ArrowDown'){
+        e.preventDefault();
+        const next = focusable[(idx + 1) % focusable.length];
+        next.focus();
+      } else if(e.key === 'ArrowUp'){
+        e.preventDefault();
+        const prev = focusable[(idx - 1 + focusable.length) % focusable.length];
+        prev.focus();
+      }
+    });
+  }
+
 });
-(function(){
+</script>
+
+  <script>
+
     let reviewsData = [];
 
+    let currentReviewIndex = 0;
     async function loadReviewsFromDB() {
         try {
-            const response = await fetch('/reviews');
+            const response = await fetch('/my-reviews');
             const dbReviews = await response.json();
 
             reviewsData = dbReviews.map((review, index) => ({
-                id: review._id || index + 1,
-                cafeName: review.establishmentName,
-                address: "Address unavailable",
-                rating: review.rating,
-                date: review.datePosted || "No date",
-                editedOn: null,
-                text: review.reviewText,
-                image: "apdev-tbv/cafe4.jpg",
-                amenities: {
-                    ac: review.tags?.includes("Air-conditioned") || false,
-                    socket: review.tags?.includes("Socket") || false,
-                    wifi: review.tags?.includes("Wi-Fi") || false,
-                    altMilk: review.tags?.includes("Alt Milk") || false
-                }
-            }));
+  id: review._id || index + 1,
+  cafeName: review.establishmentName,
+  address: "Address unavailable",
+  rating: review.rating,
+  date: review.datePosted || "No date",
+  editedOn: null,
+  text: review.reviewText,
+  image: "apdev-tbv/cafe4.jpg",
+  tags: review.tags || [],
+  amenities: {
+    ac: review.tags?.includes("Air-conditioned") || false,
+    socket: review.tags?.includes("Socket") || false,
+    wifi: review.tags?.includes("Wi-Fi") || false,
+    altMilk: review.tags?.includes("Alt Milk") || false
+  }
+}));
 
             currentReviewIndex = 0;
             renderReview(currentReviewIndex);
@@ -1454,70 +1540,81 @@
         }
     }
 
-    const repliesData = [
-        {
-            id: 901,
-            replyToUser: "Mark S.",
-            cafeName: "Yardstick",
-            date: "March 2, 2026",
-            text: "Hey Mark! Totally agree about Yardsrick's iced latte. It's my go-to on a hot afternoon. Have you tried their pastries? The croissants are surprisingly good!",
-            image: "apdev-tbv/cafe4.jpg"
-        },
-        {
-            id: 902,
-            replyToUser: "CoffeeCat_99",
-            cafeName: "The Spotted Pig",
-            date: "February 25, 2026",
-            text: "I had the same experience! The queue was long, but that hazelnut hot chocolate made it all worth it. Did you find it too noisy for working, though?",
-            image: "apdev-tbv/thespottedpig.jpeg"
-        },
-        {
-            id: 903,
-            replyToUser: "Juan Dela Cruz",
-            cafeName: "Daily Dose",
-            date: "February 10, 2026",
-            text: "This branch is definitely the best for people-watching. I haven't tried the ice cream sandwiches yet—adding that to my list for next time!",
-            image: "apdev-tbv/dailydose.jpg"
-        }
-    ];
+    const repliesData = [];
 
+    const editReviewStars = document.getElementById('editReviewStars');
+  const editReviewRating = document.getElementById('editReviewRating');
+  let currentEditRating = 0;
     const repliesContainer = document.getElementById('repliesContainer');
     const prevReplyBtn = document.getElementById('prevReplyBtn');
     const nextReplyBtn = document.getElementById('nextReplyBtn');
     let currentReplyIndex = 0;
 
+    
+
+    function renderEditStars() {
+    editReviewStars.innerHTML = '';
+
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('div');
+        star.classList.add('wr-star');
+
+        if (i <= currentEditRating) {
+            star.classList.add('filled');
+        }
+
+        star.addEventListener('click', () => {
+            currentEditRating = i;
+            editReviewRating.value = i;
+            renderEditStars();
+        });
+
+        editReviewStars.appendChild(star);
+    }
+}
+
+
     function renderSampleReplies() {
-        const reply = repliesData[currentReplyIndex];
-        const username = getCurrentUsername();
+    if (repliesData.length === 0) {
+       repliesContainer.innerHTML = `<p style="margin:0; color:#666;">No replies yet.</p>`;
+        prevReplyBtn.style.opacity = "0.5";
+        prevReplyBtn.style.cursor = "default";
+        nextReplyBtn.style.opacity = "0.5";
+        nextReplyBtn.style.cursor = "default";
+        return;
+    }
 
-        const replyHtml = `
-            <div class="review-card" style="box-shadow: none; width: 100%;">
-              <img src="${reply.image}" alt="${reply.cafeName}" class="review-img">
-              <div class="review-content">
-                <div class="review-header" style="margin-bottom: 4px;">
-                  <div>
-                    <span class="review-user">${username.replace('@', '')}</span>
-                    <span style="color: var(--muted); font-size: 14px;"> replying to </span>
-                    <span class="review-user">${reply.replyToUser}</span>
-                    <span class="review-date" style="margin-top: 4px;">${reply.date}</span>
-                  </div>
-                </div>
+    const reply = repliesData[currentReplyIndex];
+    const username = getCurrentUsername();
 
-                <div class="cafe-title-row">
-                    <h3 class="cafe-name" style="font-size: 24px;">${reply.cafeName}</h3>
-                </div>
-                <p class="review-text" style="margin-top: 12px;">${reply.text}</p>
+    const replyHtml = `
+        <div class="review-card" style="box-shadow: none; width: 100%;">
+          <img src="${reply.image}" alt="${reply.cafeName}" class="review-img">
+          <div class="review-content">
+            <div class="review-header" style="margin-bottom: 4px;">
+              <div>
+                <span class="review-user">${username.replace('@', '')}</span>
+                <span style="color: var(--muted); font-size: 14px;"> replying to </span>
+                <span class="review-user">${reply.replyToUser}</span>
+                <span class="review-date" style="margin-top: 4px;">${reply.date}</span>
               </div>
             </div>
-        `;
-        repliesContainer.innerHTML = replyHtml;
 
-        prevReplyBtn.style.opacity = currentReplyIndex === 0 ? "0.5" : "1";
-        prevReplyBtn.style.cursor = currentReplyIndex === 0 ? "default" : "pointer";
+            <div class="cafe-title-row">
+                <h3 class="cafe-name" style="font-size: 24px;">${reply.cafeName}</h3>
+            </div>
+            <p class="review-text" style="margin-top: 12px;">${reply.text}</p>
+          </div>
+        </div>
+    `;
+    repliesContainer.innerHTML = replyHtml;
 
-        nextReplyBtn.style.opacity = currentReplyIndex === repliesData.length - 1 ? "0.5" : "1";
-        nextReplyBtn.style.cursor = currentReplyIndex === repliesData.length - 1 ? "default" : "pointer";
-    }
+    prevReplyBtn.style.opacity = currentReplyIndex === 0 ? "0.5" : "1";
+    prevReplyBtn.style.cursor = currentReplyIndex === 0 ? "default" : "pointer";
+
+    nextReplyBtn.style.opacity = currentReplyIndex === repliesData.length - 1 ? "0.5" : "1";
+    nextReplyBtn.style.cursor = currentReplyIndex === repliesData.length - 1 ? "default" : "pointer";
+}
 
     prevReplyBtn.addEventListener('click', () => {
         if (currentReplyIndex > 0) {
@@ -1535,7 +1632,7 @@
 
     renderSampleReplies();
 
-    let currentReviewIndex = 0;
+    
     const reviewContainer = document.getElementById('reviewContainer');
     const prevBtn = document.getElementById('prevReviewBtn');
     const nextBtn = document.getElementById('nextReviewBtn');
@@ -1545,7 +1642,14 @@
     const editReviewText = document.getElementById('editReviewText');
     const editReviewTitle = document.getElementById('editReviewTitle');
     const closeReviewTriggers = document.querySelectorAll('[data-close-review]');
+    const editTagButtons = document.querySelectorAll('#editReviewModal .edit-tag');
+  const modalPreview = document.getElementById('modalAvatarPreview');
     let reviewIdToEdit = null;
+    editTagButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+    });
+});
 
     function getCurrentUsername() {
         const storedUser = localStorage.getItem('beanthere_profile_username');
@@ -1571,7 +1675,7 @@
 
     function renderReview(index) {
         if (reviewsData.length === 0) {
-            reviewContainer.innerHTML = `<p style="text-align:center; color:#666;">No reviews yet.</p>`;
+            reviewContainer.innerHTML = `<p style="margin:0; color:#666;">No reviews yet.</p>`;
             return;
         }
 
@@ -1632,16 +1736,25 @@
     }
 
     function openReviewModal(reviewId) {
-        const review = reviewsData.find(r => r.id === reviewId);
-        if (!review) return;
+    const review = reviewsData.find(r => r.id === reviewId);
+    if (!review) return;
 
-        reviewIdToEdit = reviewId;
-        editReviewText.value = review.text;
-        editReviewTitle.textContent = "Edit Review";
+    reviewIdToEdit = reviewId;
+    editReviewText.value = review.text || '';
 
-        editReviewModal.hidden = false;
-        setTimeout(() => editReviewText.focus(), 50);
-    }
+    currentEditRating = review.rating || 0;
+    editReviewRating.value = currentEditRating;
+    renderEditStars();
+
+    editTagButtons.forEach(btn => {
+    const tagText = btn.textContent.trim();
+    btn.classList.toggle('active', (review.tags || []).includes(tagText));
+});
+
+    editReviewTitle.textContent = "Edit Review";
+    editReviewModal.hidden = false;
+    setTimeout(() => editReviewText.focus(), 50);
+}
 
     function closeReviewModal() {
         editReviewModal.hidden = true;
@@ -1662,35 +1775,48 @@
         }
     });
 
-    editReviewForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (reviewIdToEdit === null) return;
+    editReviewForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (reviewIdToEdit === null) return;
 
-        const newText = editReviewText.value.trim();
-        const reviewIndex = reviewsData.findIndex(r => r.id === reviewIdToEdit);
+    const newText = editReviewText.value.trim();
+    const newRating = Number(editReviewRating.value);
 
-        if (reviewIndex !== -1 && newText !== reviewsData[reviewIndex].text) {
-            reviewsData[reviewIndex].text = newText;
+    const selectedTags = Array.from(document.querySelectorAll('.edit-tag'))
+    .filter(btn => btn.classList.contains('active'))
+    .map(btn => btn.textContent.trim());
 
-            const now = new Date();
-            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-            const datePart = now.toLocaleDateString('en-US', dateOptions);
+    if (!newText || !newRating) {
+        alert('Please complete the stars and review.');
+        return;
+    }
 
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'pm' : 'am';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            const timeString = `${hours}:${minutes}${ampm}`;
+    try {
+        const response = await fetch('/edit-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                reviewId: reviewIdToEdit,
+                reviewText: newText,
+                rating: newRating,
+                tags: selectedTags
+            })
+        });
 
-            reviewsData[reviewIndex].editedOn = `${datePart} at ${timeString}`;
+        const result = await response.json();
 
-            renderReview(currentReviewIndex);
-            updateReviewArrows();
+        if (!response.ok) {
+            alert(result.message || 'Failed to update review.');
+            return;
         }
 
+        await loadReviewsFromDB();
         closeReviewModal();
-    });
+    } catch (err) {
+        console.error(err);
+        alert('Error updating review.');
+    }
+});
 
     prevBtn.addEventListener('click', () => {
         if (currentReviewIndex > 0) {
@@ -1709,7 +1835,121 @@
     });
 
     loadReviewsFromDB();
-})();
+
+</script>
+<script>
+const fab = document.getElementById('addReviewFab');
+const writeModal = document.getElementById('writeReviewModal');
+const writeForm = document.getElementById('writeReviewForm');
+
+const starsContainer = document.getElementById('wrStars');
+const ratingInput = document.getElementById('wrRating');
+const tagButtons = document.querySelectorAll('#writeReviewModal .wr-tag');
+let currentRating = 0;
+
+// OPEN MODAL
+fab.addEventListener('click', () => {
+  writeModal.hidden = false;
+});
+
+// CLOSE MODAL
+document.querySelectorAll('[data-close-write]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    writeModal.hidden = true;
+  });
+});
+
+// create 5 stars
+for (let i = 1; i <= 5; i++) {
+  const star = document.createElement('div');
+  star.classList.add('wr-star');
+
+  star.addEventListener('click', () => {
+    currentRating = i;
+    ratingInput.value = i;
+    updateStars();
+  });
+
+  starsContainer.appendChild(star);
+}
+
+// update filled stars
+function updateStars() {
+  const stars = document.querySelectorAll('.wr-star');
+
+  stars.forEach((star, index) => {
+    if (index < currentRating) {
+      star.classList.add('filled');
+    } else {
+      star.classList.remove('filled');
+    }
+  });
+}
+
+// tag buttons
+tagButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+  });
+});
+
+// SUBMIT REVIEW
+writeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const establishmentName = document.getElementById('wrCafe').value;
+  const rating = Number(document.getElementById('wrRating').value);
+  const reviewText = document.getElementById('wrText').value.trim();
+
+  const selectedTags = Array.from(tagButtons)
+    .filter(btn => btn.classList.contains('active'))
+    .map(btn => btn.textContent.trim());
+
+  const today = new Date().toISOString().split('T')[0];
+
+  if (!establishmentName || !rating || !reviewText) {
+    alert('Please complete the cafe, stars, and review.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/add-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        establishmentName,
+        rating,
+        reviewText,
+        tags: selectedTags.join(','),
+        datePosted: today
+      })
+    });
+
+
+    const result = await response.text();
+
+    if (!response.ok) {
+      alert('Failed to save review: ' + result);
+      return;
+    }
+
+    alert('Review added successfully!');
+    writeModal.hidden = true;
+
+    // reset form
+    writeForm.reset();
+    currentRating = 0;
+    ratingInput.value = 0;
+    updateStars();
+    tagButtons.forEach(btn => btn.classList.remove('active'));
+
+    // easiest way to make it appear in "My reviews"
+    loadReviewsFromDB();
+  } catch (err) {
+    console.error(err);
+    alert('Error saving review.');
+  }
+});
 </script>
 </body>
 </html>
