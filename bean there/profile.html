@@ -1484,24 +1484,294 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
      if (panel) {
-    panel.addEventListener('keydown', function(e){
-      const focusable = Array.from(panel.querySelectorAll('[role="menuitem"]'));
-      if(!focusable.length) return;
-
-      const idx = focusable.indexOf(document.activeElement);
-      if(e.key === 'ArrowDown'){
-        e.preventDefault();
-        const next = focusable[(idx + 1) % focusable.length];
-        next.focus();
-      } else if(e.key === 'ArrowUp'){
-        e.preventDefault();
-        const prev = focusable[(idx - 1 + focusable.length) % focusable.length];
-        prev.focus();
-      }
-    });
+    
   }
 
 });
+</script>
+<script>
+(function(){
+  const editBtn = document.getElementById('editProfileBtn');
+  const modal = document.getElementById('editProfileModal');
+  const closeTriggers = modal ? modal.querySelectorAll('[data-close]') : [];
+  const form = document.getElementById('editProfileForm');
+  const inputUsername = document.getElementById('inputUsername');
+  const inputBio = document.getElementById('inputBio');
+  const inputTitle = document.getElementById('inputTitle');
+  const handleText = document.getElementById('handleText');
+  const bioText = document.getElementById('bioText');
+
+  const inputAvatar = document.getElementById('inputAvatar');
+  const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+  const avatarLarge = document.getElementById('avatarLargeImg');
+  const avatarMini = document.getElementById('avatarMiniImg');
+  const modalPreview = document.getElementById('modalAvatarPreview');
+
+  const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
+  const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
+
+  function openModal(){
+    if(!modal) return;
+
+    inputUsername.value = handleText ? handleText.textContent : '';
+    inputBio.value = bioText ? bioText.textContent : '';
+    inputTitle.value = localStorage.getItem('beanthere_profile_title') || 'Member';
+
+    const savedAvatar = localStorage.getItem('beanthere_profile_avatar');
+    if (modalPreview) {
+      modalPreview.src = savedAvatar || DEFAULT_LARGE_SRC;
+    }
+
+    modal.hidden = false;
+    setTimeout(() => inputUsername.focus(), 30);
+  }
+
+  function closeModal(){
+    if(!modal) return;
+    modal.hidden = true;
+    if(editBtn) editBtn.focus();
+    if(inputAvatar) inputAvatar.value = '';
+  }
+
+  function normalizeUsername(val){
+    if(!val) return '';
+    val = val.trim();
+    if(val.length === 0) return '';
+    if(val.charAt(0) !== '@') return '@' + val;
+    return val;
+  }
+
+  if(inputAvatar){
+    inputAvatar.addEventListener('change', function(){
+      const file = inputAvatar.files && inputAvatar.files[0];
+      if(!file) return;
+
+      const maxBytes = 3 * 1024 * 1024;
+
+      if(!file.type.startsWith('image/')){
+        alert('Please choose an image file (png, jpg, gif).');
+        inputAvatar.value = '';
+        return;
+      }
+
+      if(file.size > maxBytes){
+        alert('Image too large. Please pick an image under 3 MB.');
+        inputAvatar.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        if(modalPreview) modalPreview.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if(removeAvatarBtn){
+    removeAvatarBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      localStorage.removeItem('beanthere_profile_avatar');
+
+      if(avatarLarge) avatarLarge.src = DEFAULT_LARGE_SRC;
+      if(avatarMini) avatarMini.src = DEFAULT_MINI_SRC;
+      if(modalPreview) modalPreview.src = DEFAULT_LARGE_SRC;
+      if(inputAvatar) inputAvatar.value = '';
+
+      alert('Profile photo removed.');
+    });
+  }
+
+  if(editBtn){
+    editBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      openModal();
+    });
+  }
+
+  closeTriggers.forEach(btn => {
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      closeModal();
+    });
+  });
+
+  if(modal){
+    modal.addEventListener('click', function(e){
+      const backdrop = modal.querySelector('.modal-backdrop');
+      if(e.target === backdrop) closeModal();
+    });
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && modal && !modal.hidden){
+      closeModal();
+    }
+  });
+
+  if(form){
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      let usernameVal = inputUsername.value || '';
+      let bioVal = inputBio.value || '';
+      let titleVal = inputTitle.value || 'Member';
+
+      usernameVal = normalizeUsername(usernameVal);
+
+      if(usernameVal.length < 2){
+        alert('Please enter a valid username.');
+        inputUsername.focus();
+        return;
+      }
+
+      let avatarData = "";
+      const file = inputAvatar.files && inputAvatar.files[0];
+
+      if (file) {
+        avatarData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = ev => resolve(ev.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      try {
+        const response = await fetch('/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: usernameVal,
+            bio: bioVal,
+            title: titleVal,
+            avatar: avatarData
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(result.message || 'Failed to update profile.');
+          return;
+        }
+
+        localStorage.setItem('beanthere_profile_username', result.user.username || '');
+        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+
+        if(handleText) handleText.textContent = result.user.username || '';
+        if(bioText) bioText.textContent = result.user.bio || '';
+
+        const dropdownSub = document.querySelector('.ud-sub');
+        if(dropdownSub) dropdownSub.textContent = result.user.title || 'Member';
+
+        if(result.user.avatar){
+          if(avatarLarge) avatarLarge.src = result.user.avatar;
+          if(avatarMini) avatarMini.src = result.user.avatar;
+          if(modalPreview) modalPreview.src = result.user.avatar;
+        }
+
+        alert('Profile updated successfully!');
+        closeModal();
+      } catch (err) {
+        console.error(err);
+        alert('Error updating profile.');
+      }
+    });
+  }
+})();
+</script>
+
+<script>
+(function(){
+  const btn = document.getElementById('userMenuBtn');
+  const panel = document.getElementById('userDropdown');
+
+  if(!btn || !panel) return;
+
+  function openPanel(){
+    panel.hidden = false;
+    btn.setAttribute('aria-expanded','true');
+    const first = panel.querySelector('[role="menuitem"]');
+    if(first) first.focus();
+  }
+
+  function closePanel(){
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded','false');
+    btn.focus();
+  }
+
+  function togglePanel(){
+    if(panel.hidden) openPanel();
+    else closePanel();
+  }
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    togglePanel();
+  });
+
+  document.addEventListener('click', function(e){
+    if(!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)){
+      closePanel();
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !panel.hidden){
+      closePanel();
+    }
+  });
+
+  panel.addEventListener('click', function(e){
+    const actionBtn = e.target.closest('button[data-action]');
+    if(!actionBtn) return;
+
+    const action = actionBtn.getAttribute('data-action');
+
+    if(action === 'profile') {
+      window.location.href = 'profile.html';
+    } else if(action === 'contact') {
+      window.location.href = 'contact.html';
+    } else if(action === 'support') {
+      window.location.href = 'support.html';
+    } else if(action === 'signout') {
+      fetch('/logout', { method: 'POST' })
+        .then(() => {
+          localStorage.removeItem('beanthere_profile_fullname');
+          localStorage.removeItem('beanthere_profile_username');
+          localStorage.removeItem('beanthere_profile_bio');
+          localStorage.removeItem('beanthere_profile_title');
+          localStorage.removeItem('beanthere_profile_avatar');
+          window.location.href = 'index.html';
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Error logging out');
+        });
+    }
+  });
+
+  panel.addEventListener('keydown', function(e){
+    const focusable = Array.from(panel.querySelectorAll('[role="menuitem"]'));
+    if(!focusable.length) return;
+
+    const idx = focusable.indexOf(document.activeElement);
+
+    if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      const next = focusable[(idx + 1) % focusable.length];
+      next.focus();
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      const prev = focusable[(idx - 1 + focusable.length) % focusable.length];
+      prev.focus();
+    }
+  });
+})();
 </script>
 
   <script>
