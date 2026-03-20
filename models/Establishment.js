@@ -6,10 +6,6 @@ const EstablishmentSchema = new mongoose.Schema(
     handle: { type: String, default: "", trim: true },
     bio: { type: String, default: "", trim: true },
     location: { type: String, required: true, trim: true },
- 
-    hasWifi: { type: Boolean, default: false },
-    hasSockets: { type: Boolean, default: false },
-    hasAircon: { type: Boolean, default: false },
 
     imageUrl: { type: [String], default: [] }
   },
