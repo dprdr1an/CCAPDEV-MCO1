@@ -370,6 +370,43 @@
       .sidebar{order:2;height:auto}
       .main{order:1}
     }
+
+    .review-actions {
+      display: flex;
+      gap: 18px;
+      margin-top: 25px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .icon-btn img {
+      width: 20px;
+      height: 20px;
+      transition: 0.2s ease;
+    }
+
+    .icon-btn:hover img {
+      transform: scale(1.15);
+    }
+
+    /* faded (default) */
+    .faded {
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+
+    /* active (clicked) */
+    .active {
+      opacity: 1;
+      filter: none;
+      transform: scale(1.2);
+    }
   </style>
 </head>
 
@@ -1023,7 +1060,7 @@ function renderReviews(data) {
     }).join("");
 
     return `
-      <div class="review-card">
+      <div class="review-card" data-id="${review._id}">
         <div class="review-img">
           <img src="apdev-tbv/cafe4.jpg">
         </div>
@@ -1049,6 +1086,23 @@ function renderReviews(data) {
           <div class="review-text">
             ${review.reviewText}
           </div>
+
+          <div class="review-actions">
+            <div class="icon-btn like-btn">
+              <img src="icons/like.png" class="faded">
+              <span>${review.likes || 0}</span>
+            </div>
+
+            <div class="icon-btn dislike-btn">
+              <img src="icons/dislike.png" class="faded">
+              <span>${review.dislikes || 0}</span>
+            </div>
+
+            <div class="icon-btn reply-btn">
+              <img src="icons/reply.png">
+              <span>Reply</span>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -1063,6 +1117,17 @@ function renderReviews(data) {
 
 const searchInput = document.getElementById("q");
 const searchBtn = document.getElementById("searchBtn");
+
+function requireLogin() {
+  const user = localStorage.getItem("beanthere_profile_username");
+
+  if (!user) {
+    alert("Please log in or create an account first.");
+    return false;
+  }
+
+  return true;
+}
 
 function handleSearch() {
   const query = searchInput.value.toLowerCase().trim();
@@ -1094,6 +1159,113 @@ searchInput.addEventListener("keydown", (e) => {
 });
 
 searchInput.addEventListener("input", handleSearch);
+
+// LIKE / DISLIKE / REPLY LOGIC
+document.addEventListener("click", function(e) {
+
+  const likeBtn = e.target.closest(".like-btn");
+  const dislikeBtn = e.target.closest(".dislike-btn");
+  const replyBtn = e.target.closest(".reply-btn");
+
+  // LIKE
+  if (likeBtn) {
+  if (!requireLogin()) return;
+
+  const card = likeBtn.closest(".review-card");
+  const reviewId = card.dataset.id;
+
+  fetch(`/reviews/${reviewId}/like`, {
+    method: "POST"
+  });
+
+  const likeImg = likeBtn.querySelector("img");
+  const likeCount = likeBtn.querySelector("span");
+
+  const dislikeBtnEl = likeBtn.parentElement.querySelector(".dislike-btn");
+  const dislikeImg = dislikeBtnEl.querySelector("img");
+  const dislikeCount = dislikeBtnEl.querySelector("span");
+
+  const wasLiked = likeImg.classList.contains("active");
+  const wasDisliked = dislikeImg.classList.contains("active");
+
+  // remove dislike FIRST
+  if (wasDisliked) {
+    dislikeImg.classList.remove("active");
+    dislikeImg.classList.add("faded");
+    dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
+  }
+
+  if (!wasLiked) {
+    likeImg.classList.remove("faded");
+    likeImg.classList.add("active");
+    likeCount.textContent = parseInt(likeCount.textContent) + 1;
+  } else {
+    likeImg.classList.remove("active");
+    likeImg.classList.add("faded");
+    likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
+  }
+}
+
+  // DISLIKE
+  if (dislikeBtn) {
+  if (!requireLogin()) return;
+
+  const card = dislikeBtn.closest(".review-card");
+  const reviewId = card.dataset.id;
+
+  fetch(`/reviews/${reviewId}/dislike`, {
+    method: "POST"
+  });
+
+  const dislikeImg = dislikeBtn.querySelector("img");
+  const dislikeCount = dislikeBtn.querySelector("span");
+
+  const likeBtnEl = dislikeBtn.parentElement.querySelector(".like-btn");
+  const likeImg = likeBtnEl.querySelector("img");
+  const likeCount = likeBtnEl.querySelector("span");
+
+  const wasDisliked = dislikeImg.classList.contains("active");
+  const wasLiked = likeImg.classList.contains("active");
+
+  // remove like FIRST
+  if (wasLiked) {
+    likeImg.classList.remove("active");
+    likeImg.classList.add("faded");
+    likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
+  }
+
+  if (!wasDisliked) {
+    dislikeImg.classList.remove("faded");
+    dislikeImg.classList.add("active");
+    dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
+  } else {
+    dislikeImg.classList.remove("active");
+    dislikeImg.classList.add("faded");
+    dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
+  }
+}
+
+  // REPLY
+  if (replyBtn) {
+  if (!requireLogin()) return;
+
+  const card = replyBtn.closest(".review-card");
+  const reviewId = card.dataset.id;
+
+  const text = prompt("Enter your reply:");
+  if (!text) return;
+
+  fetch(`/reviews/${reviewId}/reply`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ text })
+  });
+
+  alert("Reply posted!");
+}
+});
 </script>
 </body>
 </html>
