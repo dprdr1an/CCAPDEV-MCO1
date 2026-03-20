@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bean There – Cafe Profile</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #efe8d6;
+      --sidebar: #737109;
+      --accent: #7f7b2e;
+      --muted: #8b8578;
+      --content-width: 1500px;
+      --review-bg: #cfe0ff;
+      --orange: #ee6a45;
+      --text: #2b2b2b;
+      --border: rgba(127,123,46,0.45);
+    }
+
+    *{ box-sizing:border-box; }
+
+    html, body{
+      margin:0;
+      height:100%;
+      font-family:Montserrat, system-ui, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .frame{
+      width:100%;
+      min-height:100vh;
+      padding:10px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 170px 1fr;
+      gap:14px;
+      min-height: calc(100vh - 20px);
+    }
+
+    .sidebar{
+      background:var(--sidebar);
+      color:#fff;
+      border-radius:18px;
+      padding:22px 18px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .logo{
+      font-family:Lora, serif;
+      font-size:28px;
+      font-weight:700;
+      line-height:0.95;
+      margin-bottom:40px;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:24px;
+      margin-top:80px;
+    }
+
+    .nav a,
+    .auth a{
+      color:#fff;
+      text-decoration:none;
+      font-size:18px;
+    }
+
+    .nav a:hover,
+    .auth a:hover{
+      color:#f6d87c;
+    }
+
+    .auth{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      font-size:18px;
+    }
+
+    .main{
+      border:1.5px solid var(--border);
+      border-radius:22px;
+      padding:26px 24px 32px;
+      position:relative;
+    }
+
+    .cafe-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      margin-bottom:34px;
+    }
+    .cafe-handle-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+    .cafe-left{
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+    }
+
+    .cafe-image{
+      width:120px;
+      height:88px;
+      border-radius:8px;
+      overflow:hidden;
+      background:#cde7ff;
+      flex-shrink:0;
+    }
+
+    .cafe-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .cafe-meta h1{
+      margin:0;
+      font-size:38px;
+      font-weight:700;
+      line-height:1;
+    }
+
+    .cafe-handle{
+      color:#294b83;
+      font-size:18px;
+      margin-top:8px;
+      font-weight:500;
+    }
+
+    .cafe-bio{
+      margin-top:6px;
+      color:#6e675d;
+      font-size:16px;
+    }
+
+    .edit-cafe-btn{
+      margin-top:10px;
+      padding:6px 22px;
+      border-radius:22px;
+      border:1.5px solid var(--accent);
+      background:transparent;
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .edit-cafe-btn:hover{
+      background:rgba(127,123,46,0.08);
+    }
+
+    .sort-pill{
+      align-self:flex-end;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1.5px solid var(--accent);
+      border-radius:28px;
+      padding:12px 18px;
+      background:transparent;
+      font-size:16px;
+    }
+
+    .sort-icon{
+      width:18px;
+      height:14px;
+      position:relative;
+      display:inline-block;
+    }
+
+    .sort-icon::before,
+    .sort-icon::after,
+    .sort-icon span{
+      content:"";
+      position:absolute;
+      left:0;
+      height:2px;
+      background:#2b2b2b;
+      border-radius:3px;
+    }
+
+    .sort-icon::before{
+      top:0;
+      width:100%;
+    }
+
+    .sort-icon span{
+      top:6px;
+      width:70%;
+    }
+
+    .sort-icon::after{
+      top:12px;
+      width:45%;
+    }
+
+    .section{
+      margin-top:28px;
+    }
+
+    .section-title{
+      text-align:center;
+      font-size:24px;
+      font-weight:500;
+      margin:0 0 16px;
+    }
+
+    .carousel-wrapper{
+      position:relative;
+      padding:0 38px;
+    }
+
+    .arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      border:none;
+      background:var(--orange);
+      color:#fff;
+      font-size:24px;
+      font-weight:700;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:2;
+    }
+
+    .arrow.left{ left:0; }
+    .arrow.right{ right:0; }
+
+    .blue-box{
+      background:var(--review-bg);
+      border-radius:10px;
+      min-height:112px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#2f2f2f;
+      font-size:16px;
+    }
+
+    @media (max-width: 900px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{
+        min-height:auto;
+      }
+
+      .cafe-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .sort-pill{
+        align-self:flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="layout">
+
+      <aside class="sidebar">
+        <div>
+          <div class="logo">bean<br>there</div>
+
+          <nav class="nav">
+            <a href="cafeprofile.html">My Cafe Profile</a>
+            <a href="cafereviews.html">Reviews</a>
+          </nav>
+        </div>
+
+        <div class="auth">
+          <a href="index.html">Log in</a>
+          <a href="index.html">Sign up</a>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="cafe-header">
+          <div class="cafe-left">
+            <div class="cafe-image">
+              <img src="icons/default-cafe.jpg" alt="Cafe photo" onerror="this.src='https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';">
+            </div>
+
+           <div class="cafe-meta">
+  <h1>Cafe Name</h1>
+
+  <div class="cafe-handle-row">
+    <div class="cafe-handle">@cafename</div>
+    <button class="edit-cafe-btn">Edit Cafe</button>
+  </div>
+
+  <div class="cafe-bio">Placeholder for short bio</div>
+</div>
+          </div>
+
+          <div class="sort-pill">
+            <span class="sort-icon"><span></span></span>
+            <span>Date Posted</span>
+          </div>
+        </div>
+
+        <section class="section">
+          <h2 class="section-title">My Cafe Reviews</h2>
+          <div class="carousel-wrapper">
+            <button class="arrow left">‹</button>
+            <div class="blue-box">
+              No reviews for your cafe yet.
+            </div>
+            <button class="arrow right">›</button>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">My Replies</h2>
+          <div class="carousel-wrapper">
+            <button class="arrow left">‹</button>
+            <div class="blue-box">
+              No replies yet.
+            </div>
+            <button class="arrow right">›</button>
+          </div>
+        </section>
+      </main>
+
+    </div>
+  </div>
+</body>
+</html>
