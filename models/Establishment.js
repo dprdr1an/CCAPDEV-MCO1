@@ -11,7 +11,7 @@ const EstablishmentSchema = new mongoose.Schema(
     hasSockets: { type: Boolean, default: false },
     hasAircon: { type: Boolean, default: false },
 
-    imageUrl: { type: String, default: "" }
+    imageUrl: { type: [String], default: [] }
   },
   { timestamps: true }
 );

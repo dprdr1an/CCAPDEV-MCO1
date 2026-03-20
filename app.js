@@ -34,6 +34,36 @@ app.get("/establishments", async (req, res) => {
   }
 });
 
+app.get("/establishments/:id", async (req, res) => {
+  try {
+    const est = await Establishment.findById(req.params.id);
+    if (!est) return res.status(404).json({ message: "Cafe not found" });
+    res.json(est);
+  } catch (err) {
+    res.status(500).send("Error fetching establishment");
+  }
+});
+
+app.get("/reviews-by-cafe/:id", async (req, res) => {
+  try {
+    const est = await Establishment.findById(req.params.id);
+    if (!est) return res.status(404).json([]);
+
+    const reviews = await Review.find({
+      establishmentName: { $regex: new RegExp(`^${est.name.trim()}$`, "i") }
+    });
+
+    res.json(reviews.map(r => ({
+      ...r.toObject(),
+      location: est.location || "",
+      image: r.photoUrl || est.imageUrl || "apdev-tbv/cafe4.jpg"
+    })));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching cafe reviews");
+  }
+});
+
 app.get("/owner-establishment", async (req, res) => {
   try {
     if (!req.session.owner) {
@@ -207,7 +237,8 @@ app.get("/reviews", async (req, res) => {
         return {
           ...review.toObject(),
           location: est?.location || "Location not available",
-          image: est?.image || "apdev-tbv/cafe4.jpg"
+          image: est?.imageUrl || "apdev-tbv/cafe4.jpg",
+          establishmentId: est?._id || null
         };
       })
     );
@@ -238,7 +269,7 @@ app.get("/my-reviews", async (req, res) => {
         return {
           ...review.toObject(),
           location: est?.location || "Location not available",
-          image: est?.image || "apdev-tbv/cafe4.jpg"
+          image: est?.imageUrl || "apdev-tbv/cafe4.jpg"
         };
       })
     );

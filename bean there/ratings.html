@@ -1037,7 +1037,7 @@ function renderReviews(data) {
             <div class="review-tags">${tags}</div>
           </div>
 
-          <div class="review-title">
+          <div class="review-title" style="cursor:pointer;" data-id="${review.establishmentId}">
             ${review.establishmentName}
             <span class="rating">${beans}</span>
           </div>
@@ -1053,6 +1053,12 @@ function renderReviews(data) {
       </div>
     `;
   }).join("");
+
+  document.querySelectorAll('.review-title[data-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      window.location.href = `cafe.html?id=${el.dataset.id}`;
+    });
+  });
 }
 
 const searchInput = document.getElementById("q");

@@ -1198,7 +1198,7 @@
     <form id="writeReviewForm">
       <div class="wr-row">
         <label for="wrCafe">Select cafe:</label>
-        <select id="wrCafe" required>
+        <select id="wrCafe">
           <option value="" selected disabled>Select…</option>
         </select>
       </div>
@@ -1213,10 +1213,8 @@
 
       <div class="wr-row">
         <label>Add photo/s:</label>
-        <input id="wrPhoto" type="file" accept="image/*" hidden>
-        <label for="wrPhoto" class="upload-btn">
-          📸 Add Photo
-        </label>
+        <input id="wrPhoto" type="file" accept="image/*" style="display:none;">
+        <label for="wrPhoto" class="upload-btn">📸 Add Photo</label>
         <span id="fileName" class="file-name">No file chosen</span>
       </div>
 
@@ -2167,6 +2165,26 @@ const fab = document.getElementById('addReviewFab');
 const writeModal = document.getElementById('writeReviewModal');
 const writeForm = document.getElementById('writeReviewForm');
 
+document.getElementById('wrPhoto').addEventListener('change', function() {
+  const file = this.files[0];
+  const fileName = document.getElementById('fileName');
+  
+  if (!file) {
+    fileName.textContent = 'No file chosen';
+    return;
+  }
+
+  if (!file.type.startsWith('image/')) {
+    fileName.textContent = '✕ Invalid file type';
+    fileName.style.color = 'red';
+    this.value = '';
+    return;
+  }
+
+  fileName.textContent = '✓ ' + file.name;
+  fileName.style.color = 'green';
+});
+
 const starsContainer = document.getElementById('wrStars');
 const ratingInput = document.getElementById('wrRating');
 const tagButtons = document.querySelectorAll('#writeReviewModal .wr-tag');
@@ -2222,9 +2240,15 @@ tagButtons.forEach(btn => {
 writeForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const establishmentName = document.getElementById('wrCafe').value;
+  const cafe    = document.getElementById('wrCafe').value;
   const rating = Number(document.getElementById('wrRating').value);
-  const reviewText = document.getElementById('wrText').value.trim();
+  const text    = document.getElementById('wrText').value.trim();
+  const photo   = document.getElementById('wrPhoto').files[0];
+
+  if (!cafe)         { alert("Please select a cafe.");       return; }
+  if (rating === 0) { alert("Please select a star rating."); return; }
+  if (!text)         { alert("Please write a review.");       return; }
+  if (!photo)        { alert("Please upload a photo.");       return; }
 
   const selectedTags = Array.from(tagButtons)
     .filter(btn => btn.classList.contains('active'))
@@ -2232,40 +2256,26 @@ writeForm.addEventListener('submit', async (e) => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  // 📸 GET IMAGE FILE
-  const photoFile = document.getElementById("wrPhoto").files[0];
-  console.log("FILE:", photoFile);
-
-  let photoUrl = "";
-
-  if (photoFile) {
-    photoUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(photoFile);
-    });
-  }
-
-  if (!establishmentName || !rating || !reviewText) {
-    alert('Please complete the cafe, stars, and review.');
-    return;
-  }
+  const photoUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(photo);
+  });
 
   try {
     const response = await fetch('/add-review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        establishmentName,
+        establishmentName: cafe,
         rating,
-        reviewText,
+        reviewText: text,
         tags: selectedTags.join(','),
         datePosted: today,
         photoUrl
       })
     });
-
 
     const result = await response.text();
 
