@@ -203,51 +203,6 @@ app.get("/session-user", (req, res) => {
   });
 });
 
-app.get("/session-owner", (req, res) => {
-  if (!req.session.owner) {
-    return res.status(401).json({ loggedIn: false });
-  }
-
-  res.json({
-    loggedIn: true,
-    owner: req.session.owner
-  });
-});
-app.post("/update-cafe", async (req, res) => {
-  try {
-    if (!req.session.owner) {
-      return res.status(401).json({ message: "Owner not logged in" });
-    }
-
-    const owner = await Owner.findById(req.session.owner.id);
-    if (!owner) {
-      return res.status(404).json({ message: "Owner not found" });
-    }
-
-    const { bio, imageUrl } = req.body;
-
-    const updatedCafe = await Establishment.findByIdAndUpdate(
-      owner.establishmentId,
-      {
-        bio: bio || "",
-        ...(imageUrl ? { imageUrl: [imageUrl] } : {})
-      },
-      { new: true }
-    );
-
-    if (!updatedCafe) {
-      return res.status(404).json({ message: "Establishment not found" });
-    }
-
-    res.json({
-      message: "Cafe updated successfully",
-      cafe: updatedCafe
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error updating cafe" });
-  }
-});
 // LOG OUT
 app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
@@ -345,7 +300,11 @@ app.post("/add-review", async (req, res) => {
         text: "",
         repliedAt: null
       },
-      photoUrl: photoUrl || ""
+      photoUrl: photoUrl || "",
+
+      likes: 0,
+      dislikes: 0,
+      replies: []
     });
 
     await newReview.save();
@@ -353,6 +312,97 @@ app.post("/add-review", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error adding review");
+  }
+});
+app.post('/reviews/:id/like', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send("Login required");
+  }
+
+  try {
+    await Review.findByIdAndUpdate(req.params.id, {
+      $inc: { likes: 1 }
+    });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error liking review");
+  }
+});
+app.post('/reviews/:id/dislike', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send("Login required");
+  }
+
+  try {
+    await Review.findByIdAndUpdate(req.params.id, {
+      $inc: { dislikes: 1 }
+    });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error disliking review");
+  }
+});
+app.post('/reviews/:id/reply', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send("Login required");
+  }
+
+  try {
+    const review = await Review.findById(req.params.id);
+
+    const reply = {
+      username: req.session.user.username,
+      text: req.body.text,
+      date: new Date().toLocaleDateString(),
+      reviewId: review._id,
+      establishmentName: review.establishmentName
+    };
+
+    await Review.findByIdAndUpdate(req.params.id, {
+      $push: { replies: reply }
+    });
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error replying");
+  }
+});
+app.get('/my-replies', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send("Login required");
+  }
+
+  const username = req.session.user.username;
+
+  try {
+    const reviews = await Review.find({
+      "replies.username": username
+    });
+
+    const userReplies = [];
+
+    reviews.forEach(review => {
+      review.replies.forEach(reply => {
+        if (reply.username === username) {
+          userReplies.push({
+            text: reply.text,
+            date: reply.date,
+            establishmentName: reply.establishmentName,
+            reviewId: reply.reviewId
+          });
+        }
+      });
+    });
+
+    res.json(userReplies);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching replies");
   }
 });
 app.post("/edit-review", async (req, res) => {
