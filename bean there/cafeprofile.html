@@ -303,18 +303,18 @@
         <div class="cafe-header">
           <div class="cafe-left">
             <div class="cafe-image">
-              <img src="icons/default-cafe.jpg" alt="Cafe photo" onerror="this.src='https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';">
-            </div>
+  <img id="cafeImage" src="icons/default-cafe.jpg" alt="Cafe photo" onerror="this.src='https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';">
+</div>
 
-           <div class="cafe-meta">
-  <h1>Cafe Name</h1>
+<div class="cafe-meta">
+  <h1 id="cafeName">Cafe Name</h1>
 
   <div class="cafe-handle-row">
-    <div class="cafe-handle">@cafename</div>
+    <div class="cafe-handle" id="cafeHandle">@cafename</div>
     <button class="edit-cafe-btn">Edit Cafe</button>
   </div>
 
-  <div class="cafe-bio">Placeholder for short bio</div>
+  <div class="cafe-bio" id="cafeBio">Placeholder for short bio</div>
 </div>
           </div>
 
@@ -349,5 +349,30 @@
 
     </div>
   </div>
+  <script>
+async function loadOwnerCafe() {
+  try {
+    const response = await fetch('/owner-establishment');
+    const cafe = await response.json();
+
+    if (!response.ok) {
+      alert(cafe.message || 'Failed to load cafe profile.');
+      return;
+    }
+
+    document.getElementById('cafeName').textContent = cafe.name || 'Cafe Name';
+    document.getElementById('cafeHandle').textContent = cafe.handle || '@cafename';
+    document.getElementById('cafeBio').textContent = cafe.bio || 'No bio yet.';
+    if (cafe.imageUrl) {
+      document.getElementById('cafeImage').src = cafe.imageUrl;
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error loading cafe profile.');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadOwnerCafe);
+</script>
 </body>
 </html>

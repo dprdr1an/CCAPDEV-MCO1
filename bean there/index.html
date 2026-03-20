@@ -776,7 +776,7 @@
   logInForm.onsubmit = async function(e) {
     e.preventDefault();
 
-    const username = normalizeUsername(document.getElementById('loginUser').value);
+    const username = document.getElementById('loginUser').value.trim();
     const password = document.getElementById('loginPass').value.trim();
     const rememberMe = document.getElementById('rememberMe').checked;
 
@@ -796,19 +796,32 @@
       const result = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
-        localStorage.setItem('beanthere_profile_username', result.user.username || '');
-        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
-        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
-        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
-        
-        updateUI();
+  if (result.role === "owner") {
+    localStorage.removeItem('beanthere_profile_fullname');
+    localStorage.setItem('beanthere_profile_username', result.username || username);
+    localStorage.removeItem('beanthere_profile_bio');
+    localStorage.removeItem('beanthere_profile_title');
+    localStorage.removeItem('beanthere_profile_avatar');
 
-        alert("Login successful! Welcome back.");
-        window.location.href = 'profile.html';
-      } else {
-        alert(result.message || "Invalid username or password.");
-      }
+    updateUI();
+
+    alert("Owner login successful!");
+    window.location.href = 'cafeprofile.html';
+  } else {
+    localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+    localStorage.setItem('beanthere_profile_username', result.user.username || '');
+    localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+    localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+    localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+
+    updateUI();
+
+    alert("Login successful! Welcome back.");
+    window.location.href = 'profile.html';
+  }
+} else {
+  alert(result.message || "Invalid username or password.");
+}
     } catch (err) {
       console.error(err);
       alert("Error connecting to server.");

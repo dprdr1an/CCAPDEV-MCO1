@@ -3,9 +3,10 @@ const mongoose = require("mongoose");
 const EstablishmentSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
+    handle: { type: String, default: "", trim: true },
+    bio: { type: String, default: "", trim: true },
     location: { type: String, required: true, trim: true },
-
-    // optional fields (nice for BeanThere)
+ 
     hasWifi: { type: Boolean, default: false },
     hasSockets: { type: Boolean, default: false },
     hasAircon: { type: Boolean, default: false },

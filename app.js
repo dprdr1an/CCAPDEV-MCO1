@@ -8,7 +8,7 @@ const connectDB = require("./config/db");
 const Review = require("./models/Review");
 const User = require("./models/User");
 const Establishment = require("./models/Establishment");
-
+const Owner = require("./models/Owner");
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -34,6 +34,23 @@ app.get("/establishments", async (req, res) => {
   }
 });
 
+app.get("/owner-establishment", async (req, res) => {
+  try {
+    if (!req.session.owner) {
+      return res.status(401).json({ message: "Owner not logged in" });
+    }
+
+    const owner = await Owner.findById(req.session.owner.id).populate("establishmentId");
+    if (!owner || !owner.establishmentId) {
+      return res.status(404).json({ message: "Establishment not found" });
+    }
+
+    res.json(owner.establishmentId);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching owner establishment" });
+  }
+});
 // serve your frontend
 app.use(express.static("bean there"));
 
@@ -76,8 +93,40 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { username, password, rememberMe } = req.body;
+    const rawUsername = (username || "").trim();
+    const normalizedUserUsername = rawUsername.startsWith("@")
+      ? rawUsername
+      : `@${rawUsername}`;
 
-    const user = await User.findOne({ username, password });
+    // CHECK OWNER FIRST
+    const owner = await Owner.findOne({ username: rawUsername, password });
+
+    if (owner) {
+      req.session.owner = {
+        id: owner._id,
+        username: owner.username
+      };
+
+      // clear user session if previously logged in as user
+      req.session.user = null;
+
+      if (rememberMe) {
+        req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 21; // 3 weeks
+      } else {
+        req.session.cookie.expires = false;
+        req.session.cookie.maxAge = null;
+      }
+
+      return res.json({
+        role: "owner",
+        message: "Owner login successful",
+        username: owner.username
+      });
+    }
+
+    // CHECK NORMAL USER SECOND
+    const user = await User.findOne({ username: normalizedUserUsername, password });
+
     if (!user) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
@@ -91,6 +140,9 @@ app.post("/login", async (req, res) => {
       avatar: user.avatar
     };
 
+    // clear owner session if previously logged in as owner
+    req.session.owner = null;
+
     if (rememberMe) {
       req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 21; // 3 weeks
     } else {
@@ -99,6 +151,7 @@ app.post("/login", async (req, res) => {
     }
 
     res.json({
+      role: "user",
       message: "Login successful",
       user: req.session.user
     });
