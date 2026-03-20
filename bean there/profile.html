@@ -1165,9 +1165,6 @@
         <label for="wrCafe">Select cafe:</label>
         <select id="wrCafe" required>
           <option value="" selected disabled>Select…</option>
-          <option value="Yardstick Coffee">Yardstick Coffee</option>
-          <option value="The Spotted Pig">The Spotted Pig</option>
-          <option value="Daily Dose">Daily Dose</option>
         </select>
       </div>
 
@@ -1188,7 +1185,7 @@
         <button type="button" class="wr-tag" data-tag="ac">Air-conditioned</button>
         <button type="button" class="wr-tag" data-tag="socket">Socket</button>
         <button type="button" class="wr-tag" data-tag="wifi">Wi-Fi</button>
-        <button type="button" class="wr-tag" data-tag="more">More</button>
+        <button type="button" class="wr-tag" data-tag="altmilk">Alt Milk</button>
       </div>
 
       <div class="wr-row">
@@ -1227,7 +1224,7 @@
         <button type="button" class="wr-tag edit-tag">Air-conditioned</button>
         <button type="button" class="wr-tag edit-tag">Socket</button>
         <button type="button" class="wr-tag edit-tag">Wi-Fi</button>
-        <button type="button" class="wr-tag edit-tag">More</button>
+        <button type="button" class="wr-tag edit-tag">Alt Milk</button>
       </div>
 
            <div class="edit-review-footer">
@@ -1325,7 +1322,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     logoutBtn.onclick = async () => {
     try {
-      await fetch('/logout', { method: 'POST' });
+      await fetch('/logout', { method: 'POST', credentials: 'include' });
 
       localStorage.clear();
       updateUI();
@@ -1371,7 +1368,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 3. CHECK EXISTING SESSION ---
   async function checkSessionOnLoad() {
     try {
-      const response = await fetch('/session-user');
+      const response = await fetch('/session-user', {
+        credentials: 'include'
+      });
       if (!response.ok) return;
 
       const result = await response.json();
@@ -1403,6 +1402,7 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           username,
           password,
@@ -1640,6 +1640,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await fetch('/update-profile', {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             username: usernameVal,
@@ -1778,28 +1779,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let reviewsData = [];
 
+    const tagIcons = {
+      "Air-conditioned": "icons/ac.png",
+      "Socket": "icons/socket.png",
+      "Wi-Fi": "icons/wifi.png",
+      "Alt Milk": "icons/oat.png"
+    };
+
     let currentReviewIndex = 0;
     async function loadReviewsFromDB() {
         try {
-            const response = await fetch('/my-reviews');
-            const dbReviews = await response.json();
+            const response = await fetch('/my-reviews', {
+              credentials: 'include'
+            });
+            const result = await response.json();
+
+            // make sure it's always an array
+            const dbReviews = Array.isArray(result)
+              ? result
+              : result.reviews || [];
 
             reviewsData = dbReviews.map((review, index) => ({
   id: review._id || index + 1,
   cafeName: review.establishmentName,
-  address: "Address unavailable",
+  location: review.location || "Location not available",
   rating: review.rating,
   date: review.datePosted || "No date",
   editedOn: null,
   text: review.reviewText,
   image: "apdev-tbv/cafe4.jpg",
   tags: review.tags || [],
-  amenities: {
-    ac: review.tags?.includes("Air-conditioned") || false,
-    socket: review.tags?.includes("Socket") || false,
-    wifi: review.tags?.includes("Wi-Fi") || false,
-    altMilk: review.tags?.includes("Alt Milk") || false
-  }
 }));
 
             currentReviewIndex = 0;
@@ -1927,21 +1936,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getBeanRatingHtml(rating) {
-        let beansHtml = '';
-        for (let i = 0; i < 5; i++) {
-            beansHtml += i < rating ? '☕' : '<span style="opacity:0.3; filter:grayscale(1)">☕</span>';
-        }
-        return beansHtml;
+    let beansHtml = '';
+
+    for (let i = 0; i < 5; i++) {
+      if (i < rating) {
+        beansHtml += `<img src="icons/bean.png" style="width:18px;height:18px;">`;
+      } else {
+        beansHtml += `<img src="icons/bean.png" style="width:18px;height:18px; opacity:0.3; filter:grayscale(1);">`;
+      }
     }
 
-    function getAmenitiesHtml(amenities) {
-        let html = '';
-        if (amenities.ac) html += '<div class="amenity-item">❄️ Air-conditioned</div>';
-        if (amenities.socket) html += '<div class="amenity-item">🔌 Socket</div>';
-        if (amenities.wifi) html += '<div class="amenity-item">🛜 Wifi</div>';
-        if (amenities.altMilk) html += '<div class="amenity-item">🥛 Alt Milk</div>';
-        return html;
-    }
+    return beansHtml;
+  }
 
     function renderReview(index) {
         if (reviewsData.length === 0) {
@@ -1954,7 +1960,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const review = reviewsData[index];
         const username = getCurrentUsername();
         const beansHtml = getBeanRatingHtml(review.rating);
-        const amenitiesHtml = getAmenitiesHtml(review.amenities);
+
+        const tagsHtml = (review.tags || []).map(tag => {
+        const icon = tagIcons[tag];
+
+        return `
+          <div class="amenity-item">
+            ${icon ? `<img src="${icon}" style="width:14px;height:14px;">` : ""}
+            ${tag}
+          </div>
+        `;
+      }).join("");
 
         let editedHtml = '';
         if (review.editedOn) {
@@ -1972,7 +1988,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${editedHtml}
                   </div>
                   <div class="amenities-list">
-                    ${amenitiesHtml}
+                    ${tagsHtml}
                   </div>
                 </div>
 
@@ -1980,7 +1996,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h3 class="cafe-name">${review.cafeName}</h3>
                     <span class="rating-beans">${beansHtml}</span>
                 </div>
-                <div class="cafe-address">${review.address}</div>
+                <div class="cafe-address">${review.location}</div>
                 <p class="review-text">${review.text}</p>
 
                 <div class="edit-review-btn-container">
@@ -2064,6 +2080,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
         const response = await fetch('/edit-review', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 reviewId: reviewIdToEdit,
@@ -2218,6 +2235,25 @@ writeForm.addEventListener('submit', async (e) => {
   } catch (err) {
     console.error(err);
     alert('Error saving review.');
+  }
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const select = document.getElementById("wrCafe");
+
+  try {
+    const res = await fetch('/establishments');
+    const establishments = await res.json();
+
+    establishments.forEach(est => {
+      const option = document.createElement("option");
+      option.value = est.name;
+      option.textContent = `${est.name} (${est.location})`;
+      select.appendChild(option);
+    });
+
+  } catch (err) {
+    console.error("Error loading cafes:", err);
   }
 });
 </script>

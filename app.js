@@ -7,6 +7,7 @@ const session = require("express-session");
 const connectDB = require("./config/db");
 const Review = require("./models/Review");
 const User = require("./models/User");
+const Establishment = require("./models/Establishment");
 
 const app = express();
 
@@ -21,6 +22,16 @@ app.use(session({
     httpOnly: true
   }
 }));
+
+app.get("/establishments", async (req, res) => {
+  try {
+    const ests = await Establishment.find();
+    res.json(ests);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching establishments");
+  }
+});
 
 // serve your frontend
 app.use(express.static("bean there"));
@@ -129,7 +140,25 @@ app.post("/logout", (req, res) => {
 app.get("/reviews", async (req, res) => {
   try {
     const reviews = await Review.find();
-    res.json(reviews);
+
+    const enriched = await Promise.all(
+      reviews.map(async (review) => {
+        const est = await Establishment.findOne({
+          name: { $regex: new RegExp(`^${review.establishmentName.trim()}$`, "i") }
+        });
+
+            console.log("Review:", review.establishmentName);
+            console.log("Matched:", est);
+
+        return {
+          ...review.toObject(),
+          location: est?.location || "Location not available",
+          image: est?.image || "apdev-tbv/cafe4.jpg"
+        };
+      })
+    );
+
+    res.json(enriched);
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching reviews");
@@ -146,7 +175,21 @@ app.get("/my-reviews", async (req, res) => {
       username: req.session.user.username
     });
 
-    res.json(reviews);
+    const enriched = await Promise.all(
+      reviews.map(async (review) => {
+        const est = await Establishment.findOne({
+          name: { $regex: new RegExp(`^${review.establishmentName.trim()}$`, "i") }
+        });
+
+        return {
+          ...review.toObject(),
+          location: est?.location || "Location not available",
+          image: est?.image || "apdev-tbv/cafe4.jpg"
+        };
+      })
+    );
+
+    res.json(enriched);
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching user reviews");
