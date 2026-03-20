@@ -303,7 +303,7 @@
         <div class="cafe-header">
           <div class="cafe-left">
             <div class="cafe-image">
-  <img id="cafeImage" src="icons/default-cafe.jpg" alt="Cafe photo" onerror="this.src='https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';">
+  <img id="cafeImage" src="icons/default-cafe.jpg" alt="Cafe photo">
 </div>
 
 <div class="cafe-meta">
@@ -311,7 +311,7 @@
 
   <div class="cafe-handle-row">
     <div class="cafe-handle" id="cafeHandle">@cafename</div>
-    <button class="edit-cafe-btn">Edit Cafe</button>
+   <button id="editCafeBtn" class="edit-cafe-btn">Edit Cafe</button>
   </div>
 
   <div class="cafe-bio" id="cafeBio">Placeholder for short bio</div>
@@ -349,7 +349,67 @@
 
     </div>
   </div>
-  <script>
+  
+<div id="editCafeModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" data-close-cafe></div>
+
+  <div class="modal-panel" role="document">
+    <header style="display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="margin:0">Edit Cafe</h3>
+      <button class="modal-close" aria-label="Close" data-close-cafe>✕</button>
+    </header>
+
+    <form id="editCafeForm" style="margin-top:14px;">
+      <div style="display:flex;gap:14px;align-items:center;">
+        <div style="flex:0 0 auto; text-align:center;">
+          <div style="width:84px; height:84px; border-radius:12px; overflow:hidden; border:2px solid #e6eaea; display:inline-block;">
+            <img id="modalCafePreview" src="https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+          </div>
+        </div>
+
+        <div style="flex:1;">
+          <label for="inputCafeImage" style="display:block;font-weight:600;margin-bottom:6px;">Cafe picture</label>
+          <input id="inputCafeImage" type="file" accept="image/*" />
+          <div style="font-size:13px;color:#666;margin-top:6px;">PNG/JPG, max 3 MB. Preview shown above.</div>
+
+          <div style="margin-top:8px;">
+            <button type="button" id="removeCafeImageBtn" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Remove photo</button>
+          </div>
+        </div>
+      </div>
+
+      <label for="inputCafeBio" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Short bio</label>
+      <textarea id="inputCafeBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;"></textarea>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+        <button type="button" data-close-cafe style="padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Cancel</button>
+        <button type="submit" style="padding:8px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+let currentCafeData = null;
+
+// CHECK OWNER SESSION
+async function checkOwnerSession() {
+  try {
+    const response = await fetch('/session-owner');
+    const result = await response.json();
+
+    if (!response.ok || !result.loggedIn) {
+      window.location.href = 'index.html';
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(err);
+    window.location.href = 'index.html';
+    return false;
+  }
+}
+
+// LOAD CAFE DATA
 async function loadOwnerCafe() {
   try {
     const response = await fetch('/owner-establishment');
@@ -360,11 +420,20 @@ async function loadOwnerCafe() {
       return;
     }
 
+    currentCafeData = cafe;
+
     document.getElementById('cafeName').textContent = cafe.name || 'Cafe Name';
     document.getElementById('cafeHandle').textContent = cafe.handle || '@cafename';
     document.getElementById('cafeBio').textContent = cafe.bio || 'No bio yet.';
-    if (cafe.imageUrl) {
-      document.getElementById('cafeImage').src = cafe.imageUrl;
+
+    const img = document.getElementById('cafeImage');
+
+    if (Array.isArray(cafe.imageUrl) && cafe.imageUrl.length > 0) {
+      img.src = '/' + cafe.imageUrl[0];
+    } else if (typeof cafe.imageUrl === 'string' && cafe.imageUrl.trim() !== '') {
+      img.src = '/' + cafe.imageUrl;
+    } else {
+      img.src = 'https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';
     }
   } catch (err) {
     console.error(err);
@@ -372,7 +441,104 @@ async function loadOwnerCafe() {
   }
 }
 
-window.addEventListener('DOMContentLoaded', loadOwnerCafe);
+// MODAL LOGIC
+function setupEditCafe() {
+  const editCafeBtn = document.getElementById('editCafeBtn');
+  const editCafeModal = document.getElementById('editCafeModal');
+  const editCafeForm = document.getElementById('editCafeForm');
+  const inputCafeBio = document.getElementById('inputCafeBio');
+  const inputCafeImage = document.getElementById('inputCafeImage');
+  const modalCafePreview = document.getElementById('modalCafePreview');
+  const removeCafeImageBtn = document.getElementById('removeCafeImageBtn');
+
+  function openCafeModal() {
+    if (!currentCafeData) return;
+
+    inputCafeBio.value = currentCafeData.bio || '';
+
+    if (Array.isArray(currentCafeData.imageUrl) && currentCafeData.imageUrl.length > 0) {
+      modalCafePreview.src = '/' + currentCafeData.imageUrl[0];
+    } else {
+      modalCafePreview.src = 'https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';
+    }
+
+    editCafeModal.hidden = false;
+  }
+
+  function closeCafeModal() {
+    editCafeModal.hidden = true;
+    inputCafeImage.value = '';
+  }
+
+  editCafeBtn.addEventListener('click', openCafeModal);
+
+  document.querySelectorAll('[data-close-cafe]').forEach(btn => {
+    btn.addEventListener('click', closeCafeModal);
+  });
+
+  inputCafeImage.addEventListener('change', function() {
+    const file = inputCafeImage.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => modalCafePreview.src = e.target.result;
+    reader.readAsDataURL(file);
+  });
+
+  removeCafeImageBtn.addEventListener('click', function() {
+    modalCafePreview.src = 'https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';
+    inputCafeImage.value = '';
+  });
+
+  editCafeForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    let newImage = null;
+    const file = inputCafeImage.files[0];
+
+    if (file) {
+      newImage = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => resolve(ev.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    try {
+      const response = await fetch('/update-cafe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bio: inputCafeBio.value.trim(),
+          imageUrl: newImage
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        alert(result.message || 'Failed to update cafe.');
+        return;
+      }
+
+      closeCafeModal();
+      await loadOwnerCafe();
+      alert('Cafe updated successfully!');
+    } catch (err) {
+      console.error(err);
+      alert('Error updating cafe.');
+    }
+  });
+}
+
+// RUN EVERYTHING
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await checkOwnerSession();
+  if (ok) {
+    await loadOwnerCafe();
+    setupEditCafe();
+  }
+});
 </script>
 </body>
 </html>
