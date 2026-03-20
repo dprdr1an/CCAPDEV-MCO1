@@ -12,7 +12,8 @@ const Establishment = require("./models/Establishment");
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.use(session({
   secret: "beanthere-secret-key",
@@ -202,7 +203,7 @@ app.post("/add-review", async (req, res) => {
       return res.status(401).send("Not logged in");
     }
 
-    const { establishmentName, rating, reviewText, tags, datePosted } = req.body;
+    const { establishmentName, rating, reviewText, tags, datePosted, photoUrl } = req.body;
 
     const newReview = new Review({
       username: req.session.user.username,
@@ -215,7 +216,7 @@ app.post("/add-review", async (req, res) => {
         text: "",
         repliedAt: null
       },
-      photoUrl: ""
+      photoUrl: photoUrl || ""
     });
 
     await newReview.save();

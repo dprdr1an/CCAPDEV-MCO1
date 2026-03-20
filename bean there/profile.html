@@ -120,8 +120,20 @@
   color: #4a3f35;
 }
 
-.wr-row{ display:flex; align-items:center; gap:14px; margin: 12px 0; }
-.wr-row label{ width: 120px; font-weight: 700; color:#4a3f35; }
+.wr-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.wr-row label {
+  width: auto;           /* ✅ remove fixed width */
+  min-width: 100px;      /* ✅ optional: keeps alignment neat */
+  text-align: left;
+  font-weight: 700;
+  color: #4a3f35;
+}
 
 #wrcafe, #wrCafe, #wrText{
   font-family: Montserrat, system-ui, sans-serif;
@@ -787,6 +799,27 @@
         background: rgba(0,0,0,0.05);
     }
 
+    .upload-btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1.5px solid #4a3f35;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .upload-btn:hover {
+      background: #f5f3f0;
+    }
+
+    .file-name {
+      margin-left: 10px;
+      font-size: 13px;
+      color: #777;
+    }
+
 
     @media(max-width:980px){
     :root{ --content-width: 820px; }
@@ -1155,10 +1188,12 @@
 <div id="writeReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" data-close-write></div>
 
-  <div class="modal-panel write-review-panel" role="document">
-    <button class="modal-close-review" aria-label="Close" data-close-write>✕</button>
+  <div class="modal-panel edit-review-panel" role="document">
 
-    <h3 class="write-review-title">Write a review:</h3>
+    <header class="edit-review-header">
+      <h3>Write Review</h3>
+      <button class="modal-close-review" data-close-write>✕</button>
+    </header>
 
     <form id="writeReviewForm">
       <div class="wr-row">
@@ -1177,8 +1212,16 @@
       </div>
 
       <div class="wr-row">
-        <label for="wrText">Review:</label>
-        <textarea id="wrText" placeholder="write your review here" required></textarea>
+        <label>Add photo/s:</label>
+        <input id="wrPhoto" type="file" accept="image/*" hidden>
+        <label for="wrPhoto" class="upload-btn">
+          📸 Add Photo
+        </label>
+        <span id="fileName" class="file-name">No file chosen</span>
+      </div>
+
+      <div class="wr-row">
+        <textarea id="wrText" placeholder="Write your review here"></textarea>
       </div>
 
       <div class="wr-row wr-tags">
@@ -1188,12 +1231,7 @@
         <button type="button" class="wr-tag" data-tag="altmilk">Alt Milk</button>
       </div>
 
-      <div class="wr-row">
-        <label>Add photo/s</label>
-        <input id="wrPhoto" type="file" accept="image/*">
-      </div>
-
-      <div class="wr-actions">
+      <div class="edit-review-footer">
         <button type="submit" class="btn-save-review">Save</button>
       </div>
     </form>
@@ -1807,7 +1845,7 @@ document.addEventListener("DOMContentLoaded", () => {
   date: review.datePosted || "No date",
   editedOn: null,
   text: review.reviewText,
-  image: "apdev-tbv/cafe4.jpg",
+  image: review.photoUrl || review.image || "apdev-tbv/cafe4.jpg",
   tags: review.tags || [],
 }));
 
@@ -2194,6 +2232,21 @@ writeForm.addEventListener('submit', async (e) => {
 
   const today = new Date().toISOString().split('T')[0];
 
+  // 📸 GET IMAGE FILE
+  const photoFile = document.getElementById("wrPhoto").files[0];
+  console.log("FILE:", photoFile);
+
+  let photoUrl = "";
+
+  if (photoFile) {
+    photoUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(photoFile);
+    });
+  }
+
   if (!establishmentName || !rating || !reviewText) {
     alert('Please complete the cafe, stars, and review.');
     return;
@@ -2208,7 +2261,8 @@ writeForm.addEventListener('submit', async (e) => {
         rating,
         reviewText,
         tags: selectedTags.join(','),
-        datePosted: today
+        datePosted: today,
+        photoUrl
       })
     });
 
@@ -2255,6 +2309,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error("Error loading cafes:", err);
   }
+});
+
+const fileInput = document.getElementById("wrPhoto");
+const fileNameText = document.getElementById("fileName");
+
+fileInput.addEventListener("change", () => {
+  fileNameText.textContent = fileInput.files[0]
+    ? fileInput.files[0].name
+    : "No file chosen";
 });
 </script>
 </body>
