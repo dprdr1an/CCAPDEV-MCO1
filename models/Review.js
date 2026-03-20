@@ -9,6 +9,18 @@ const ReviewSchema = new mongoose.Schema(
     tags: { type: [String], default: [] },
     datePosted: { type: String, default: "" },
     photoUrl: { type: String, default: "" },
+
+    likes: { type: Number, default: 0 },
+    dislikes: { type: Number, default: 0 },
+
+    replies: [
+      {
+        username: String,
+        text: String,
+        date: String
+      }
+    ],
+
     ownerReply: {
       text: { type: String, default: "" },
       repliedAt: { type: Date, default: null }
