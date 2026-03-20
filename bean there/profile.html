@@ -81,9 +81,9 @@
 .fab:hover{ transform: translateY(-1px); }
 .fab:active{ transform: translateY(0px); } */
 #addReviewFab {
-  position: fixed;   /* makes it stick to the screen */
-  bottom: 30px;      /* distance from bottom */
-  right: 30px;       /* distance from right */
+  position: fixed;   
+  bottom: 30px;      
+  right: 30px;       
 
   width: 65px;
   height: 65px;
@@ -100,6 +100,7 @@
 
   cursor: pointer;
   z-index: 9999;     /* keeps it above everything */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 /* Write Review modal styling */
@@ -1070,12 +1071,11 @@
   </div>
 </section>
 
+      </main>
 <!-- Floating + button -->
 <button id="addReviewFab" class="fab" aria-label="Write a review" title="Write a review">
   +
 </button>
-      </main>
-
       <div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
     <div class="modal-backdrop" id="closeLogIn"></div>
     <div class="modal-panel login-custom-panel">
