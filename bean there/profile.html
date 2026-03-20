@@ -979,49 +979,39 @@
 
       <main class="main animate-on-load delay-2">
 
+
+
+            <div class="user-menu" id="userMenu" style="position:absolute; top:20px; right:28px;">
+              <button id="userMenuBtn" class="user-mini-btn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" title="Open account menu">
+                <img id="avatarMiniImg"src="icons/noprof.jpg" alt="profile mini">
+              </button>
+
+              <div id="userDropdown" class="user-dropdown" role="menu" aria-labelledby="userMenuBtn" hidden>
+                <div class="ud-header">
+                  <div class="ud-greet">Hi, Erylle Jerica Galinato!</div>
+                  <div class="ud-sub">Student</div>
+                </div>
+
+                <div class="ud-divider" role="separator"></div>
+
+                <ul class="ud-list" role="menu">
+                  <li role="none"><button role="menuitem" class="ud-item" data-action="profile">Profile</button></li>
+                  <li role="none"><button role="menuitem" class="ud-item" data-action="contact">Contact Us</button></li>
+                  <li role="none"><button role="menuitem" class="ud-item" data-action="support">Support Us</button></li>
+                </ul>
+
+                <div class="ud-divider" role="separator"></div>
+
+                <div class="ud-signout">
+                  <button role="menuitem" class="ud-signout-btn" data-action="signout">Sign Out</button>
+                </div>
+              </div> 
+            </div>
+
         <div id="profileMessage" style="display:none; text-align:center; margin-top:40px; font-size:18px;">
           <h2>You’re not logged in 👤</h2>
           <p>Please log in or sign up to view your profile.</p>
         </div>
-
-        <div id="searchSection" class="search-row">
-  <div class="search-area" role="search" aria-label="Search cafes owners tags">
-    <div class="search" aria-hidden="false">
-      <input id="q" placeholder="Search cafes, owners, tags..." />
-      <button id="searchBtn">
-        <img src="icons/search.png" alt="search">
-      </button>
-    </div>
-
-    <div class="user-menu" id="userMenu">
-  <button id="userMenuBtn" class="user-mini-btn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" title="Open account menu">
-    <img id="avatarMiniImg"src="icons/noprof.jpg" alt="profile mini">
-  </button>
-
-  <div id="userDropdown" class="user-dropdown" role="menu" aria-labelledby="userMenuBtn" hidden>
-    <div class="ud-header">
-      <div class="ud-greet">Hi, Erylle Jerica Galinato!</div>
-      <div class="ud-sub">Student</div>
-    </div>
-
-    <div class="ud-divider" role="separator"></div>
-
-    <ul class="ud-list" role="menu">
-      <li role="none"><button role="menuitem" class="ud-item" data-action="profile">Profile</button></li>
-      <li role="none"><button role="menuitem" class="ud-item" data-action="contact">Contact Us</button></li>
-      <li role="none"><button role="menuitem" class="ud-item" data-action="support">Support Us</button></li>
-    </ul>
-
-    <div class="ud-divider" role="separator"></div>
-
-    <div class="ud-signout">
-      <button role="menuitem" class="ud-signout-btn" data-action="signout">Sign Out</button>
-    </div>
-  </div>
-</div>
-
-  </div>
-</div>
 
         <div class="profile-header">
           <div class="avatar-large">
@@ -1323,7 +1313,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const avatar   = localStorage.getItem('beanthere_profile_avatar');
 
     document.getElementById('profileMessage').style.display = 'none';
-    document.getElementById('searchSection').style.display  = '';
     document.querySelector('.profile-header').style.display = '';
     document.querySelectorAll('.section').forEach(s => s.style.display = '');
     document.getElementById('addReviewFab').style.display   = '';
@@ -1345,7 +1334,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- profile.html additions ---
     document.getElementById('profileMessage').style.display = 'block';
-    document.getElementById('searchSection').style.display  = 'none';
     document.querySelector('.profile-header').style.display = 'none';
     document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
     document.getElementById('addReviewFab').style.display   = 'none';
