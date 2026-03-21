@@ -1847,6 +1847,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function loadMyReplies() {
+      try {
+        const res = await fetch('/my-replies', {
+          credentials: 'include'
+        });
+
+        const replies = await res.json();
+        console.log("REPLIES:", replies);
+
+        // save to your existing array
+        repliesData.length = 0; // clear
+        replies.forEach(r => {
+          repliesData.push({
+            text: r.text,
+            datePosted: r.date,
+            establishmentName: r.establishmentName,
+            image: r.image || "apdev-tbv/cafe4.jpg",
+            replyToUser: r.replyToUser || "Anonymous"  // now comes from backend
+          });
+        });
+        currentReplyIndex = 0;
+        renderSampleReplies();
+
+      } catch (err) {
+        console.error("Error loading replies:", err);
+      }
+    }
+
     const repliesData = [];
 
     const editReviewStars = document.getElementById('editReviewStars');
@@ -1895,24 +1923,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = getCurrentUsername();
 
     const replyHtml = `
-        <div class="review-card" style="box-shadow: none; width: 100%;">
-          <img src="${reply.image}" alt="${reply.cafeName}" class="review-img">
-          <div class="review-content">
-            <div class="review-header" style="margin-bottom: 4px;">
-              <div>
-                <span class="review-user">${username.replace('@', '')}</span>
-                <span style="color: var(--muted); font-size: 14px;"> replying to </span>
-                <span class="review-user">${reply.replyToUser}</span>
-                <span class="review-date" style="margin-top: 4px;">${reply.date}</span>
-              </div>
-            </div>
+      <div class="review-card" style="box-shadow: none; width: 100%;">
+        <img src="${reply.image}" class="review-img">
 
-            <div class="cafe-title-row">
-                <h3 class="cafe-name" style="font-size: 24px;">${reply.cafeName}</h3>
+        <div class="review-content">
+          <div class="review-header">
+            <div>
+              <span class="review-user">${getCurrentUsername()}</span>
+              <span style="color:#888;"> replied to </span>
+              <span class="review-user">${reply.replyToUser}</span>
+              <span class="review-date">${reply.datePosted}</span>
             </div>
-            <p class="review-text" style="margin-top: 12px;">${reply.text}</p>
           </div>
+
+          <h3 class="cafe-name">${reply.establishmentName}</h3>
+
+          <p class="review-text">${reply.text}</p>
         </div>
+      </div>
     `;
     repliesContainer.innerHTML = replyHtml;
 
@@ -2150,6 +2178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     loadReviewsFromDB();
+    loadMyReplies();
 
 </script>
 <script>
@@ -2288,6 +2317,7 @@ writeForm.addEventListener('submit', async (e) => {
 
     // easiest way to make it appear in "My reviews"
     loadReviewsFromDB();
+    loadMyReplies();
   } catch (err) {
     console.error(err);
     alert('Error saving review.');

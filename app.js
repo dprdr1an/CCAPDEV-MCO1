@@ -571,36 +571,27 @@ app.post("/reviews/:id/reply", async (req, res) => {
 });
 
 // GET CURRENT USER'S REPLIES
-app.get("/my-replies", async (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).send("Login required");
-  }
-
+app.get('/my-replies', async (req, res) => {
+  if (!req.session.user) return res.status(401).send("Login required");
   try {
-    const reviews = await Review.find({
-      "replies.username": req.session.user.username
-    });
-
+    const reviews = await Review.find({ "replies.username": req.session.user.username });
     const userReplies = [];
-
-    reviews.forEach((review) => {
-      review.replies.forEach((reply) => {
+    reviews.forEach(review => {
+      review.replies.forEach(reply => {
         if (reply.username === req.session.user.username) {
           userReplies.push({
             text: reply.text,
             date: reply.date,
             establishmentName: reply.establishmentName,
-            reviewId: reply.reviewId
+            reviewId: reply.reviewId,
+            replyToUser: review.username,   // ADD THIS
+            image: review.photoUrl || "" 
           });
         }
       });
     });
-
     res.json(userReplies);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching replies");
-  }
+  } catch (err) { res.status(500).send("Error fetching replies"); }
 });
 
 /* =========================
