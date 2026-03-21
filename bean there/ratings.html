@@ -1097,17 +1097,9 @@ function renderReviews(data) {
       `;
     }).join("");
 
-<<<<<<< HEAD
     const currentUser = localStorage.getItem('beanthere_profile_username') || '';
     const isLiked    = (review.likedBy || []).includes(currentUser);
     const isDisliked = (review.dislikedBy || []).includes(currentUser);
-=======
-    return `
-      <div class="review-card" data-id="${review._id}">
-        <div class="review-img">
-          <img src="apdev-tbv/cafe4.jpg">
-        </div>
->>>>>>> db265bf3cfbb2ff5c00a1d884d761af13c7bbf61
 
     const repliesHtml = (review.replies || []).length > 0
     ? (review.replies || []).map(rep => `
@@ -1143,49 +1135,17 @@ function renderReviews(data) {
             ${review.establishmentName}
             <span class="rating">${beans}</span>
           </div>
-          <div class="review-location">${review.location || ""}</div>
-          <div class="review-text">${review.reviewText}</div>
-          <div class="review-actions">
-            <div class="icon-btn like-btn">
-              <img src="icons/like.png" class="${isLiked ? 'active' : 'faded'}">
-              <span>${review.likes || 0}</span>
-            </div>
-            <div class="icon-btn dislike-btn">
-              <img src="icons/dislike.png" class="${isDisliked ? 'active' : 'faded'}">
-              <span>${review.dislikes || 0}</span>
-            </div>
-            <button class="reply-btn" style="
-              margin-top: 4px;
-              padding: 6px 20px;
-              border-radius: 20px;
-              border: 1.5px solid var(--accent);
-              background: transparent;
-              font-weight: 600;
-              font-size: 13px;
-              cursor: pointer;
-              font-family: Montserrat, sans-serif;
-            ">Reply</button>
+
+          <div class="review-location">
+            ${review.location || ""}
           </div>
 
-          <div class="review-actions">
-            <div class="icon-btn like-btn">
-              <img src="icons/like.png" class="faded">
-              <span>${review.likes || 0}</span>
-            </div>
-
-            <div class="icon-btn dislike-btn">
-              <img src="icons/dislike.png" class="faded">
-              <span>${review.dislikes || 0}</span>
-            </div>
-
-            <div class="icon-btn reply-btn">
-              <img src="icons/reply.png">
-              <span>Reply</span>
-            </div>
+          <div class="review-text">
+            ${review.reviewText}
           </div>
         </div>
-        ${repliesHtml ? `<div style="grid-column: 1 / -1;">${repliesHtml}</div>` : ''}
-      </div>`;
+      </div>
+    `;
   }).join("");
 
   document.querySelectorAll('.review-title[data-id]').forEach(el => {
@@ -1239,205 +1199,6 @@ searchInput.addEventListener("keydown", (e) => {
 });
 
 searchInput.addEventListener("input", handleSearch);
-
-<<<<<<< HEAD
-function requireLogin() {
-  const user = localStorage.getItem("beanthere_profile_username");
-  if (!user) {
-    alert("Please log in or create an account first.");
-    return false;
-  }
-  return true;
-}
-
-document.addEventListener("click", function(e) {
-  const likeBtn    = e.target.closest(".like-btn");
-  const dislikeBtn = e.target.closest(".dislike-btn");
-  const replyBtn   = e.target.closest(".reply-btn");
-
-  if (likeBtn) {
-    if (!requireLogin()) return;
-    const card = likeBtn.closest(".review-card");
-    const reviewId = card.dataset.id;
-    fetch(`/reviews/${reviewId}/like`, { method: "POST" });
-    const likeImg = likeBtn.querySelector("img");
-    const likeCount = likeBtn.querySelector("span");
-    const dislikeBtnEl = likeBtn.parentElement.querySelector(".dislike-btn");
-    const dislikeImg = dislikeBtnEl.querySelector("img");
-    const dislikeCount = dislikeBtnEl.querySelector("span");
-    const wasLiked = likeImg.classList.contains("active");
-    const wasDisliked = dislikeImg.classList.contains("active");
-    if (wasDisliked) {
-      dislikeImg.classList.remove("active"); dislikeImg.classList.add("faded");
-      dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
-    }
-    if (!wasLiked) {
-      likeImg.classList.remove("faded"); likeImg.classList.add("active");
-      likeCount.textContent = parseInt(likeCount.textContent) + 1;
-    } else {
-      likeImg.classList.remove("active"); likeImg.classList.add("faded");
-      likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
-    }
-  }
-
-  if (dislikeBtn) {
-    if (!requireLogin()) return;
-    const card = dislikeBtn.closest(".review-card");
-    const reviewId = card.dataset.id;
-    fetch(`/reviews/${reviewId}/dislike`, { method: "POST" });
-    const dislikeImg = dislikeBtn.querySelector("img");
-    const dislikeCount = dislikeBtn.querySelector("span");
-    const likeBtnEl = dislikeBtn.parentElement.querySelector(".like-btn");
-    const likeImg = likeBtnEl.querySelector("img");
-    const likeCount = likeBtnEl.querySelector("span");
-    const wasDisliked = dislikeImg.classList.contains("active");
-    const wasLiked = likeImg.classList.contains("active");
-    if (wasLiked) {
-      likeImg.classList.remove("active"); likeImg.classList.add("faded");
-      likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
-    }
-    if (!wasDisliked) {
-      dislikeImg.classList.remove("faded"); dislikeImg.classList.add("active");
-      dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
-    } else {
-      dislikeImg.classList.remove("active"); dislikeImg.classList.add("faded");
-      dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
-    }
-  }
-
-  if (replyBtn) {
-    if (!requireLogin()) return;
-    const card = replyBtn.closest(".review-card");
-    document.getElementById('replyReviewId').value = card.dataset.id;
-    document.getElementById('replyText').value = '';
-    document.getElementById('replyModal').hidden = false;
-  }
-});
-
-document.getElementById('replyForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const reviewId = document.getElementById('replyReviewId').value;
-  const text     = document.getElementById('replyText').value.trim();
-  if (!text) { alert("Please write a reply."); return; }
-
-  try {
-    await fetch(`/reviews/${reviewId}/reply`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
-    document.getElementById('replyModal').hidden = true;
-  } catch (err) {
-    alert("Error posting reply.");
-  }
-=======
-// LIKE / DISLIKE / REPLY LOGIC
-document.addEventListener("click", function(e) {
-
-  const likeBtn = e.target.closest(".like-btn");
-  const dislikeBtn = e.target.closest(".dislike-btn");
-  const replyBtn = e.target.closest(".reply-btn");
-
-  // LIKE
-  if (likeBtn) {
-  if (!requireLogin()) return;
-
-  const card = likeBtn.closest(".review-card");
-  const reviewId = card.dataset.id;
-
-  fetch(`/reviews/${reviewId}/like`, {
-    method: "POST"
-  });
-
-  const likeImg = likeBtn.querySelector("img");
-  const likeCount = likeBtn.querySelector("span");
-
-  const dislikeBtnEl = likeBtn.parentElement.querySelector(".dislike-btn");
-  const dislikeImg = dislikeBtnEl.querySelector("img");
-  const dislikeCount = dislikeBtnEl.querySelector("span");
-
-  const wasLiked = likeImg.classList.contains("active");
-  const wasDisliked = dislikeImg.classList.contains("active");
-
-  // remove dislike FIRST
-  if (wasDisliked) {
-    dislikeImg.classList.remove("active");
-    dislikeImg.classList.add("faded");
-    dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
-  }
-
-  if (!wasLiked) {
-    likeImg.classList.remove("faded");
-    likeImg.classList.add("active");
-    likeCount.textContent = parseInt(likeCount.textContent) + 1;
-  } else {
-    likeImg.classList.remove("active");
-    likeImg.classList.add("faded");
-    likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
-  }
-}
-
-  // DISLIKE
-  if (dislikeBtn) {
-  if (!requireLogin()) return;
-
-  const card = dislikeBtn.closest(".review-card");
-  const reviewId = card.dataset.id;
-
-  fetch(`/reviews/${reviewId}/dislike`, {
-    method: "POST"
-  });
-
-  const dislikeImg = dislikeBtn.querySelector("img");
-  const dislikeCount = dislikeBtn.querySelector("span");
-
-  const likeBtnEl = dislikeBtn.parentElement.querySelector(".like-btn");
-  const likeImg = likeBtnEl.querySelector("img");
-  const likeCount = likeBtnEl.querySelector("span");
-
-  const wasDisliked = dislikeImg.classList.contains("active");
-  const wasLiked = likeImg.classList.contains("active");
-
-  // remove like FIRST
-  if (wasLiked) {
-    likeImg.classList.remove("active");
-    likeImg.classList.add("faded");
-    likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
-  }
-
-  if (!wasDisliked) {
-    dislikeImg.classList.remove("faded");
-    dislikeImg.classList.add("active");
-    dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
-  } else {
-    dislikeImg.classList.remove("active");
-    dislikeImg.classList.add("faded");
-    dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
-  }
-}
-
-  // REPLY
-  if (replyBtn) {
-  if (!requireLogin()) return;
-
-  const card = replyBtn.closest(".review-card");
-  const reviewId = card.dataset.id;
-
-  const text = prompt("Enter your reply:");
-  if (!text) return;
-
-  fetch(`/reviews/${reviewId}/reply`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ text })
-  });
-
-  alert("Reply posted!");
-}
->>>>>>> db265bf3cfbb2ff5c00a1d884d761af13c7bbf61
-});
 </script>
 </body>
 </html>
