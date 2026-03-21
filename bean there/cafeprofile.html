@@ -430,23 +430,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── CHECK OWNER SESSION ──
   async function checkOwnerSession() {
-    try {
-      const res    = await fetch('/session-owner');
-      const result = await res.json();
-      if (!res.ok || !result.loggedIn) {
-        window.location.href = 'index.html';
-        return false;
-      }
-      // store owner username for sidebar
-      if (result.owner?.username) {
-        localStorage.setItem('beanthere_owner_username', result.owner.username);
-        updateUI();
-      }
-      return true;
-    } catch (err) {
-      window.location.href = 'index.html';
-      return false;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      try {
+        const res    = await fetch('/session-owner');
+        const result = await res.json();
+        if (res.ok && result.loggedIn) {
+          if (result.owner?.username) {
+            localStorage.setItem('beanthere_owner_username', result.owner.username);
+            updateUI();
+          }
+          return true;
+        }
+      } catch (err) {}
+      await new Promise(r => setTimeout(r, 1000));
     }
+    window.location.href = 'index.html';
+    return false;
   }
 
   // ── HELPERS ──
