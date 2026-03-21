@@ -10,457 +10,609 @@
   <style>
     :root{
       --bg: #efe8d6;
-      --sidebar: #737109;
+      --sidebar: #5b5f10;
       --accent: #7f7b2e;
-      --muted: #8b8578;
+      --muted: #bfb0a8;
       --content-width: 1500px;
       --review-bg: #cfe0ff;
       --orange: #ee6a45;
-      --text: #2b2b2b;
-      --border: rgba(127,123,46,0.45);
     }
 
-    *{ box-sizing:border-box; }
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-on-load { opacity:0; animation: floatUp 0.9s ease-out forwards; }
+    .delay-1 { animation-delay: 0.15s; }
+    .delay-2 { animation-delay: 0.35s; }
 
+    *{ box-sizing: border-box; }
     html, body{
-      margin:0;
-      height:100%;
-      font-family:Montserrat, system-ui, sans-serif;
-      background:var(--bg);
-      color:var(--text);
+      height: 100%;
+      margin: 0;
+      font-family: Montserrat, system-ui, sans-serif;
+      background: var(--bg);
+      color: #2b2b2b;
     }
 
-    .frame{
-      width:100%;
-      min-height:100vh;
-      padding:10px;
-    }
+    .frame{ width:100%; height:100vh; overflow:hidden; }
 
     .layout{
-      display:grid;
-      grid-template-columns: 170px 1fr;
-      gap:14px;
-      min-height: calc(100vh - 20px);
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      height: 100%;
+      column-gap: 18px;
     }
 
+    /* ── SIDEBAR ── */
     .sidebar{
-      background:var(--sidebar);
-      color:#fff;
-      border-radius:18px;
-      padding:22px 18px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
+      background: var(--sidebar);
+      color: #fff;
+      padding: 28px;
+      margin: 18px 0 18px 18px;
+      border-radius: 22px;
+      height: calc(100% - 36px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
+    .logo{ font-family:Lora,serif; font-size:42px; font-weight:700; letter-spacing:1px; }
+    .nav{ margin-top:36px; display:flex; flex-direction:column; gap:26px; }
+    .nav a{ color:#fff; text-decoration:none; font-size:20px; }
+    .auth{ font-size:20px; }
+    .sidebar .nav a:hover,
+    .sidebar .auth div:hover{ color:#fa7a11; cursor:pointer; transition:0.3s; }
 
-    .logo{
-      font-family:Lora, serif;
-      font-size:28px;
-      font-weight:700;
-      line-height:0.95;
-      margin-bottom:40px;
-    }
-
-    .nav{
-      display:flex;
-      flex-direction:column;
-      gap:24px;
-      margin-top:80px;
-    }
-
-    .nav a,
-    .auth a{
-      color:#fff;
-      text-decoration:none;
-      font-size:18px;
-    }
-
-    .nav a:hover,
-    .auth a:hover{
-      color:#f6d87c;
-    }
-
-    .auth{
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-      font-size:18px;
-    }
-
+    /* ── MAIN ── */
     .main{
-      border:1.5px solid var(--border);
-      border-radius:22px;
-      padding:26px 24px 32px;
-      position:relative;
+      height: calc(100% - 36px);
+      margin: 18px 18px 0 0;
+      padding: 24px 28px;
+      border: 1.5px solid rgba(127,123,46,0.4);
+      border-radius: 24px;
+      overflow-y: auto;
+      position: relative;
     }
 
+    /* ── CAFE HEADER (same as cafe.html) ── */
     .cafe-header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:20px;
-      margin-bottom:34px;
+      max-width: var(--content-width);
+      margin: 0 auto 22px;
     }
-    .cafe-handle-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 8px;
-}
+    .cafe-name-row{
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .cafe-name{
+      font-family: Lora, serif;
+      font-size: 44px;
+      font-weight: 700;
+      color: #c0441a;
+      margin: 0;
+    }
+    .cafe-score{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .score-divider{ color: var(--muted); }
 
-    .cafe-left{
-      display:flex;
-      gap:18px;
-      align-items:flex-start;
+    /* ── PHOTO GRID (same as cafe.html) ── */
+    .photo-grid{
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .photo-grid img{
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+      border-radius: 8px;
     }
 
-    .cafe-image{
-      width:120px;
-      height:88px;
-      border-radius:8px;
-      overflow:hidden;
-      background:#cde7ff;
-      flex-shrink:0;
+    /* ── CAFE META BELOW PHOTOS ── */
+    .cafe-meta{
+      margin-bottom: 28px;
     }
-
-    .cafe-image img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-
-    .cafe-meta h1{
-      margin:0;
-      font-size:38px;
-      font-weight:700;
-      line-height:1;
-    }
-
     .cafe-handle{
-      color:#294b83;
-      font-size:18px;
-      margin-top:8px;
-      font-weight:500;
+      color: #2b5b6f;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
     }
-
     .cafe-bio{
-      margin-top:6px;
-      color:#6e675d;
-      font-size:16px;
+      color: var(--muted);
+      margin: 0 0 10px;
     }
-
     .edit-cafe-btn{
-      margin-top:10px;
-      padding:6px 22px;
-      border-radius:22px;
-      border:1.5px solid var(--accent);
-      background:transparent;
-      font-size:14px;
-      cursor:pointer;
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(127,123,46,0.4);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: Montserrat, sans-serif;
     }
+    .edit-cafe-btn:hover{ background: rgba(127,123,46,0.08); }
 
-    .edit-cafe-btn:hover{
-      background:rgba(127,123,46,0.08);
+    /* ── REVIEWS (identical to ratings.html) ── */
+    .reviews{
+      max-width: var(--content-width);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
     }
-
-    .sort-pill{
-      align-self:flex-end;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      border:1.5px solid var(--accent);
-      border-radius:28px;
-      padding:12px 18px;
-      background:transparent;
-      font-size:16px;
+    .reviews-title{
+      font-size: 26px;
+      font-family: Lora, serif;
+      margin: 0 0 4px;
     }
-
-    .sort-icon{
-      width:18px;
-      height:14px;
-      position:relative;
-      display:inline-block;
+    .review-card{
+      background: var(--review-bg);
+      border-radius: 22px;
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 22px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-
-    .sort-icon::before,
-    .sort-icon::after,
-    .sort-icon span{
-      content:"";
-      position:absolute;
-      left:0;
-      height:2px;
-      background:#2b2b2b;
-      border-radius:3px;
+    .review-card:hover{ transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
+    .review-img{
+      width: 100%;
+      height: 180px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #dfe8f5;
     }
-
-    .sort-icon::before{
-      top:0;
-      width:100%;
+    .review-img img{ width:100%; height:100%; object-fit:cover; }
+    .review-content{ display:flex; flex-direction:column; gap:8px; }
+    .review-top{
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #253d67;
     }
-
-    .sort-icon span{
-      top:6px;
-      width:70%;
+    .review-title{
+      font-family: Lora, serif;
+      font-size: 28px;
+      color: #d45a2a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+    .review-location{ color:#253d67; font-size:15px; font-weight:600; margin-top:-8px; }
+    .review-tags{ display:flex; gap:14px; font-size:13px; color:#253d67; flex-wrap:wrap; }
+    .tag{ display:inline-flex; align-items:center; gap:6px; }
+    .tag img{ width:14px; height:14px; }
+    .rating{ display:inline-flex; gap:4px; margin-left:6px; }
+    .rating img{ width:18px; height:18px; }
+    .review-text{ font-size:14px; line-height:1.5; }
 
-    .sort-icon::after{
-      top:12px;
-      width:45%;
+    /* ── EDIT CAFE MODAL (same style as write/edit review in profile.html) ── */
+    .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
+    .modal[hidden]{ display:none; }
+    .modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0.3); }
+    .modal-panel{ position:relative; background:#fff; padding:30px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.2); width:90%; z-index:2001; }
+
+    .edit-cafe-panel{
+      background-color: #f8f5ee;
+      border-radius: 20px;
+      padding: 30px 26px;
+      width: min(520px, calc(100% - 32px));
+      position: relative;
     }
-
-    .section{
-      margin-top:28px;
+    .edit-cafe-title{
+      font-family: 'Lora', serif;
+      font-size: 34px;
+      margin: 0 0 18px;
+      text-align: center;
+      color: #4a3f35;
     }
-
-    .section-title{
-      text-align:center;
-      font-size:24px;
-      font-weight:500;
-      margin:0 0 16px;
+    .modal-close-cafe{
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      font-size: 28px;
+      color: #4a3f35;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      line-height: 1;
     }
-
-    .carousel-wrapper{
-      position:relative;
-      padding:0 38px;
+    .modal-close-cafe:hover{ opacity: 0.7; }
+    .ec-row{ display:flex; align-items:flex-start; gap:14px; margin:12px 0; }
+    .ec-row label{ width:120px; font-weight:700; color:#4a3f35; padding-top:6px; }
+    .ec-row textarea{
+      flex: 1;
+      min-height: 100px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(0,0,0,0.18);
+      padding: 14px;
+      resize: none;
+      font-family: Montserrat, sans-serif;
+      font-size: 15px;
     }
-
-    .arrow{
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      width:32px;
-      height:32px;
-      border-radius:50%;
-      border:none;
-      background:var(--orange);
-      color:#fff;
-      font-size:24px;
-      font-weight:700;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:2;
+    .ec-actions{ display:flex; justify-content:center; margin-top:18px; }
+    .btn-save-cafe{
+      background-color: transparent;
+      color: #4a3f35;
+      border: 2px solid #4a3f35;
+      border-radius: 30px;
+      padding: 10px 50px;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
     }
+    .btn-save-cafe:hover{ background-color: #4a3f35; color: #fff; }
 
-    .arrow.left{ left:0; }
-    .arrow.right{ right:0; }
-
-    .blue-box{
-      background:var(--review-bg);
-      border-radius:10px;
-      min-height:112px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      color:#2f2f2f;
-      font-size:16px;
+    @media(max-width:880px){
+      .layout{ grid-template-columns:1fr; }
+      .sidebar{ order:2; height:auto; }
+      .main{ order:1; }
+      .review-card{ grid-template-columns:1fr; }
+      .review-img{ height:200px; }
+      .photo-grid{ grid-template-columns:repeat(3,1fr); }
     }
-
-    @media (max-width: 900px){
-      .layout{
-        grid-template-columns:1fr;
-      }
-
-      .sidebar{
-        min-height:auto;
-      }
-
-      .cafe-header{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .sort-pill{
-        align-self:flex-start;
-      }
+    .review-actions {
+      display: flex;
+      gap: 18px;
+      margin-top: 25px;
+      align-items: center;
     }
-  </style>
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .icon-btn img {
+      width: 20px;
+      height: 20px;
+    }
+    .faded { opacity: 0.3; filter: grayscale(1); }
+    .active { opacity: 1; filter: none; }
+      </style>
 </head>
+
 <body>
-  <div class="frame">
-    <div class="layout">
+<div class="frame">
+  <div class="layout">
 
-      <aside class="sidebar">
-        <div>
-          <div class="logo">bean<br>there</div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar animate-on-load delay-1">
+      <div>
+        <div class="logo">bean<br>there</div>
+        <nav class="nav">
+          <a href="cafeprofile.html">My Cafe Profile</a>
+          <a href="cafereviews.html">Reviews</a>
+        </nav>
+      </div>
+      <div class="auth" id="authSection">
+        <div id="loginBtn" style="margin-bottom:14px">Log in</div>
+        <div id="signupBtn">Sign up</div>
+      </div>
+      <div class="auth" id="userSection" style="display:none;">
+        <div id="welcomeUser" style="margin-bottom:14px"></div>
+        <div id="logoutBtn">Log out</div>
+      </div>
+    </aside>
 
-          <nav class="nav">
-            <a href="cafeprofile.html">My Cafe Profile</a>
-            <a href="cafereviews.html">Reviews</a>
-          </nav>
-        </div>
+    <!-- MAIN -->
+    <main class="main animate-on-load delay-2">
 
-        <div class="auth">
-          <a href="index.html">Log in</a>
-          <a href="index.html">Sign up</a>
-        </div>
-      </aside>
-
-      <main class="main">
-        <div class="cafe-header">
-          <div class="cafe-left">
-            <div class="cafe-image">
-  <img id="cafeImage" src="icons/default-cafe.jpg" alt="Cafe photo">
-</div>
-
-<div class="cafe-meta">
-  <h1 id="cafeName">Cafe Name</h1>
-
-  <div class="cafe-handle-row">
-    <div class="cafe-handle" id="cafeHandle">@cafename</div>
-   <button id="editCafeBtn" class="edit-cafe-btn">Edit Cafe</button>
-  </div>
-
-  <div class="cafe-bio" id="cafeBio">Placeholder for short bio</div>
-</div>
-          </div>
-
-          <div class="sort-pill">
-            <span class="sort-icon"><span></span></span>
-            <span>Date Posted</span>
+      <!-- Cafe Header: name + rating -->
+      <div class="cafe-header">
+        <div class="cafe-name-row">
+          <h1 class="cafe-name" id="cafeName">Loading…</h1>
+          <div class="cafe-score">
+            <img src="icons/bean.png" alt="bean" style="width:20px;height:20px;">
+            <span id="cafeRating">—</span>
           </div>
         </div>
+        <div id="cafeLocation" style="font-size:15px; color:#6b6151; margin-top:4px;"></div>
+      </div>
 
-        <section class="section">
-          <h2 class="section-title">My Cafe Reviews</h2>
-          <div class="carousel-wrapper">
-            <button class="arrow left">‹</button>
-            <div class="blue-box">
-              No reviews for your cafe yet.
-            </div>
-            <button class="arrow right">›</button>
-          </div>
-        </section>
+      <!-- Photo Grid -->
+      <div class="photo-grid" id="cafePhotoGrid"></div>
 
-        <section class="section">
-          <h2 class="section-title">My Replies</h2>
-          <div class="carousel-wrapper">
-            <button class="arrow left">‹</button>
-            <div class="blue-box">
-              No replies yet.
-            </div>
-            <button class="arrow right">›</button>
-          </div>
-        </section>
-      </main>
+      <!-- Cafe Meta: handle, bio, edit button -->
+      <div class="cafe-meta">
+        <div class="cafe-handle" id="cafeHandle">@cafename</div>
+        <p class="cafe-bio" id="cafeBio">Placeholder for short bio</p>
+        <button id="editCafeBtn" class="edit-cafe-btn">Edit Cafe</button>
+      </div>
 
-    </div>
-  </div>
-  
-<div id="editCafeModal" class="modal" role="dialog" aria-modal="true" hidden>
-  <div class="modal-backdrop" data-close-cafe></div>
-
-  <div class="modal-panel" role="document">
-    <header style="display:flex;align-items:center;justify-content:space-between;">
-      <h3 style="margin:0">Edit Cafe</h3>
-      <button class="modal-close" aria-label="Close" data-close-cafe>✕</button>
-    </header>
-
-    <form id="editCafeForm" style="margin-top:14px;">
-      <div style="display:flex;gap:14px;align-items:center;">
-        <div style="flex:0 0 auto; text-align:center;">
-          <div style="width:84px; height:84px; border-radius:12px; overflow:hidden; border:2px solid #e6eaea; display:inline-block;">
-            <img id="modalCafePreview" src="https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
-          </div>
-        </div>
-
-        <div style="flex:1;">
-          <label for="inputCafeImage" style="display:block;font-weight:600;margin-bottom:6px;">Cafe picture</label>
-          <input id="inputCafeImage" type="file" accept="image/*" />
-          <div style="font-size:13px;color:#666;margin-top:6px;">PNG/JPG, max 3 MB. Preview shown above.</div>
-
-          <div style="margin-top:8px;">
-            <button type="button" id="removeCafeImageBtn" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Remove photo</button>
-          </div>
+      <!-- Reviews -->
+      <div class="reviews">
+        <h2 class="reviews-title">My Cafe Reviews</h2>
+        <div id="reviewContainer">
+          <p style="color:#666; text-align:center;">Loading reviews…</p>
         </div>
       </div>
 
-      <label for="inputCafeBio" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Short bio</label>
-      <textarea id="inputCafeBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;"></textarea>
+    </main>
+  </div>
+</div>
 
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
-        <button type="button" data-close-cafe style="padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Cancel</button>
-        <button type="submit" style="padding:8px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;">Save</button>
+<!-- EDIT CAFE MODAL -->
+<div id="editCafeModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" data-close-cafe></div>
+  <div class="modal-panel edit-cafe-panel" role="document">
+    <button class="modal-close-cafe" aria-label="Close" data-close-cafe>✕</button>
+    <h3 class="edit-cafe-title">Edit Cafe</h3>
+
+    <form id="editCafeForm">
+      <div class="ec-row">
+        <label>Photos</label>
+        <div style="flex:1;">
+          <div id="cafePhotosGrid" style="display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:10px;"></div>
+          <input id="inputCafeImage" type="file" accept="image/*" multiple style="font-size:13px;">
+          <div style="font-size:12px; color:#888; margin-top:4px;">Select up to 5 photos to replace all current ones.</div>
+        </div>
+      </div>
+
+      <div class="ec-row">
+        <label for="inputCafeBio">Bio</label>
+        <textarea id="inputCafeBio" placeholder="Write a short bio..."></textarea>
+      </div>
+
+      <div class="ec-actions">
+        <button type="submit" class="btn-save-cafe">Save</button>
       </div>
     </form>
   </div>
 </div>
+
+<div id="replyModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" data-close-reply></div>
+  <div class="modal-panel edit-cafe-panel" role="document">
+    <button class="modal-close-cafe" data-close-reply>✕</button>
+    <h3 class="edit-cafe-title">Reply to Review</h3>
+    <form id="replyForm">
+      <input type="hidden" id="replyReviewId">
+      <div class="ec-row">
+        <label for="replyText">Reply</label>
+        <textarea id="replyText" placeholder="Write your reply..."></textarea>
+      </div>
+      <div class="ec-actions">
+        <button type="submit" class="btn-save-cafe">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
-let currentCafeData = null;
+document.addEventListener("DOMContentLoaded", async () => {
 
-// CHECK OWNER SESSION
-async function checkOwnerSession() {
-  try {
-    const response = await fetch('/session-owner');
-    const result = await response.json();
+  // ── AUTH SIDEBAR ──
+  const authSection = document.getElementById('authSection');
+  const userSection = document.getElementById('userSection');
+  const welcomeUser = document.getElementById('welcomeUser');
+  const logoutBtn   = document.getElementById('logoutBtn');
+  const loginBtn    = document.getElementById('loginBtn');
+  const signupBtn   = document.getElementById('signupBtn');
 
-    if (!response.ok || !result.loggedIn) {
+  function updateUI() {
+    const username = localStorage.getItem('beanthere_owner_username') || localStorage.getItem('beanthere_profile_username');
+    if (username) {
+      authSection.style.display = 'none';
+      userSection.style.display = 'block';
+      welcomeUser.textContent = username;
+    } else {
+      authSection.style.display = 'block';
+      userSection.style.display = 'none';
+    }
+  }
+
+  updateUI();
+  welcomeUser.onclick = () => { window.location.href = 'profile.html'; };
+  logoutBtn.onclick = async () => {
+    try {
+      await fetch('/logout', { method: 'POST' });
+      localStorage.clear();
+      updateUI();
+      alert("Logged out");
+    } catch (err) { alert("Error logging out"); }
+  };
+  loginBtn.onclick  = () => { window.location.href = 'index.html'; };
+  signupBtn.onclick = () => { window.location.href = 'index.html'; };
+
+  // ── CHECK OWNER SESSION ──
+  async function checkOwnerSession() {
+    try {
+      const res    = await fetch('/session-owner');
+      const result = await res.json();
+      if (!res.ok || !result.loggedIn) {
+        window.location.href = 'index.html';
+        return false;
+      }
+      // store owner username for sidebar
+      if (result.owner?.username) {
+        localStorage.setItem('beanthere_owner_username', result.owner.username);
+        updateUI();
+      }
+      return true;
+    } catch (err) {
       window.location.href = 'index.html';
       return false;
     }
-    return true;
-  } catch (err) {
-    console.error(err);
-    window.location.href = 'index.html';
-    return false;
   }
-}
 
-// LOAD CAFE DATA
-async function loadOwnerCafe() {
-  try {
-    const response = await fetch('/owner-establishment');
-    const cafe = await response.json();
+  // ── HELPERS ──
+  const tagIcons = {
+    "Air-conditioned": "icons/ac.png",
+    "Socket":          "icons/socket.png",
+    "Wi-Fi":           "icons/wifi.png",
+    "Alt Milk":        "icons/oat.png"
+  };
 
-    if (!response.ok) {
-      alert(cafe.message || 'Failed to load cafe profile.');
-      return;
-    }
-
-    currentCafeData = cafe;
-
-    document.getElementById('cafeName').textContent = cafe.name || 'Cafe Name';
-    document.getElementById('cafeHandle').textContent = cafe.handle || '@cafename';
-    document.getElementById('cafeBio').textContent = cafe.bio || 'No bio yet.';
-
-    const img = document.getElementById('cafeImage');
-
-    if (Array.isArray(cafe.imageUrl) && cafe.imageUrl.length > 0) {
-      img.src = '/' + cafe.imageUrl[0];
-    } else if (typeof cafe.imageUrl === 'string' && cafe.imageUrl.trim() !== '') {
-      img.src = '/' + cafe.imageUrl;
-    } else {
-      img.src = 'https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Error loading cafe profile.');
+  function buildBeans(rating) {
+    return Array.from({length:5}, (_,i) =>
+      `<img src="icons/bean.png" alt="bean"${i >= rating ? ' style="opacity:0.25;filter:grayscale(1)"' : ''}>`
+    ).join('');
   }
-}
 
-// MODAL LOGIC
-function setupEditCafe() {
-  const editCafeBtn = document.getElementById('editCafeBtn');
-  const editCafeModal = document.getElementById('editCafeModal');
-  const editCafeForm = document.getElementById('editCafeForm');
-  const inputCafeBio = document.getElementById('inputCafeBio');
+  // ── LOAD CAFE DATA ──
+  let currentCafeData = null;
+
+  async function loadOwnerCafe() {
+    try {
+      const res  = await fetch('/owner-establishment');
+      const cafe = await res.json();
+      if (!res.ok) { alert(cafe.message || 'Failed to load cafe profile.'); return; }
+
+      currentCafeData = cafe;
+
+      document.getElementById('cafeName').textContent   = cafe.name     || 'Cafe Name';
+      document.getElementById('cafeHandle').textContent = cafe.handle   || '';
+      document.getElementById('cafeBio').textContent    = cafe.bio      || 'No bio yet.';
+      document.getElementById('cafeLocation').textContent = cafe.location || '';
+
+      // photo grid
+      const grid   = document.getElementById('cafePhotoGrid');
+      const images = Array.isArray(cafe.imageUrl) && cafe.imageUrl.length
+        ? cafe.imageUrl
+        : ['https://placehold.co/300x160/cfe0ff/6b7280?text=Cafe'];
+      grid.innerHTML = images.map(src =>
+        `<img src="${src}" alt="${cafe.name}">`
+      ).join('');
+
+    } catch (err) {
+      console.error(err);
+      alert('Error loading cafe profile.');
+    }
+  }
+
+  // ── LOAD REVIEWS ──
+  async function loadCafeReviews() {
+    const container = document.getElementById('reviewContainer');
+    try {
+      const estId  = currentCafeData._id;
+      const res    = await fetch(`/reviews-by-cafe/${estId}`);
+      const reviews = await res.json();
+
+      // compute average rating
+      if (reviews.length) {
+        const avg = (reviews.reduce((s,r) => s + (r.rating||0), 0) / reviews.length).toFixed(1);
+        document.getElementById('cafeRating').textContent = avg;
+      }
+
+      if (!reviews.length) {
+        container.innerHTML = '<p style="color:#666; text-align:center;">No reviews for your cafe yet.</p>';
+        return;
+      }
+
+      container.innerHTML = reviews.map(r => {
+        const tags = (r.tags || []).map(tag => {
+          const icon = tagIcons[tag];
+          return `<span class="tag">${icon ? `<img src="${icon}">` : ''} ${tag}</span>`;
+        }).join('');
+
+        const replySection = r.ownerReply?.text
+        ? `<div style="
+            margin-top: 12px;
+            background: rgba(127,123,46,0.08);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            padding: 10px 14px;
+            font-size: 13px;
+          ">
+            <strong style="color:var(--accent);">Your reply</strong>
+            <span style="color:#888; font-size:12px; margin-left:8px;">${r.ownerReply.repliedAt ? new Date(r.ownerReply.repliedAt).toLocaleDateString() : ''}</span>
+            <p style="margin:6px 0 0; color:#4a5568;">${r.ownerReply.text}</p>
+          </div>`
+        : `<button class="reply-btn" data-id="${r._id}" style="
+            margin-top: 12px;
+            align-self: flex-start;
+            padding: 6px 20px;
+            border-radius: 20px;
+            border: 1.5px solid var(--accent);
+            background: transparent;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: Montserrat, sans-serif;
+          ">Reply</button>`;
+
+          return `
+            <div class="review-card" data-id="${r._id}">
+              <div class="review-img">
+                <img src="${r.photoUrl || r.image || 'apdev-tbv/cafe4.jpg'}" alt="${r.establishmentName || ''}">
+              </div>
+              <div class="review-content">
+                <div class="review-top">
+                  <div>
+                    <strong>${r.username || 'Anonymous'}</strong><br>
+                    ${r.datePosted || ''}
+                  </div>
+                  <div class="review-tags">${tags}</div>
+                </div>
+                <div class="review-title">
+                  ${r.establishmentName || ''}
+                  <span class="rating">${buildBeans(r.rating || 0)}</span>
+                </div>
+                <div class="review-location">${r.location || ''}</div>
+                <div class="review-text">${r.reviewText || ''}</div>
+                <div class="review-actions">
+                  <div class="icon-btn">
+                    <img src="icons/like.png" class="active">
+                    <span>${r.likes || 0}</span>
+                  </div>
+                  <div class="icon-btn">
+                    <img src="icons/dislike.png" class="active">
+                    <span>${r.dislikes || 0}</span>
+                  </div>
+                </div>
+                ${replySection}
+              </div>
+            </div>`;
+          }).join('');
+
+      // wire reply buttons
+      document.querySelectorAll('.reply-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('replyReviewId').value = btn.dataset.id;
+          document.getElementById('replyText').value = '';
+          document.getElementById('replyModal').hidden = false;
+        });
+      });
+
+      // wire up click to go to review container with gap
+      document.getElementById('reviewContainer').style.cssText = 'display:flex; flex-direction:column; gap:22px;';
+
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = '<p style="color:#666;">Could not load reviews.</p>';
+    }
+  }
+
+  // ── EDIT CAFE MODAL ──
+  const editCafeBtn    = document.getElementById('editCafeBtn');
+  const editCafeModal  = document.getElementById('editCafeModal');
+  const editCafeForm   = document.getElementById('editCafeForm');
+  const inputCafeBio   = document.getElementById('inputCafeBio');
   const inputCafeImage = document.getElementById('inputCafeImage');
-  const modalCafePreview = document.getElementById('modalCafePreview');
-  const removeCafeImageBtn = document.getElementById('removeCafeImageBtn');
 
   function openCafeModal() {
     if (!currentCafeData) return;
-
     inputCafeBio.value = currentCafeData.bio || '';
 
-    if (Array.isArray(currentCafeData.imageUrl) && currentCafeData.imageUrl.length > 0) {
-      modalCafePreview.src = '/' + currentCafeData.imageUrl[0];
-    } else {
-      modalCafePreview.src = 'https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';
-    }
+    const grid   = document.getElementById('cafePhotosGrid');
+    const images = Array.isArray(currentCafeData.imageUrl) ? currentCafeData.imageUrl : [];
+    grid.innerHTML = images.map(src =>
+      `<img src="${src}" style="width:100%; height:70px; object-fit:cover; border-radius:8px; border:1px solid #e6eaea;">`
+    ).join('');
 
     editCafeModal.hidden = false;
   }
@@ -470,56 +622,49 @@ function setupEditCafe() {
     inputCafeImage.value = '';
   }
 
-  editCafeBtn.addEventListener('click', openCafeModal);
-
-  document.querySelectorAll('[data-close-cafe]').forEach(btn => {
-    btn.addEventListener('click', closeCafeModal);
+  document.addEventListener('keydown', e => {
+    if (editCafeModal && e.key === 'Escape' && !editCafeModal.hidden) closeCafeModal();
   });
 
   inputCafeImage.addEventListener('change', function() {
-    const file = inputCafeImage.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = e => modalCafePreview.src = e.target.result;
-    reader.readAsDataURL(file);
-  });
-
-  removeCafeImageBtn.addEventListener('click', function() {
-    modalCafePreview.src = 'https://placehold.co/120x88/cfe0ff/6b7280?text=Cafe';
-    inputCafeImage.value = '';
+    const files  = Array.from(this.files).slice(0, 5);
+    const grid   = document.getElementById('cafePhotosGrid');
+    grid.innerHTML = '';
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:100%; height:70px; object-fit:cover; border-radius:8px; border:1px solid #e6eaea;';
+        grid.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
   });
 
   editCafeForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    let newImage = null;
-    const file = inputCafeImage.files[0];
-
-    if (file) {
-      newImage = await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = ev => resolve(ev.target.result);
-        reader.readAsDataURL(file);
-      });
+    const files = Array.from(inputCafeImage.files).slice(0, 5);
+    let newImages = null;
+    if (files.length > 0) {
+      newImages = await Promise.all(files.map(file =>
+        new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = ev => resolve(ev.target.result);
+          reader.readAsDataURL(file);
+        })
+      ));
     }
 
     try {
-      const response = await fetch('/update-cafe', {
-        method: 'POST',
+      const res    = await fetch('/update-cafe', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bio: inputCafeBio.value.trim(),
-          imageUrl: newImage
-        })
+        body:    JSON.stringify({ bio: inputCafeBio.value.trim(), imageUrl: newImages })
       });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        alert(result.message || 'Failed to update cafe.');
-        return;
-      }
+      const result = await res.json();
+      if (!res.ok) { alert(result.message || 'Failed to update cafe.'); return; }
 
       closeCafeModal();
       await loadOwnerCafe();
@@ -529,14 +674,47 @@ function setupEditCafe() {
       alert('Error updating cafe.');
     }
   });
-}
 
-// RUN EVERYTHING
-window.addEventListener('DOMContentLoaded', async () => {
+  // ── RUN ──
   const ok = await checkOwnerSession();
   if (ok) {
     await loadOwnerCafe();
-    setupEditCafe();
+    await loadCafeReviews();
+
+    editCafeBtn.addEventListener('click', openCafeModal);
+    document.querySelectorAll('[data-close-cafe]').forEach(btn => {
+      btn.addEventListener('click', closeCafeModal);
+    });
+    
+    document.querySelectorAll('[data-close-reply]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('replyModal').hidden = true;
+      });
+    });
+
+    document.getElementById('replyForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const reviewId  = document.getElementById('replyReviewId').value;
+      const replyText = document.getElementById('replyText').value.trim();
+
+      if (!replyText) { alert("Please write a reply."); return; }
+
+      try {
+        const res    = await fetch('/reply-review', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ reviewId, replyText })
+        });
+        const result = await res.json();
+        if (!res.ok) { alert(result.message || 'Failed to save reply.'); return; }
+
+        document.getElementById('replyModal').hidden = true;
+        await loadCafeReviews(); // refresh to show the reply
+        alert('Reply saved!');
+      } catch (err) {
+        alert('Error saving reply.');
+      }
+    });
   }
 });
 </script>

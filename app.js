@@ -65,6 +65,7 @@ app.get("/reviews-by-cafe/:id", async (req, res) => {
 });
 
 app.get("/owner-establishment", async (req, res) => {
+  console.log("session.owner:", req.session.owner);
   try {
     if (!req.session.owner) {
       return res.status(401).json({ message: "Owner not logged in" });
@@ -79,6 +80,34 @@ app.get("/owner-establishment", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error fetching owner establishment" });
+  }
+});
+
+app.post("/reply-review", async (req, res) => {
+  try {
+    if (!req.session.owner) {
+      return res.status(401).json({ message: "Owner not logged in" });
+    }
+
+    const { reviewId, replyText } = req.body;
+
+    const updated = await Review.findByIdAndUpdate(
+      reviewId,
+      {
+        ownerReply: {
+          text: replyText,
+          repliedAt: new Date().toISOString()
+        }
+      },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Review not found" });
+
+    res.json({ message: "Reply saved", review: updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error saving reply" });
   }
 });
 // serve your frontend
@@ -129,7 +158,9 @@ app.post("/login", async (req, res) => {
       : `@${rawUsername}`;
 
     // CHECK OWNER FIRST
+    console.log("Trying owner login with:", rawUsername, password);
     const owner = await Owner.findOne({ username: rawUsername, password });
+    console.log("Owner found:", owner);
 
     if (owner) {
       req.session.owner = {
@@ -230,7 +261,7 @@ app.post("/update-cafe", async (req, res) => {
       owner.establishmentId,
       {
         bio: bio || "",
-        ...(imageUrl ? { imageUrl: [imageUrl] } : {})
+        ...(imageUrl ? { imageUrl } : {})
       },
       { new: true }
     );
@@ -272,20 +303,31 @@ app.get("/reviews", async (req, res) => {
 
     const enriched = await Promise.all(
       reviews.map(async (review) => {
-        const est = await Establishment.findOne({
-          name: { $regex: new RegExp(`^${review.establishmentName.trim()}$`, "i") }
-        });
 
-            console.log("Review:", review.establishmentName);
-            console.log("Matched:", est);
+      const rawName = (review.establishmentName || "").trim();
 
-        return {
-          ...review.toObject(),
-          location: est?.location || "Location not available",
-          image: est?.imageUrl || "apdev-tbv/cafe4.jpg",
-          establishmentId: est?._id || null
-        };
-      })
+      // 🔥 escape special regex characters
+      const safeName = rawName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      const est = await Establishment.findOne({
+        name: { $regex: new RegExp(`^${safeName}$`, "i") }
+      });
+
+      console.log("Review:", review.establishmentName);
+      console.log("Matched:", est);
+
+      return {
+        ...review.toObject(),
+        location: est?.location || "Location not available",
+        image: est?.imageUrl || "apdev-tbv/cafe4.jpg",
+        establishmentId: est?._id || null,
+        likes: review.likes || 0,        
+        dislikes: review.dislikes || 0,
+        likedBy: review.likedBy || [],
+        dislikedBy: review.dislikedBy || [],  
+        replies: review.replies || []    
+      };
+    })
     );
 
     res.json(enriched);
@@ -345,7 +387,10 @@ app.post("/add-review", async (req, res) => {
         text: "",
         repliedAt: null
       },
-      photoUrl: photoUrl || ""
+      photoUrl: photoUrl || "",
+        likes: 0,    
+        dislikes: 0,
+        replies: []  
     });
 
     await newReview.save();
@@ -445,6 +490,96 @@ app.post("/update-profile", async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Error updating profile" });
   }
+});
+app.post('/reviews/:id/like', async (req, res) => {
+  if (!req.session.user) return res.status(401).send("Login required");
+  const username = req.session.user.username;
+  try {
+    const review = await Review.findById(req.params.id);
+    const alreadyLiked = review.likedBy?.includes(username);
+    
+    if (alreadyLiked) {
+      // unlike
+      await Review.findByIdAndUpdate(req.params.id, {
+        $inc: { likes: -1 },
+        $pull: { likedBy: username }
+      });
+    } else {
+      // like + remove dislike if exists
+      await Review.findByIdAndUpdate(req.params.id, {
+        $inc: { likes: 1, dislikes: review.dislikedBy?.includes(username) ? -1 : 0 },
+        $addToSet: { likedBy: username },
+        $pull: { dislikedBy: username }
+      });
+    }
+    res.sendStatus(200);
+  } catch (err) { res.status(500).send("Error liking review"); }
+});
+
+app.post('/reviews/:id/dislike', async (req, res) => {
+  if (!req.session.user) return res.status(401).send("Login required");
+  const username = req.session.user.username;
+  try {
+    const review = await Review.findById(req.params.id);
+    const alreadyDisliked = review.dislikedBy?.includes(username);
+
+    if (alreadyDisliked) {
+      // undislike
+      await Review.findByIdAndUpdate(req.params.id, {
+        $inc: { dislikes: -1 },
+        $pull: { dislikedBy: username }
+      });
+    } else {
+      // dislike + remove like if exists
+      await Review.findByIdAndUpdate(req.params.id, {
+        $inc: { dislikes: 1, likes: review.likedBy?.includes(username) ? -1 : 0 },
+        $addToSet: { dislikedBy: username },
+        $pull: { likedBy: username }
+      });
+    }
+    res.sendStatus(200);
+  } catch (err) { res.status(500).send("Error disliking review"); }
+});
+
+// user reply to a review
+app.post('/reviews/:id/reply', async (req, res) => {
+  console.log("session.user:", req.session.user); // add this
+  console.log("body:", req.body);                  // add this
+  if (!req.session.user) return res.status(401).send("Login required");
+  try {
+    const review = await Review.findById(req.params.id);
+    const reply = {
+      username: req.session.user.username,
+      text: req.body.text,
+      date: new Date().toLocaleDateString(),
+      reviewId: review._id,
+      establishmentName: review.establishmentName
+    };
+    await Review.findByIdAndUpdate(req.params.id, { $push: { replies: reply } });
+    res.sendStatus(200);
+  } catch (err) { res.status(500).send("Error replying"); }
+});
+
+// get current user's replies
+app.get('/my-replies', async (req, res) => {
+  if (!req.session.user) return res.status(401).send("Login required");
+  try {
+    const reviews = await Review.find({ "replies.username": req.session.user.username });
+    const userReplies = [];
+    reviews.forEach(review => {
+      review.replies.forEach(reply => {
+        if (reply.username === req.session.user.username) {
+          userReplies.push({
+            text: reply.text,
+            date: reply.date,
+            establishmentName: reply.establishmentName,
+            reviewId: reply.reviewId
+          });
+        }
+      });
+    });
+    res.json(userReplies);
+  } catch (err) { res.status(500).send("Error fetching replies"); }
 });
 const PORT = 3000;
 

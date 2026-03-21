@@ -364,6 +364,27 @@
       height: 18px;
     }
 
+    .review-actions {
+      display: flex;
+      gap: 18px;
+      margin-top: 25px;
+      align-items: center;
+    }
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .icon-btn img {
+      width: 20px;
+      height: 20px;
+      transition: 0.2s ease;
+    }
+    .icon-btn:hover img { transform: scale(1.15); }
+    .faded { opacity: 0.3; filter: grayscale(1); }
+    .active { opacity: 1; filter: none; transform: scale(1.2); }
+
     /* MOBILE */
     @media(max-width:880px){
       .layout{grid-template-columns:1fr}
@@ -749,6 +770,20 @@
     </form>
   </div>
 </div>
+<div id="replyModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeReplyModal"></div>
+  <div class="modal-panel login-custom-panel" style="background:#f8f5ee; border-radius:20px; padding:30px;">
+    <button id="xReplyModal" style="position:absolute; top:18px; right:22px; font-size:28px; color:#4a3f35; border:none; background:transparent; cursor:pointer;">✕</button>
+    <h3 style="font-family:Lora,serif; font-size:28px; text-align:center; color:#4a3f35; margin:0 0 20px;">Reply to Review</h3>
+    <form id="replyForm">
+      <input type="hidden" id="replyReviewId">
+      <textarea id="replyText" placeholder="Write your reply..." style="width:100%; min-height:120px; border-radius:14px; border:1.5px solid rgba(0,0,0,0.18); padding:14px; font-family:Montserrat,sans-serif; font-size:15px; resize:none;"></textarea>
+      <div style="display:flex; justify-content:center; margin-top:18px;">
+        <button type="submit" style="background:transparent; color:#4a3f35; border:2px solid #4a3f35; border-radius:30px; padding:10px 50px; font-size:18px; font-weight:700; font-family:Montserrat,sans-serif; cursor:pointer;">Post</button>
+      </div>
+    </form>
+  </div>
+</div>
   <script>
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -988,6 +1023,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   loadReviews();
 
+  document.getElementById('closeReplyModal').onclick = () => document.getElementById('replyModal').hidden = true;
+  document.getElementById('xReplyModal').onclick     = () => document.getElementById('replyModal').hidden = true;
+
 });
 function renderReviews(data) {
   const container = document.getElementById("reviewsContainer");
@@ -1022,12 +1060,32 @@ function renderReviews(data) {
       `;
     }).join("");
 
-    return `
-      <div class="review-card">
-        <div class="review-img">
-          <img src="apdev-tbv/cafe4.jpg">
-        </div>
+    const currentUser = localStorage.getItem('beanthere_profile_username') || '';
+    const isLiked    = (review.likedBy || []).includes(currentUser);
+    const isDisliked = (review.dislikedBy || []).includes(currentUser);
 
+    const repliesHtml = (review.replies || []).length > 0
+    ? (review.replies || []).map(rep => `
+        <div style="
+        margin-top: 8px;
+        background: rgba(0,0,0,0.04);
+        border-left: 4px solid var(--muted);
+        border-radius: 0 16px 16px 0;
+        padding: 10px 16px;
+        font-size: 13px;
+      ">
+        <strong>${rep.username || 'Anonymous'}</strong>
+        <span style="color:#888; font-size:12px; margin-left:8px;">${rep.date || ''}</span>
+        <p style="margin:6px 0 0; color:#4a5568; line-height:1.5;">${rep.text || ''}</p>
+      </div>
+      `).join('')
+    : '';
+
+    return `
+      <div class="review-card" data-id="${review._id}">
+        <div class="review-img">
+          <img src="${review.photoUrl || review.image || 'apdev-tbv/cafe4.jpg'}">
+        </div>
         <div class="review-content">
           <div class="review-top">
             <div>
@@ -1036,22 +1094,36 @@ function renderReviews(data) {
             </div>
             <div class="review-tags">${tags}</div>
           </div>
-
           <div class="review-title" style="cursor:pointer;" data-id="${review.establishmentId}">
             ${review.establishmentName}
             <span class="rating">${beans}</span>
           </div>
-
-          <div class="review-location">
-            ${review.location || ""}
-          </div>
-
-          <div class="review-text">
-            ${review.reviewText}
+          <div class="review-location">${review.location || ""}</div>
+          <div class="review-text">${review.reviewText}</div>
+          <div class="review-actions">
+            <div class="icon-btn like-btn">
+              <img src="icons/like.png" class="${isLiked ? 'active' : 'faded'}">
+              <span>${review.likes || 0}</span>
+            </div>
+            <div class="icon-btn dislike-btn">
+              <img src="icons/dislike.png" class="${isDisliked ? 'active' : 'faded'}">
+              <span>${review.dislikes || 0}</span>
+            </div>
+            <button class="reply-btn" style="
+              margin-top: 4px;
+              padding: 6px 20px;
+              border-radius: 20px;
+              border: 1.5px solid var(--accent);
+              background: transparent;
+              font-weight: 600;
+              font-size: 13px;
+              cursor: pointer;
+              font-family: Montserrat, sans-serif;
+            ">Reply</button>
           </div>
         </div>
-      </div>
-    `;
+        ${repliesHtml ? `<div style="grid-column: 1 / -1;">${repliesHtml}</div>` : ''}
+      </div>`;
   }).join("");
 
   document.querySelectorAll('.review-title[data-id]').forEach(el => {
@@ -1094,6 +1166,97 @@ searchInput.addEventListener("keydown", (e) => {
 });
 
 searchInput.addEventListener("input", handleSearch);
+
+function requireLogin() {
+  const user = localStorage.getItem("beanthere_profile_username");
+  if (!user) {
+    alert("Please log in or create an account first.");
+    return false;
+  }
+  return true;
+}
+
+document.addEventListener("click", function(e) {
+  const likeBtn    = e.target.closest(".like-btn");
+  const dislikeBtn = e.target.closest(".dislike-btn");
+  const replyBtn   = e.target.closest(".reply-btn");
+
+  if (likeBtn) {
+    if (!requireLogin()) return;
+    const card = likeBtn.closest(".review-card");
+    const reviewId = card.dataset.id;
+    fetch(`/reviews/${reviewId}/like`, { method: "POST" });
+    const likeImg = likeBtn.querySelector("img");
+    const likeCount = likeBtn.querySelector("span");
+    const dislikeBtnEl = likeBtn.parentElement.querySelector(".dislike-btn");
+    const dislikeImg = dislikeBtnEl.querySelector("img");
+    const dislikeCount = dislikeBtnEl.querySelector("span");
+    const wasLiked = likeImg.classList.contains("active");
+    const wasDisliked = dislikeImg.classList.contains("active");
+    if (wasDisliked) {
+      dislikeImg.classList.remove("active"); dislikeImg.classList.add("faded");
+      dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
+    }
+    if (!wasLiked) {
+      likeImg.classList.remove("faded"); likeImg.classList.add("active");
+      likeCount.textContent = parseInt(likeCount.textContent) + 1;
+    } else {
+      likeImg.classList.remove("active"); likeImg.classList.add("faded");
+      likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
+    }
+  }
+
+  if (dislikeBtn) {
+    if (!requireLogin()) return;
+    const card = dislikeBtn.closest(".review-card");
+    const reviewId = card.dataset.id;
+    fetch(`/reviews/${reviewId}/dislike`, { method: "POST" });
+    const dislikeImg = dislikeBtn.querySelector("img");
+    const dislikeCount = dislikeBtn.querySelector("span");
+    const likeBtnEl = dislikeBtn.parentElement.querySelector(".like-btn");
+    const likeImg = likeBtnEl.querySelector("img");
+    const likeCount = likeBtnEl.querySelector("span");
+    const wasDisliked = dislikeImg.classList.contains("active");
+    const wasLiked = likeImg.classList.contains("active");
+    if (wasLiked) {
+      likeImg.classList.remove("active"); likeImg.classList.add("faded");
+      likeCount.textContent = Math.max(0, parseInt(likeCount.textContent) - 1);
+    }
+    if (!wasDisliked) {
+      dislikeImg.classList.remove("faded"); dislikeImg.classList.add("active");
+      dislikeCount.textContent = parseInt(dislikeCount.textContent) + 1;
+    } else {
+      dislikeImg.classList.remove("active"); dislikeImg.classList.add("faded");
+      dislikeCount.textContent = Math.max(0, parseInt(dislikeCount.textContent) - 1);
+    }
+  }
+
+  if (replyBtn) {
+    if (!requireLogin()) return;
+    const card = replyBtn.closest(".review-card");
+    document.getElementById('replyReviewId').value = card.dataset.id;
+    document.getElementById('replyText').value = '';
+    document.getElementById('replyModal').hidden = false;
+  }
+});
+
+document.getElementById('replyForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const reviewId = document.getElementById('replyReviewId').value;
+  const text     = document.getElementById('replyText').value.trim();
+  if (!text) { alert("Please write a reply."); return; }
+
+  try {
+    await fetch(`/reviews/${reviewId}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    document.getElementById('replyModal').hidden = true;
+  } catch (err) {
+    alert("Error posting reply.");
+  }
+});
 </script>
 </body>
 </html>
