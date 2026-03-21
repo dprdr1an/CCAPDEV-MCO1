@@ -121,6 +121,44 @@ app.get("/", (req, res) => {
    AUTH ROUTES
 ========================= */
 
+app.get("/session-owner", (req, res) => {
+  if (!req.session.owner) {
+    return res.status(401).json({ loggedIn: false });
+  }
+  res.json({
+    loggedIn: true,
+    owner: req.session.owner
+  });
+});
+
+app.post("/update-cafe", async (req, res) => {
+  try {
+    if (!req.session.owner) {
+      return res.status(401).json({ message: "Owner not logged in" });
+    }
+    const owner = await Owner.findById(req.session.owner.id);
+    if (!owner) {
+      return res.status(404).json({ message: "Owner not found" });
+    }
+    const { bio, imageUrl } = req.body;
+    const updatedCafe = await Establishment.findByIdAndUpdate(
+      owner.establishmentId,
+      {
+        bio: bio || "",
+        ...(imageUrl ? { imageUrl } : {})
+      },
+      { new: true }
+    );
+    if (!updatedCafe) {
+      return res.status(404).json({ message: "Establishment not found" });
+    }
+    res.json({ message: "Cafe updated successfully", cafe: updatedCafe });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating cafe" });
+  }
+});
+
 // SIGN UP
 app.post("/signup", async (req, res) => {
   try {
@@ -540,5 +578,5 @@ const PORT = 3000;
 // start server after DB connection
 (async () => {
   await connectDB();
-  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+  app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));
 })();
