@@ -258,7 +258,141 @@
       color:#2f2f2f;
       font-size:16px;
     }
+  .reviews-carousel{
+  background: #dce6f7;
+  border-radius: 20px;
+  min-height: 220px;
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
 
+.review-card{
+  background: #dce6f7;
+  border-radius: 20px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 18px;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: none;
+  text-align: left;
+}
+
+.review-img{
+  width: 170px;
+  height: 170px;
+  border-radius: 18px;
+  object-fit: cover;
+  display: block;
+}
+
+.review-content{
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.review-top{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.review-meta{
+  min-width: 0;
+}
+
+.review-user{
+  font-size: 15px;
+  font-weight: 700;
+  color: #2c3e63;
+  line-height: 1.1;
+}
+
+.review-date{
+  font-size: 12px;
+  color: #6f7685;
+  margin-top: 2px;
+}
+
+.amenities-list{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: flex-end;
+  font-size: 13px;
+  color: #58627a;
+}
+
+.amenity-item{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.cafe-title-row{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.cafe-name-card{
+  margin: 0;
+  font-family: Lora, serif;
+  font-size: 26px;
+  line-height: 1.05;
+  font-weight: 700;
+  color: #d96a1d;
+}
+
+.rating-beans{
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.cafe-address{
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2f446b;
+}
+
+.review-text{
+  margin: 10px 0 12px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #556070;
+  max-width: 100%;
+}
+
+.review-btn-container{
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+.btn-reply-review{
+  background: transparent;
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  padding: 7px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-reply-review:hover{
+  background: rgba(127,123,46,0.08);
+}
     @media (max-width: 900px){
       .layout{
         grid-template-columns:1fr;
@@ -328,9 +462,9 @@
           <h2 class="section-title">My Cafe Reviews</h2>
           <div class="carousel-wrapper">
             <button class="arrow left">‹</button>
-            <div class="blue-box">
-              No reviews for your cafe yet.
-            </div>
+            <div id="reviewsContainer" class="reviews-carousel">
+  Loading reviews...
+</div>
             <button class="arrow right">›</button>
           </div>
         </section>
@@ -406,6 +540,79 @@ async function checkOwnerSession() {
     console.error(err);
     window.location.href = 'index.html';
     return false;
+  }
+}
+async function loadCafeReviews(cafeId) {
+  try {
+    const response = await fetch(`/reviews-by-cafe/${cafeId}`);
+    const reviews = await response.json();
+
+    const container = document.getElementById('reviewsContainer');
+
+    if (!reviews.length) {
+      container.innerHTML = `<p style="margin:auto; color:#666;">No reviews for your cafe yet.</p>`;
+      return;
+    }
+
+    const review = reviews[0];
+
+    const displayDate =
+      review.datePosted && review.datePosted.trim() !== ''
+        ? review.datePosted
+        : (review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'No date');
+
+    const beansHtml = getBeanRatingHtml(review.rating);
+
+    const tagsHtml = (review.tags || []).map(tag => {
+      const icon = tagIcons[tag];
+      return `
+        <div class="amenity-item">
+          ${icon ? `<img src="${icon}" style="width:14px;height:14px;object-fit:contain;">` : ``}
+          <span>${tag}</span>
+        </div>
+      `;
+    }).join('');
+
+    const reviewImage =
+      review.photoUrl && review.photoUrl.trim() !== ''
+        ? review.photoUrl
+        : (review.image ? `/${review.image}` : 'apdev-tbv/cafe4.jpg');
+
+    container.innerHTML = `
+      <div class="review-card">
+        <img src="${reviewImage}" alt="${review.establishmentName}" class="review-img">
+
+        <div class="review-content">
+          <div class="review-top">
+            <div class="review-meta">
+              <div class="review-user">${review.username}</div>
+              <div class="review-date">${displayDate}</div>
+            </div>
+
+            <div class="amenities-list">
+              ${tagsHtml}
+            </div>
+          </div>
+
+          <div class="cafe-title-row">
+            <h3 class="cafe-name-card">${review.establishmentName}</h3>
+            <div class="rating-beans">${beansHtml}</div>
+          </div>
+
+          <div class="cafe-address">${review.location || 'Location not available'}</div>
+
+          <div class="review-text">${review.reviewText}</div>
+
+          <div class="review-btn-container">
+            <button class="btn-reply-review">Reply</button>
+          </div>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    console.error(err);
+    document.getElementById('reviewsContainer').innerHTML =
+      `<p style="margin:auto; color:#666;">Error loading reviews.</p>`;
   }
 }
 
@@ -530,6 +737,26 @@ function setupEditCafe() {
     }
   });
 }
+const tagIcons = {
+  "Air-conditioned": "icons/ac.png",
+  "Socket": "icons/socket.png",
+  "Wi-Fi": "icons/wifi.png",
+  "Alt Milk": "icons/oat.png"
+};
+
+function getBeanRatingHtml(rating) {
+  let beansHtml = '';
+
+  for (let i = 0; i < 5; i++) {
+    if (i < rating) {
+      beansHtml += `<img src="icons/bean.png" style="width:18px;height:18px;">`;
+    } else {
+      beansHtml += `<img src="icons/bean.png" style="width:18px;height:18px;opacity:0.3;filter:grayscale(1);">`;
+    }
+  }
+
+  return beansHtml;
+}
 
 // RUN EVERYTHING
 window.addEventListener('DOMContentLoaded', async () => {
@@ -537,8 +764,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (ok) {
     await loadOwnerCafe();
     setupEditCafe();
+
+    if (currentCafeData && currentCafeData._id) {
+      await loadCafeReviews(currentCafeData._id);
+    }
   }
 });
+
 </script>
 </body>
 </html>

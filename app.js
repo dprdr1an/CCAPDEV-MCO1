@@ -203,6 +203,18 @@ app.get("/session-user", (req, res) => {
   });
 });
 
+// CHECK CURRENT SESSION OWNER
+app.get("/session-owner", (req, res) => {
+  if (!req.session.owner) {
+    return res.status(401).json({ loggedIn: false });
+  }
+
+  res.json({
+    loggedIn: true,
+    owner: req.session.owner
+  });
+});
+
 // LOG OUT
 app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
