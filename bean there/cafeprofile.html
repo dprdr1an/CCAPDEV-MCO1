@@ -275,6 +275,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      cursor: pointer;
     }
     .icon-btn img {
       width: 20px;
@@ -521,15 +522,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         const replySection = r.ownerReply?.text
         ? `<div style="
             margin-top: 8px;
-            background: rgba(127,123,46,0.08);
-            border-left: 4px solid var(--accent);
+            background: rgba(0,0,0,0.04);
+            border-left: 4px solid var(--muted);
             border-radius: 0 16px 16px 0;
             padding: 10px 16px;
             font-size: 13px;
           ">
-            <strong style="color:var(--accent);">Your reply</strong>
-            <span style="color:#888; font-size:12px; margin-left:8px;">${r.ownerReply.repliedAt ? new Date(r.ownerReply.repliedAt).toLocaleDateString() : ''}</span>
-            <p style="margin:6px 0 0; color:#4a5568; line-height:1.5;">${r.ownerReply.text}</p>
+            <strong>@owner</strong>
+            <span style="color:#888; font-size:12px; margin-left:8px;">
+              ${r.ownerReply.repliedAt ? new Date(r.ownerReply.repliedAt).toLocaleDateString() : ''}
+            </span>
+            <p style="margin:6px 0 0; color:#4a5568; line-height:1.5;">
+              ${r.ownerReply.text}
+            </p>
           </div>`
         : `<button class="reply-btn" data-id="${r._id}" style="
             margin-top: 12px;
@@ -572,9 +577,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <img src="icons/dislike.png" class="active">
                     <span>${r.dislikes || 0}</span>
                   </div>
+                  <button class="reply-btn" data-id="${r._id}" style="
+                    margin-top: 4px;
+                    padding: 6px 20px;
+                    border-radius: 20px;
+                    border: 1.5px solid var(--accent);
+                    background: transparent;
+                    font-weight: 600;
+                    font-size: 13px;
+                    cursor: pointer;
+                    font-family: Montserrat, sans-serif;
+                  ">
+                    Reply
+                  </button>
                 </div>
-                ${replySection}
               </div>
+              ${replySection ? `<div style="grid-column: 1 / -1;">${replySection}</div>` : ''}
             </div>`;
           }).join('');
 
