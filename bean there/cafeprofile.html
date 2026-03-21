@@ -467,6 +467,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      cursor: pointer;
     }
     .icon-btn img {
       width: 20px;
@@ -788,8 +789,117 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ── LOAD REVIEWS ──
-  
-  
+  // ── LOAD REVIEWS ──
+  async function loadCafeReviews(cafeId) {
+    try {
+      const response = await fetch(`/reviews-by-cafe/${cafeId}`);
+      const reviews = await response.json();
+
+      const container = document.getElementById('reviewsContainer');
+
+      if (!reviews.length) {
+        container.innerHTML = `<p style="margin:auto; color:#666;">No reviews for your cafe yet.</p>`;
+        document.getElementById('cafeRating').textContent = '—';
+        return;
+      }
+
+      const avg = (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1);
+      document.getElementById('cafeRating').textContent = avg;
+
+      const review = reviews[0];
+
+      const displayDate =
+        review.datePosted && review.datePosted.trim() !== ''
+          ? review.datePosted
+          : (review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'No date');
+
+      const beansHtml = getBeanRatingHtml(review.rating);
+
+      const tagsHtml = (review.tags || []).map(tag => {
+        const icon = tagIcons[tag];
+        return `
+          <div class="amenity-item">
+            ${icon ? `<img src="${icon}" style="width:14px;height:14px;object-fit:contain;">` : ``}
+            <span>${tag}</span>
+          </div>
+        `;
+      }).join('');
+
+      const reviewImage =
+        review.photoUrl && review.photoUrl.trim() !== ''
+          ? review.photoUrl
+          : (review.image ? `/${review.image}` : 'apdev-tbv/cafe4.jpg');
+
+      const replySection = review.ownerReply?.text
+        ? `
+          <div style="
+            margin-top: 12px;
+            background: rgba(127,123,46,0.08);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            padding: 10px 14px;
+            font-size: 13px;
+          ">
+            <strong style="color:var(--accent);">Your reply</strong>
+            <span style="color:#888; font-size:12px; margin-left:8px;">
+              ${review.ownerReply.repliedAt ? new Date(review.ownerReply.repliedAt).toLocaleDateString() : ''}
+            </span>
+            <p style="margin:6px 0 0; color:#4a5568;">${review.ownerReply.text}</p>
+          </div>
+        `
+        : `
+          <div class="review-btn-container">
+            <button class="btn-reply-review reply-btn" data-id="${review._id}">Reply</button>
+          </div>
+        `;
+
+      container.innerHTML = `
+        <div class="review-card" data-id="${review._id}">
+          <div class="review-img">
+            <img src="${reviewImage}" alt="${review.establishmentName}">
+          </div>
+
+          <div class="review-content">
+            <div class="review-top">
+              <div class="review-meta">
+                <div class="review-user">${review.username}</div>
+                <div class="review-date">${displayDate}</div>
+              </div>
+
+              <div class="amenities-list">
+                ${tagsHtml}
+              </div>
+            </div>
+
+            <div class="cafe-title-row">
+              <h3 class="cafe-name-card">${review.establishmentName}</h3>
+              <div class="rating-beans">${beansHtml}</div>
+            </div>
+
+            <div class="cafe-address">${review.location || 'Location not available'}</div>
+
+            <div class="review-text">${review.reviewText}</div>
+
+            ${replySection}
+          </div>
+        </div>
+      `;
+
+      const replyBtn = container.querySelector('.reply-btn');
+      if (replyBtn) {
+        replyBtn.addEventListener('click', () => {
+          document.getElementById('replyReviewId').value = replyBtn.dataset.id;
+          document.getElementById('replyText').value = '';
+          document.getElementById('replyModal').hidden = false;
+        });
+      }
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('reviewsContainer').innerHTML =
+        `<p style="margin:auto; color:#666;">Error loading reviews.</p>`;
+    }
+  }
 
   // ── EDIT CAFE MODAL ──
   const editCafeBtn    = document.getElementById('editCafeBtn');
