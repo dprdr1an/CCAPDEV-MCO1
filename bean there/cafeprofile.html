@@ -417,15 +417,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   updateUI();
-  welcomeUser.onclick = () => { window.location.href = 'profile.html'; };
+  welcomeUser.onclick = () => {
+  window.location.href = 'cafeprofile.html';
+};
   logoutBtn.onclick = async () => {
-    try {
-      await fetch('/logout', { method: 'POST' });
-      localStorage.clear();
-      updateUI();
-      alert("Logged out");
-    } catch (err) { alert("Error logging out"); }
-  };
+  try {
+    await fetch('/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+
+    localStorage.removeItem('beanthere_owner_username');
+    localStorage.removeItem('beanthere_profile_fullname');
+    localStorage.removeItem('beanthere_profile_username');
+    localStorage.removeItem('beanthere_profile_bio');
+    localStorage.removeItem('beanthere_profile_title');
+    localStorage.removeItem('beanthere_profile_avatar');
+
+    window.location.href = 'index.html';
+  } catch (err) {
+    console.error(err);
+    alert("Error logging out");
+  }
+};
   loginBtn.onclick  = () => { window.location.href = 'index.html'; };
   signupBtn.onclick = () => { window.location.href = 'index.html'; };
 

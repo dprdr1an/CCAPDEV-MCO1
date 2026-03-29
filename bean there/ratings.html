@@ -914,17 +914,30 @@
       const result = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
-        localStorage.setItem('beanthere_profile_username', result.user.username || '');
-        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
-        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
-        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
-        
-        updateUI();
+  if (result.role === "owner") {
+    localStorage.removeItem('beanthere_profile_fullname');
+    localStorage.setItem('beanthere_profile_username', result.username);
+    localStorage.removeItem('beanthere_profile_bio');
+    localStorage.removeItem('beanthere_profile_title');
+    localStorage.removeItem('beanthere_profile_avatar');
 
-        alert("Login successful! Welcome back.");
-        window.location.href = 'profile.html';
-      } else {
+    updateUI();
+
+    alert("Owner login successful!");
+    window.location.href = 'cafeprofile.html';
+  } else {
+    localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+    localStorage.setItem('beanthere_profile_username', result.user.username || '');
+    localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+    localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+    localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+
+    updateUI();
+
+    alert("Login successful! Welcome back.");
+    window.location.href = 'profile.html';
+  }
+} else {
         alert(result.message || "Invalid username or password.");
       }
     } catch (err) {
