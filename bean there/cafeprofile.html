@@ -550,18 +550,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               ${r.ownerReply.text}
             </p>
           </div>`
-        : `<button class="reply-btn" data-id="${r._id}" style="
-            margin-top: 12px;
-            align-self: flex-start;
-            padding: 6px 20px;
-            border-radius: 20px;
-            border: 1.5px solid var(--accent);
-            background: transparent;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            font-family: Montserrat, sans-serif;
-          ">Reply</button>`;
+        : "";
 
           return `
             <div class="review-card" data-id="${r._id}">
