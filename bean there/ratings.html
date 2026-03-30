@@ -809,34 +809,53 @@
   };
 
   function updateUI() {
-    const username = localStorage.getItem("beanthere_profile_username");
+  const ownerUsername = localStorage.getItem("beanthere_owner_username");
+  const userUsername = localStorage.getItem("beanthere_profile_username");
 
-    if (username) {
-      authSection.style.display = "none";
-      userSection.style.display = "block";
-      welcomeUser.textContent = username;
-    } else {
-      authSection.style.display = "block";
-      userSection.style.display = "none";
-    }
+  if (ownerUsername) {
+    authSection.style.display = "none";
+    userSection.style.display = "block";
+    welcomeUser.textContent = ownerUsername;
+    welcomeUser.onclick = () => {
+      window.location.href = "cafeprofile.html";
+    };
+  } else if (userUsername) {
+    authSection.style.display = "none";
+    userSection.style.display = "block";
+    welcomeUser.textContent = userUsername;
+    welcomeUser.onclick = () => {
+      window.location.href = "profile.html";
+    };
+  } else {
+    authSection.style.display = "block";
+    userSection.style.display = "none";
+    welcomeUser.onclick = null;
   }
+}
 
   // run on load
   updateUI();
 
     logoutBtn.onclick = async () => {
-    try {
-      await fetch('/logout', { method: 'POST' });
+  try {
+    await fetch('/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
 
-      localStorage.clear();
-      updateUI();
+    localStorage.removeItem('beanthere_owner_username');
+    localStorage.removeItem('beanthere_profile_fullname');
+    localStorage.removeItem('beanthere_profile_username');
+    localStorage.removeItem('beanthere_profile_bio');
+    localStorage.removeItem('beanthere_profile_title');
+    localStorage.removeItem('beanthere_profile_avatar');
 
-      alert("Logged out");
-    } catch (err) {
-      console.error(err);
-      alert("Error logging out");
-    }
-  };
+    window.location.href = 'index.html';
+  } catch (err) {
+    console.error(err);
+    alert("Error logging out");
+  }
+};
 
   // --- 2. MODAL CONTROLS ---
   loginBtn.onclick = () => logInModal.hidden = false;
@@ -871,80 +890,117 @@
 
   // --- 3. CHECK EXISTING SESSION ---
   async function checkSessionOnLoad() {
-    try {
-      const response = await fetch('/session-user');
-      if (!response.ok) return;
+  try {
+    const ownerResponse = await fetch('/session-owner', {
+      credentials: 'include'
+    });
 
-      const result = await response.json();
-      if (result.loggedIn) {
-        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
-        localStorage.setItem('beanthere_profile_username', result.user.username || '');
-        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
-        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
-        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+    if (ownerResponse.ok) {
+      const ownerResult = await ownerResponse.json();
+
+      if (ownerResult.loggedIn && ownerResult.owner) {
+        localStorage.setItem('beanthere_owner_username', ownerResult.owner.username || '');
+        localStorage.removeItem('beanthere_profile_fullname');
+        localStorage.removeItem('beanthere_profile_username');
+        localStorage.removeItem('beanthere_profile_bio');
+        localStorage.removeItem('beanthere_profile_title');
+        localStorage.removeItem('beanthere_profile_avatar');
+        updateUI();
+        return;
       }
-    } catch (err) {
-      console.error('No active session found.');
     }
+
+    const userResponse = await fetch('/session-user', {
+      credentials: 'include'
+    });
+
+    if (!userResponse.ok) return;
+
+    const userResult = await userResponse.json();
+    if (userResult.loggedIn) {
+      localStorage.removeItem('beanthere_owner_username');
+      localStorage.setItem('beanthere_profile_fullname', userResult.user.fullName || '');
+      localStorage.setItem('beanthere_profile_username', userResult.user.username || '');
+      localStorage.setItem('beanthere_profile_bio', userResult.user.bio || '');
+      localStorage.setItem('beanthere_profile_title', userResult.user.title || 'Member');
+      localStorage.setItem('beanthere_profile_avatar', userResult.user.avatar || '');
+      updateUI();
+    }
+  } catch (err) {
+    console.error('No active session found.');
   }
+}
 
   checkSessionOnLoad();
 
   // --- 4. LOGIN HANDLER ---
   logInForm.onsubmit = async function(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const username = normalizeUsername(document.getElementById('loginUser').value);
-    const password = document.getElementById('loginPass').value.trim();
-    const rememberMe = document.getElementById('rememberMe').checked;
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value.trim();
+  const rememberMe = document.getElementById('rememberMe').checked;
 
-    try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username,
-          password,
-          rememberMe
-        })
-      });
+  const normalizedUsername = username.startsWith('@') ? username : '@' + username;
 
-      const result = await response.json();
-
-      if (response.ok) {
-  if (result.role === "owner") {
-    localStorage.removeItem('beanthere_profile_fullname');
-    localStorage.setItem('beanthere_profile_username', result.username);
-    localStorage.removeItem('beanthere_profile_bio');
-    localStorage.removeItem('beanthere_profile_title');
-    localStorage.removeItem('beanthere_profile_avatar');
-
-    updateUI();
-
-    alert("Owner login successful!");
-    window.location.href = 'cafeprofile.html';
-  } else {
-    localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
-    localStorage.setItem('beanthere_profile_username', result.user.username || '');
-    localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
-    localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
-    localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
-
-    updateUI();
-
-    alert("Login successful! Welcome back.");
-    window.location.href = 'profile.html';
+  if (!/^@[A-Za-z0-9_]{3,20}$/.test(normalizedUsername)) {
+    alert("Please enter a valid username.");
+    return;
   }
-} else {
-        alert(result.message || "Invalid username or password.");
+
+  if (password.length < 6 || password.length > 50) {
+    alert("Password must be 6 to 50 characters.");
+    return;
+  }
+
+  try {
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        username,
+        password,
+        rememberMe
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      if (result.role === "owner") {
+        localStorage.setItem('beanthere_owner_username', result.username || normalizedUsername);
+        localStorage.removeItem('beanthere_profile_fullname');
+        localStorage.removeItem('beanthere_profile_username');
+        localStorage.removeItem('beanthere_profile_bio');
+        localStorage.removeItem('beanthere_profile_title');
+        localStorage.removeItem('beanthere_profile_avatar');
+
+        updateUI();
+        alert("Owner login successful!");
+        window.location.href = 'cafeprofile.html';
+      } else {
+        localStorage.removeItem('beanthere_owner_username');
+        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', result.user.username || '');
+        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
+        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
+
+        updateUI();
+        alert("Login successful! Welcome back.");
+        window.location.href = 'profile.html';
       }
-    } catch (err) {
-      console.error(err);
-      alert("Error connecting to server.");
+    } else {
+      alert(result.message || "Invalid username or password.");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Error connecting to server.");
+  }
+};
 
   // --- 5. SIGNUP HANDLER ---
   signUpForm.onsubmit = async function(e) {
@@ -958,6 +1014,30 @@
     const title = document.getElementById('regTitle').value.trim() || "Member";
     const avatarFile = document.getElementById('regAvatar').files[0];
 
+    if (fullName.length < 2 || fullName.length > 60) {
+  alert("Full name must be 2 to 60 characters.");
+  return;
+}
+
+if (!/^@[A-Za-z0-9_]{3,20}$/.test(username)) {
+  alert("Username must start with @ and be 3 to 20 characters using only letters, numbers, and underscores.");
+  return;
+}
+
+if (password.length < 6 || password.length > 50) {
+  alert("Password must be 6 to 50 characters.");
+  return;
+}
+
+if (bio.length > 160) {
+  alert("Bio must be 160 characters or less.");
+  return;
+}
+
+if (title.length > 50) {
+  alert("Job title must be 50 characters or less.");
+  return;
+}
     if (password !== confirm) {
       alert("Passwords do not match!");
       return;
@@ -1198,7 +1278,10 @@ document.addEventListener("click", function(e) {
     if (!requireLogin()) return;
     const card = likeBtn.closest(".review-card");
     const reviewId = card.dataset.id;
-    fetch(`/reviews/${reviewId}/like`, { method: "POST" });
+    fetch(`/reviews/${reviewId}/like`, {
+  method: "POST",
+  credentials: "include"
+});
     const likeImg = likeBtn.querySelector("img");
     const likeCount = likeBtn.querySelector("span");
     const dislikeBtnEl = likeBtn.parentElement.querySelector(".dislike-btn");
@@ -1223,7 +1306,10 @@ document.addEventListener("click", function(e) {
     if (!requireLogin()) return;
     const card = dislikeBtn.closest(".review-card");
     const reviewId = card.dataset.id;
-    fetch(`/reviews/${reviewId}/dislike`, { method: "POST" });
+    fetch(`/reviews/${reviewId}/dislike`, {
+  method: "POST",
+  credentials: "include"
+});
     const dislikeImg = dislikeBtn.querySelector("img");
     const dislikeCount = dislikeBtn.querySelector("span");
     const likeBtnEl = dislikeBtn.parentElement.querySelector(".like-btn");
@@ -1261,10 +1347,11 @@ document.getElementById('replyForm').addEventListener('submit', async function(e
 
   try {
     await fetch(`/reviews/${reviewId}/reply`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ text })
+});
     document.getElementById('replyModal').hidden = true;
   } catch (err) {
     alert("Error posting reply.");

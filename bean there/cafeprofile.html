@@ -405,16 +405,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   const signupBtn   = document.getElementById('signupBtn');
 
   function updateUI() {
-    const username = localStorage.getItem('beanthere_owner_username') || localStorage.getItem('beanthere_profile_username');
-    if (username) {
-      authSection.style.display = 'none';
-      userSection.style.display = 'block';
-      welcomeUser.textContent = username;
-    } else {
-      authSection.style.display = 'block';
-      userSection.style.display = 'none';
-    }
+  const ownerUsername = localStorage.getItem('beanthere_owner_username');
+  const userUsername = localStorage.getItem('beanthere_profile_username');
+
+  if (ownerUsername) {
+    authSection.style.display = 'none';
+    userSection.style.display = 'block';
+    welcomeUser.textContent = ownerUsername;
+    welcomeUser.onclick = () => {
+      window.location.href = 'cafeprofile.html';
+    };
+  } else if (userUsername) {
+    authSection.style.display = 'none';
+    userSection.style.display = 'block';
+    welcomeUser.textContent = userUsername;
+    welcomeUser.onclick = () => {
+      window.location.href = 'profile.html';
+    };
+  } else {
+    authSection.style.display = 'block';
+    userSection.style.display = 'none';
+    welcomeUser.onclick = null;
   }
+}
 
   updateUI();
   welcomeUser.onclick = () => {
@@ -447,7 +460,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function checkOwnerSession() {
     for (let attempt = 0; attempt < 10; attempt++) {
       try {
-        const res    = await fetch('/session-owner');
+        const res = await fetch('/session-owner', {
+  credentials: 'include'
+});
         const result = await res.json();
         if (res.ok && result.loggedIn) {
           if (result.owner?.username) {
@@ -482,7 +497,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function loadOwnerCafe() {
     try {
-      const res  = await fetch('/owner-establishment');
+     const res = await fetch('/owner-establishment', {
+  credentials: 'include'
+});
       const cafe = await res.json();
       if (!res.ok) { alert(cafe.message || 'Failed to load cafe profile.'); return; }
 
@@ -678,11 +695,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      const res    = await fetch('/update-cafe', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ bio: inputCafeBio.value.trim(), imageUrl: newImages })
-      });
+      const res = await fetch('/update-cafe', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ bio: inputCafeBio.value.trim(), imageUrl: newImages })
+});
       const result = await res.json();
       if (!res.ok) { alert(result.message || 'Failed to update cafe.'); return; }
 
@@ -721,12 +739,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!replyText) { alert("Please write a reply."); return; }
 
       try {
-        const res    = await fetch('/reply-review', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ reviewId, replyText })
-        });
-
+        const res = await fetch('/reply-review', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ reviewId, replyText })
+});
         const result = await res.json();
         if (!res.ok) { alert(result.message || 'Failed to save reply.'); return; }
 

@@ -3,6 +3,7 @@ dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const express = require("express");
 const session = require("express-session");
+const bcrypt = require("bcrypt");
 
 const connectDB = require("./config/db");
 const Review = require("./models/Review");
@@ -11,6 +12,27 @@ const Establishment = require("./models/Establishment");
 const Owner = require("./models/Owner");
 
 const app = express();
+
+function normalizeUsername(username) {
+  const raw = (username || "").trim();
+  return raw.startsWith("@") ? raw : `@${raw}`;
+}
+
+function isValidUsername(username) {
+  return /^@[A-Za-z0-9_]{3,20}$/.test(username);
+}
+
+function isValidPassword(password) {
+  return typeof password === "string" && password.length >= 6 && password.length <= 50;
+}
+
+function isValidFullName(fullName) {
+  return typeof fullName === "string" && fullName.trim().length >= 2 && fullName.trim().length <= 60;
+}
+
+function isValidOptionalText(text, maxLength) {
+  return typeof text === "string" && text.length <= maxLength;
+}
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "10mb" }));
@@ -125,18 +147,46 @@ app.post("/update-cafe", async (req, res) => {
 // SIGN UP
 app.post("/signup", async (req, res) => {
   try {
-    const { fullName, username, password, bio, title, avatar } = req.body;
+    let { fullName, username, password, bio, title, avatar } = req.body;
+
+    fullName = (fullName || "").trim();
+    username = normalizeUsername(username);
+    password = password || "";
+    bio = (bio || "").trim();
+    title = (title || "").trim();
+
+    if (!isValidFullName(fullName)) {
+      return res.status(400).send("Full name must be 2 to 60 characters.");
+    }
+
+    if (!isValidUsername(username)) {
+      return res.status(400).send("Username must start with @ and be 3 to 20 characters using only letters, numbers, and underscores.");
+    }
+
+    if (!isValidPassword(password)) {
+      return res.status(400).send("Password must be 6 to 50 characters.");
+    }
+
+    if (!isValidOptionalText(bio, 160)) {
+      return res.status(400).send("Bio must be 160 characters or less.");
+    }
+
+    if (!isValidOptionalText(title, 50)) {
+      return res.status(400).send("Job title must be 50 characters or less.");
+    }
 
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).send("Username already exists.");
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({
       fullName,
       username,
-      password,
-      bio: bio || "",
+      password: hashedPassword,
+      bio: bio || "No bio added yet.",
       title: title || "Member",
       avatar: avatar || ""
     });
@@ -153,15 +203,20 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { username, password, rememberMe } = req.body;
-    const rawUsername = (username || "").trim();
-    const normalizedUserUsername = rawUsername.startsWith("@")
-      ? rawUsername
-      : `@${rawUsername}`;
+    const normalizedUsername = normalizeUsername(username);
+    const cleanPassword = password || "";
 
-    // CHECK OWNER FIRST
-    const owner = await Owner.findOne({ username: rawUsername, password });
+    if (!isValidUsername(normalizedUsername)) {
+      return res.status(400).json({ message: "Invalid username format." });
+    }
 
-    if (owner) {
+    if (!isValidPassword(cleanPassword)) {
+      return res.status(400).json({ message: "Invalid password format." });
+    }
+
+    const owner = await Owner.findOne({ username: normalizedUsername });
+
+    if (owner && await bcrypt.compare(cleanPassword, owner.password)) {
       req.session.owner = {
         id: owner._id,
         username: owner.username
@@ -183,10 +238,9 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    // CHECK NORMAL USER SECOND
-    const user = await User.findOne({ username: normalizedUserUsername, password });
+    const user = await User.findOne({ username: normalizedUsername });
 
-    if (!user) {
+    if (!user || !(await bcrypt.compare(cleanPassword, user.password))) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
 
@@ -604,14 +658,26 @@ app.post("/update-profile", async (req, res) => {
       return res.status(401).json({ message: "Not logged in" });
     }
 
-    const { username, bio, title, avatar } = req.body;
+    let { username, bio, title, avatar } = req.body;
 
-    const normalizedUsername = username && username.startsWith("@")
-      ? username
-      : `@${(username || "").replace(/^@/, "")}`;
+    username = normalizeUsername(username);
+    bio = (bio || "").trim();
+    title = (title || "").trim();
+
+    if (!isValidUsername(username)) {
+      return res.status(400).json({ message: "Username must start with @ and be 3 to 20 characters using only letters, numbers, and underscores." });
+    }
+
+    if (!isValidOptionalText(bio, 160)) {
+      return res.status(400).json({ message: "Bio must be 160 characters or less." });
+    }
+
+    if (!isValidOptionalText(title, 50)) {
+      return res.status(400).json({ message: "Job title must be 50 characters or less." });
+    }
 
     const existingUser = await User.findOne({
-      username: normalizedUsername,
+      username,
       _id: { $ne: req.session.user.id }
     });
 
@@ -622,7 +688,7 @@ app.post("/update-profile", async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.session.user.id,
       {
-        username: normalizedUsername,
+        username,
         bio: bio || "",
         title: title || "Member",
         ...(avatar ? { avatar } : {})

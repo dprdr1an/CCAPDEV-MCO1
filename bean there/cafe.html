@@ -405,27 +405,52 @@ document.addEventListener("DOMContentLoaded", () => {
   welcomeUser.onclick = () => { window.location.href = 'profile.html'; };
 
   function updateUI() {
-    const username = localStorage.getItem('beanthere_profile_username');
-    if (username) {
-      authSection.style.display = 'none';
-      userSection.style.display = 'block';
-      welcomeUser.textContent = username;
-    } else {
-      authSection.style.display = 'block';
-      userSection.style.display = 'none';
-    }
+  const ownerUsername = localStorage.getItem('beanthere_owner_username');
+  const userUsername = localStorage.getItem('beanthere_profile_username');
+
+  if (ownerUsername) {
+    authSection.style.display = 'none';
+    userSection.style.display = 'block';
+    welcomeUser.textContent = ownerUsername;
+    welcomeUser.onclick = () => {
+      window.location.href = 'cafeprofile.html';
+    };
+  } else if (userUsername) {
+    authSection.style.display = 'none';
+    userSection.style.display = 'block';
+    welcomeUser.textContent = userUsername;
+    welcomeUser.onclick = () => {
+      window.location.href = 'profile.html';
+    };
+  } else {
+    authSection.style.display = 'block';
+    userSection.style.display = 'none';
+    welcomeUser.onclick = null;
   }
+}
 
   updateUI();
 
   logoutBtn.onclick = async () => {
-    try {
-      await fetch('/logout', { method: 'POST' });
-      localStorage.clear();
-      updateUI();
-      alert("Logged out");
-    } catch (err) { alert("Error logging out"); }
-  };
+  try {
+    await fetch('/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+
+    localStorage.removeItem('beanthere_owner_username');
+    localStorage.removeItem('beanthere_profile_fullname');
+    localStorage.removeItem('beanthere_profile_username');
+    localStorage.removeItem('beanthere_profile_bio');
+    localStorage.removeItem('beanthere_profile_title');
+    localStorage.removeItem('beanthere_profile_avatar');
+
+    window.location.href = 'index.html';
+  } catch (err) {
+    console.error(err);
+    alert("Error logging out");
+  }
+};
 
   loginBtn.onclick  = () => logInModal.hidden  = false;
   signupBtn.onclick = () => signUpModal.hidden = false;
@@ -450,42 +475,106 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function checkSessionOnLoad() {
-    try {
-      const res = await fetch('/session-user');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data.loggedIn) {
-        localStorage.setItem('beanthere_profile_fullname', data.user.fullName || '');
-        localStorage.setItem('beanthere_profile_username', data.user.username || '');
-        localStorage.setItem('beanthere_profile_bio',      data.user.bio      || '');
-        localStorage.setItem('beanthere_profile_title',    data.user.title    || 'Member');
-        localStorage.setItem('beanthere_profile_avatar',   data.user.avatar   || '');
-        updateUI();
-      }
-    } catch (err) { console.error('No active session found.'); }
-  }
+  try {
+    const ownerRes = await fetch('/session-owner', {
+      credentials: 'include'
+    });
 
+    if (ownerRes.ok) {
+      const ownerData = await ownerRes.json();
+      if (ownerData.loggedIn && ownerData.owner) {
+        localStorage.setItem('beanthere_owner_username', ownerData.owner.username || '');
+        localStorage.removeItem('beanthere_profile_fullname');
+        localStorage.removeItem('beanthere_profile_username');
+        localStorage.removeItem('beanthere_profile_bio');
+        localStorage.removeItem('beanthere_profile_title');
+        localStorage.removeItem('beanthere_profile_avatar');
+        updateUI();
+        return;
+      }
+    }
+
+    const userRes = await fetch('/session-user', {
+      credentials: 'include'
+    });
+
+    if (!userRes.ok) return;
+
+    const userData = await userRes.json();
+    if (userData.loggedIn) {
+      localStorage.removeItem('beanthere_owner_username');
+      localStorage.setItem('beanthere_profile_fullname', userData.user.fullName || '');
+      localStorage.setItem('beanthere_profile_username', userData.user.username || '');
+      localStorage.setItem('beanthere_profile_bio', userData.user.bio || '');
+      localStorage.setItem('beanthere_profile_title', userData.user.title || 'Member');
+      localStorage.setItem('beanthere_profile_avatar', userData.user.avatar || '');
+      updateUI();
+    }
+  } catch (err) {
+    console.error('No active session found.');
+  }
+}
   checkSessionOnLoad();
 
   logInForm.onsubmit = async function(e) {
-    e.preventDefault();
-    const username   = normalizeUsername(document.getElementById('loginUser').value);
-    const password   = document.getElementById('loginPass').value.trim();
-    const rememberMe = document.getElementById('rememberMe').checked;
-    try {
-      const res  = await fetch('/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password, rememberMe }) });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('beanthere_profile_fullname', data.user.fullName || '');
-        localStorage.setItem('beanthere_profile_username', data.user.username || '');
-        localStorage.setItem('beanthere_profile_bio',      data.user.bio      || '');
-        localStorage.setItem('beanthere_profile_title',    data.user.title    || 'Member');
-        localStorage.setItem('beanthere_profile_avatar',   data.user.avatar   || '');
+  e.preventDefault();
+
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value.trim();
+  const rememberMe = document.getElementById('rememberMe').checked;
+
+  const normalizedUsername = username.startsWith('@') ? username : '@' + username;
+
+if (!/^@[A-Za-z0-9_]{3,20}$/.test(normalizedUsername)) {
+  alert("Please enter a valid username.");
+  return;
+}
+
+if (password.length < 6 || password.length > 50) {
+  alert("Password must be 6 to 50 characters.");
+  return;
+}
+  try {
+    const res = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username, password, rememberMe })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      if (data.role === "owner") {
+        localStorage.setItem('beanthere_owner_username', data.username || username);
+        localStorage.removeItem('beanthere_profile_fullname');
+        localStorage.removeItem('beanthere_profile_username');
+        localStorage.removeItem('beanthere_profile_bio');
+        localStorage.removeItem('beanthere_profile_title');
+        localStorage.removeItem('beanthere_profile_avatar');
+
         logInModal.hidden = true;
         updateUI();
-      } else { alert(data.message || "Invalid username or password."); }
-    } catch (err) { alert("Error connecting to server."); }
-  };
+        window.location.href = 'cafeprofile.html';
+      } else {
+        localStorage.removeItem('beanthere_owner_username');
+        localStorage.setItem('beanthere_profile_fullname', data.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', data.user.username || '');
+        localStorage.setItem('beanthere_profile_bio', data.user.bio || '');
+        localStorage.setItem('beanthere_profile_title', data.user.title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar', data.user.avatar || '');
+
+        logInModal.hidden = true;
+        updateUI();
+      }
+    } else {
+      alert(data.message || "Invalid username or password.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error connecting to server.");
+  }
+};
 
   signUpForm.onsubmit = async function(e) {
     e.preventDefault();
