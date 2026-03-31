@@ -493,20 +493,27 @@ app.post("/reply-review", async (req, res) => {
       return res.status(400).json({ message: "Missing reviewId or replyText" });
     }
 
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
     const updated = await Review.findByIdAndUpdate(
       reviewId,
       {
-        ownerReply: {
-          text: replyText,
-          repliedAt: new Date()
+        $push: {
+          replies: {
+            username: req.session.owner.username,
+            text: replyText,
+            date: new Date().toLocaleDateString(),
+            reviewId: reviewId,
+            establishmentName: review.establishmentName,
+            role: "owner" // 🔥 THIS is the key
+          }
         }
       },
       { new: true }
     );
-
-    if (!updated) {
-      return res.status(404).json({ message: "Review not found" });
-    }
 
     res.json({ message: "Reply saved", review: updated });
   } catch (err) {

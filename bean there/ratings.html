@@ -367,7 +367,7 @@
     .review-actions {
       display: flex;
       gap: 18px;
-      margin-top: 25px;
+      margin-top: 10px;
       align-items: center;
     }
     .icon-btn {
@@ -1157,22 +1157,63 @@ function renderReviews(data) {
     const isLiked    = (review.likedBy || []).includes(currentUser);
     const isDisliked = (review.dislikedBy || []).includes(currentUser);
 
-    const repliesHtml = (review.replies || []).length > 0
-    ? (review.replies || []).map(rep => `
-        <div style="
-        margin-top: 8px;
-        background: rgba(0,0,0,0.04);
-        border-left: 4px solid var(--muted);
-        border-radius: 0 16px 16px 0;
-        padding: 10px 16px;
-        font-size: 13px;
-      ">
-        <strong>${rep.username || 'Anonymous'}</strong>
-        <span style="color:#888; font-size:12px; margin-left:8px;">${rep.date || ''}</span>
-        <p style="margin:6px 0 0; color:#4a5568; line-height:1.5;">${rep.text || ''}</p>
+    const replies = review.replies || [];
+
+    const previewReplies = replies.slice(0, 2);
+    const hasMore = replies.length > 2;
+
+    const repliesHtml = `
+      <div class="replies-container" data-id="${review._id}">
+        ${previewReplies.map(rep => `
+          <div style="
+            margin-top: 8px;
+            background: rgba(0,0,0,0.04);
+            border-left: 4px solid var(--muted);
+            border-radius: 0 16px 16px 0;
+            padding: 10px 16px;
+            font-size: 13px;
+          ">
+            <strong>
+              ${rep.username || 'Anonymous'}
+              ${rep.role === "owner" ? `
+                <span style="
+                  background: rgba(91, 95, 16, 0.15);
+                  color: #5b5f10;
+                  font-size: 11px;
+                  padding: 2px 6px;
+                  border-radius: 10px;
+                  margin-left: 6px;
+                  font-weight: 600;
+                ">
+                  Owner
+                </span>
+              ` : ""}
+            </strong>
+
+            <span style="color:#888; font-size:12px; margin-left:8px;">
+              ${rep.date || ''}
+            </span>
+
+            <p style="margin:6px 0 0; color:#4a5568;">
+              ${rep.text || ''}
+            </p>
+          </div>
+        `).join('')}
+
+        ${hasMore ? `
+          <button class="see-more-btn" data-id="${review._id}" style="
+            margin-top: 8px;
+            background: none;
+            border: none;
+            color: #5b5f10;
+            font-weight: 600;
+            cursor: pointer;
+          ">
+            See all ${replies.length} replies
+          </button>
+        ` : ""}
       </div>
-      `).join('')
-    : '';
+    `;
 
     return `
       <div class="review-card" data-id="${review._id}">
@@ -1215,7 +1256,11 @@ function renderReviews(data) {
             ">Reply</button>
           </div>
         </div>
-        ${repliesHtml ? `<div style="grid-column: 1 / -1;">${repliesHtml}</div>` : ''}
+        ${replies.length > 0 ? `
+          <div style="grid-column: 1 / -1;">
+            ${repliesHtml}
+          </div>
+        ` : ''}
       </div>`;
   }).join("");
 
@@ -1355,6 +1400,59 @@ document.getElementById('replyForm').addEventListener('submit', async function(e
     document.getElementById('replyModal').hidden = true;
   } catch (err) {
     alert("Error posting reply.");
+  }
+});
+
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("see-more-btn")) {
+    const reviewId = e.target.dataset.id;
+
+    const review = allReviews.find(r => r._id === reviewId); // 🔥 USE allReviews
+    if (!review) return;
+
+    const fullReplies = (review.replies || []).map(rep => `
+      <div style="
+        margin-top: 8px;
+        background: rgba(0,0,0,0.04);
+        border-left: 4px solid var(--muted);
+        border-radius: 0 16px 16px 0;
+        padding: 10px 16px;
+        font-size: 13px;
+      ">
+        <strong>
+          ${rep.username || 'Anonymous'}
+          ${rep.role === "owner" ? `
+            <span style="
+              background: rgba(91, 95, 16, 0.15);
+              color: #5b5f10;
+              font-size: 11px;
+              padding: 2px 6px;
+              border-radius: 10px;
+              margin-left: 6px;
+              font-weight: 600;
+            ">
+              Owner
+            </span>
+          ` : ""}
+        </strong>
+
+        <span style="color:#888; font-size:12px; margin-left:8px;">
+          ${rep.date || ''}
+        </span>
+
+        <p style="margin:6px 0 0; color:#4a5568;">
+          ${rep.text || ''}
+        </p>
+      </div>
+    `).join('');
+
+    const container = document.querySelector(
+      `.replies-container[data-id="${reviewId}"]`
+    );
+
+    if (!container) return;
+
+    container.innerHTML = fullReplies;
   }
 });
 </script>

@@ -550,8 +550,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           return `<span class="tag">${icon ? `<img src="${icon}">` : ''} ${tag}</span>`;
         }).join('');
 
-        const replySection = r.ownerReply?.text
-        ? `<div style="
+        const ownerReplies = (r.replies || []).filter(rep => rep.role === "owner");
+
+        const replySection = ownerReplies.map(rep => `
+          <div style="
             margin-top: 8px;
             background: rgba(0,0,0,0.04);
             border-left: 4px solid var(--muted);
@@ -561,13 +563,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           ">
             <strong>You</strong>
             <span style="color:#888; font-size:12px; margin-left:8px;">
-              ${r.ownerReply.repliedAt ? new Date(r.ownerReply.repliedAt).toLocaleDateString() : ''}
+              ${rep.date || ''}
             </span>
             <p style="margin:6px 0 0; color:#4a5568; line-height:1.5;">
-              ${r.ownerReply.text}
+              ${rep.text}
             </p>
-          </div>`
-        : "";
+          </div>
+        `).join('');
 
           return `
             <div class="review-card" data-id="${r._id}">

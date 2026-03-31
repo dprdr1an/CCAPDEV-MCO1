@@ -20,7 +20,8 @@ const ReviewSchema = new mongoose.Schema({
       text: String,
       date: String,
       reviewId: mongoose.Schema.Types.ObjectId,
-      establishmentName: String
+      establishmentName: String,
+      role: { type: String, default: "user" }
     }
   ],
 
