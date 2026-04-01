@@ -816,6 +816,105 @@
   }
 }
 
+    /* ✅ UNIFIED AUTH MODAL STYLE */
+    .auth-panel {
+      background-color: #f8f5ee;
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: min(480px, calc(100% - 32px));
+      text-align: center;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* title */
+    .auth-title {
+      font-family: 'Lora', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #4a3f35;
+      margin: 0 0 30px;
+      line-height: 1.2;
+    }
+
+    /* inputs */
+    .auth-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 14px 0;
+    }
+
+    .auth-group label {
+      min-width: 110px;
+      font-weight: 700;
+      color: #4a3f35;
+      text-align: left;
+    }
+
+    .auth-group input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(0,0,0,0.18);
+      background: #fff;
+      font-size: 15px;
+      outline: none;
+    }
+
+    /* button */
+    .auth-btn {
+      margin-top: 20px;
+      padding: 10px 40px;
+      border-radius: 30px;
+      border: 2px solid #4a3f35;
+      background: transparent;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #4a3f35;
+    }
+
+    .auth-btn:hover {
+      background: #4a3f35;
+      color: #fff;
+    }
+
+    .remember-row {
+      justify-content: flex-start;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .remember-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #5b5f10; /* matches your theme */
+      cursor: pointer;
+    }
+
+    .remember-row label {
+      min-width: auto;
+      font-weight: 500;
+      color: #4a3f35;
+      cursor: pointer;
+    }
+
+    .modal-close-review{
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      font-size: 28px;
+      color: #4a3f35;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close-review:hover{
+      opacity: 0.7;
+    }
   </style>
 </head>
 
@@ -1267,75 +1366,79 @@
 
   <div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
     <div class="modal-backdrop" id="closeLogIn"></div>
-    <div class="modal-panel login-custom-panel">
-      <button id="xLogIn" class="modal-close-btn">✕</button>
-      <h2 class="modal-title">Log in</h2>
-      
+    <div class="modal-panel auth-panel">
+      <button id="xLogIn" class="modal-close-review">✕</button>
+      <h2 class="auth-title">Log in</h2>
+
       <form id="logInForm">
-        <div class="input-group">
-          <label for="loginUser">Username:</label>
+
+        <div class="auth-group">
+          <label>Username:</label>
           <input id="loginUser" type="text" required>
         </div>
 
-        <div class="input-group">
-          <label for="loginPass">Password:</label>
+        <div class="auth-group">
+          <label>Password:</label>
           <input id="loginPass" type="password" required>
         </div>
 
-        <div class="login-footer">
-          <label class="remember-me">
-            <input type="checkbox" id="rememberMe">
-            <span>Remember Me</span>
-          </label>
-          <button type="submit" class="done-btn">Done</button>
+        <div class="auth-group remember-row">
+          <input type="checkbox" id="rememberMe">
+          <label for="rememberMe">Remember me</label>
         </div>
+
+        <button type="submit" class="auth-btn">Log in</button>
+
       </form>
     </div>
   </div>
   <div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
           <div class="modal-backdrop" id="closeSignUp"></div>
-          <div class="modal-panel" style="max-width: 450px; text-align: center;">
-            <button id="xSignUp" style="position:absolute; top:10px; right:15px; border:0; background:transparent; font-size:20px; cursor:pointer;">✕</button>
-            <h2 style="font-family:Lora, serif; margin-top:0;">Sign Up</h2>
-            
-            <form id="signUpForm" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
-              <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
-                <label for="regName">Name:</label>
-                <input id="regName" type="text" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
-              </div>
-              
-              <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
-                <label for="regUser">Username:</label>
-                <input id="regUser" type="text" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
-              </div>
+          <div class="modal-panel auth-panel">
+      <button id="xSignUp" class="modal-close-review">✕</button>
 
-              <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
-                <label for="regPass">Password:</label>
-                <input id="regPass" type="password" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
-              </div>
+      <h2 class="auth-title">Sign Up</h2>
 
-              <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
-                <label for="regConfirm">Confirm Password:</label>
-                <input id="regConfirm" type="password" required style="padding:5px; border-radius:4px; border:1px solid #ccc;">
-              </div>
+      <form id="signUpForm">
 
-              <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
-                <label>Profile Picture:</label>
-                <input id="regAvatar" type="file" accept="image/*">
-              </div>
-
-              <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
-          <label for="regTitle">Job Title:</label>
-          <input id="regTitle" type="text" placeholder="e.g. Associate for Talent Management" style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+        <div class="auth-group">
+          <label>Name:</label>
+          <input id="regName" type="text" required>
         </div>
-              <div style="display:grid; grid-template-columns: 1fr 1.5fr; align-items: center;">
-                <label for="regBio">Bio:</label>
-                <input id="regBio" type="text" placeholder="not required" style="padding:5px; border-radius:4px; border:1px solid #ccc;">
-              </div>
 
-              <button type="submit" style="margin-top:10px; padding:10px; border-radius:20px; border:1px solid var(--accent); background:transparent; font-weight:700; cursor:pointer; width:120px; align-self:center;">Save</button>
-            </form>
-          </div>
+        <div class="auth-group">
+          <label>Username:</label>
+          <input id="regUser" type="text" required>
+        </div>
+
+        <div class="auth-group">
+          <label>Password:</label>
+          <input id="regPass" type="password" required>
+        </div>
+
+        <div class="auth-group">
+          <label>Confirm:</label>
+          <input id="regConfirm" type="password" required>
+        </div>
+
+        <div class="auth-group">
+          <label>Job Title:</label>
+          <input id="regTitle" type="text">
+        </div>
+
+        <div class="auth-group">
+          <label>Bio:</label>
+          <input id="regBio" type="text">
+        </div>
+
+        <div class="auth-group">
+          <label>Photo:</label>
+          <input id="regAvatar" type="file" accept="image/*">
+        </div>
+
+        <button type="submit" class="auth-btn">Sign Up</button>
+      </form>
+    </div>
         </div>
 
         <script>
