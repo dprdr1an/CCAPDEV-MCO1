@@ -1036,6 +1036,25 @@
       color: #4a3f35;
       cursor: pointer;
     }
+
+    .handle-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 15px;
+      color: #2b5b6f;
+      font-weight: 600;
+    }
+
+    .dot {
+      color: #aaa;
+    }
+
+    #titleText {
+      color: #6b7280;
+      font-weight: 500;
+    }
   </style>
 </head>
 
@@ -1149,12 +1168,17 @@
 
 
 
-          <div class="profile-meta">
-  <h1>Erylle Galinato</h1>
-  <div id="handleText" class="handle">@erylle_g</div>
-  <p id="bioText">Placeholder for short bio — add a couple of lines about yourself here.</p>
-  <button id="editProfileBtn" class="edit-btn" aria-haspopup="dialog" aria-controls="editProfileModal">Edit Profile</button>
-</div>
+  <div class="profile-meta">
+    <h1 id="nameText">Full Name</h1>
+
+    <div class="handle-row">
+      <span id="handleText">username</span>
+      <span class="dot">·</span>
+      <span id="titleText">Member</span>
+    </div>
+
+    <p id="bioText">No bio added yet.</p>
+  </div>
 
         </div>
 
@@ -1428,9 +1452,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('.section').forEach(s => s.style.display = '');
     document.getElementById('addReviewFab').style.display = '';
 
-    document.querySelector('.profile-meta h1').textContent = fullName || userUsername;
-    document.getElementById('handleText').textContent = userUsername;
-    document.getElementById('bioText').textContent = bio || 'No bio added yet.';
+    document.getElementById('nameText').textContent = fullName || userUsername;
+    const cleanUsername = userUsername.replace(/^@+/, "");
+    document.getElementById('handleText').textContent = `@${cleanUsername}`;
+    document.getElementById('titleText').textContent = title || "Member";
+    document.getElementById('bioText').textContent = bio || "No bio added yet.";
     document.querySelector('.ud-greet').textContent = `Hi, ${fullName || userUsername}!`;
     document.querySelector('.ud-sub').textContent = title || 'Member';
 
