@@ -1374,6 +1374,27 @@
   </div>
 </div>
 
+<div id="deleteModal" class="modal" hidden>
+  <div class="modal-backdrop" id="closeDeleteModal"></div>
+
+  <div class="modal-panel auth-panel">
+    <button id="xDeleteModal" class="modal-close-review">✕</button>
+
+    <h2 class="auth-title">Delete Reply</h2>
+
+    <p style="margin-bottom:20px; color:#4a3f35;">
+      Are you sure you want to delete this reply?
+    </p>
+
+    <div style="display:flex; justify-content:center; gap:12px;">
+      <button id="cancelDelete" class="auth-btn">Cancel</button>
+      <button id="confirmDelete" class="auth-btn" style="border-color:#a94442; color:#a94442;">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -2024,6 +2045,9 @@ if (title.length > 50) {
 
   <script>
 
+    let selectedReviewId = null;
+    let selectedReplyText = null;
+
     let reviewsData = [];
 
     const tagIcons = {
@@ -2073,17 +2097,17 @@ if (title.length > 50) {
         });
 
         const replies = await res.json();
-        console.log("REPLIES:", replies);
 
         // save to your existing array
         repliesData.length = 0; // clear
         replies.forEach(r => {
           repliesData.push({
+            reviewId: r.reviewId,       // the parent review's _id for deletion
             text: r.text,
             datePosted: r.date,
             establishmentName: r.establishmentName,
             image: r.image || "apdev-tbv/cafe4.jpg",
-            replyToUser: r.replyToUser || "Anonymous"  // now comes from backend
+            replyToUser: r.replyToUser || "Anonymous"
           });
         });
         currentReplyIndex = 0;
@@ -2145,7 +2169,8 @@ if (title.length > 50) {
       <div class="review-card" style="box-shadow: none; width: 100%;">
         <img src="${reply.image}" class="review-img">
 
-        <div class="review-content">
+        <div class="review-content" style="position: relative;">
+          
           <div class="review-header">
             <div>
               <span class="review-user">${getCurrentUsername()}</span>
@@ -2154,6 +2179,25 @@ if (title.length > 50) {
               <span class="review-date">${reply.datePosted}</span>
             </div>
           </div>
+
+          <!-- 🔥 DELETE BUTTON -->
+          <button 
+            class="delete-reply-btn" 
+            data-review-id="${reply.reviewId}"
+            data-text="${reply.text.replace(/"/g, '&quot;')}"
+            style="
+              position: absolute;
+              top: 8px;
+              right: 10px;
+              background: none;
+              border: none;
+              cursor: pointer;
+              font-size: 16px;
+              color: #999;
+            "
+          >
+            <img src="icons/delete.png" width="16">
+          </button>
 
           <h3 class="cafe-name">${reply.establishmentName}</h3>
 
@@ -2255,7 +2299,7 @@ if (title.length > 50) {
         const reviewHtml = `
             <div class="review-card" data-id="${review.id}">
               <img src="${review.image}" alt="${review.cafeName}" class="review-img">
-              <div class="review-content">
+              <div class="review-content" style="position: relative;">
                 <div class="review-header">
                   <div>
                     <div class="review-user">${username.replace('@', '')}</div>
@@ -2570,6 +2614,63 @@ fileInput.addEventListener("change", () => {
     ? fileInput.files[0].name
     : "No file chosen";
 });
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".delete-reply-btn");
+  if (!btn) return;
+
+  selectedReviewId = btn.dataset.reviewId;
+  selectedReplyText = btn.dataset.text;
+
+  document.getElementById("deleteModal").hidden = false;
+});
+
+const deleteModal = document.getElementById("deleteModal");
+
+document.getElementById("cancelDelete").onclick = () => {
+  deleteModal.hidden = true;
+  selectedReviewId = null;
+  selectedReplyText = null;
+};
+
+document.getElementById("closeDeleteModal").onclick = () => {
+  deleteModal.hidden = true;
+};
+
+document.getElementById("xDeleteModal").onclick = () => {
+  deleteModal.hidden = true;
+};
+
+document.getElementById("confirmDelete").onclick = async () => {
+  if (!selectedReviewId || !selectedReplyText) return;
+
+  try {
+    const res = await fetch("/delete-reply", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ reviewId: selectedReviewId, text: selectedReplyText })
+    });
+
+    if (res.ok) {
+      deleteModal.hidden = true;
+      selectedReviewId = null;
+      selectedReplyText = null;
+
+      // Remove the card from the DOM and reload replies
+      await loadMyReplies();
+
+    } else {
+      alert("Failed to delete");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting reply.");
+  }
+};
+
 </script>
 </body>
 </html>

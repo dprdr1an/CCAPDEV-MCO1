@@ -1186,7 +1186,6 @@ if (title.length > 50) {
 <script>
 let allReviews = [];
 
-
 const tagIcons = {
   "Air-conditioned": "icons/ac.png",
   "Socket": "icons/socket.png",
@@ -1194,29 +1193,26 @@ const tagIcons = {
   "Alt Milk": "icons/oat.png"
 };
 
-document.addEventListener("DOMContentLoaded", async () => {
-
+async function loadReviews() {
   const container = document.getElementById("reviewsContainer");
+  try {
+    const res = await fetch('/reviews');
+    allReviews = await res.json();
 
-  async function loadReviews() {
-    try {
-      const res = await fetch('/reviews');
-      allReviews = await res.json();
-
-      if (!allReviews.length) {
-        container.innerHTML = "<p>No reviews yet.</p>";
-        return;
-      }
-
-      renderReviews(allReviews);
-
-      
-
-    } catch (err) {
-      console.error(err);
-      container.innerHTML = "<p>Error loading reviews.</p>";
+    if (!allReviews.length) {
+      container.innerHTML = "<p>No reviews yet.</p>";
+      return;
     }
+
+    renderReviews(allReviews);
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<p>Error loading reviews.</p>";
   }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
 
   loadReviews();
 
@@ -1495,13 +1491,20 @@ document.getElementById('replyForm').addEventListener('submit', async function(e
   if (!text) { alert("Please write a reply."); return; }
 
   try {
-    await fetch(`/reviews/${reviewId}/reply`, {
-  method: 'POST',
-  credentials: 'include',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ text })
-});
+    const res = await fetch(`/reviews/${reviewId}/reply`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+
+    if (!res.ok) { alert("Error posting reply."); return; }
+
     document.getElementById('replyModal').hidden = true;
+
+    // Reload reviews so the new reply appears immediately without refreshing
+    await loadReviews();
+
   } catch (err) {
     alert("Error posting reply.");
   }

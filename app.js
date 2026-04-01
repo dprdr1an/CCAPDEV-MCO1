@@ -644,9 +644,9 @@ app.get('/my-replies', async (req, res) => {
             text: reply.text,
             date: reply.date,
             establishmentName: reply.establishmentName,
-            reviewId: reply.reviewId,
-            replyToUser: review.username,   // ADD THIS
-            image: review.photoUrl || "" 
+            reviewId: review._id,   // always use the parent review's _id directly
+            replyToUser: review.username,
+            image: review.photoUrl || ""
           });
         }
       });
@@ -723,6 +723,51 @@ app.post("/update-profile", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error updating profile" });
+  }
+});
+
+app.delete("/delete-reply", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
+
+    const { reviewId, text } = req.body;
+
+    if (!reviewId || !text) {
+      return res.status(400).json({ message: "Missing reviewId or text" });
+    }
+
+    const updated = await Review.findOneAndUpdate(
+      {
+        _id: reviewId,
+        replies: {
+          $elemMatch: {
+            text: text,
+            username: req.session.user.username
+          }
+        }
+      },
+      {
+        $pull: {
+          replies: {
+            text: text,
+            username: req.session.user.username
+          }
+        }
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Reply not found or already deleted" });
+    }
+
+    res.json({ message: "Reply deleted successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error deleting reply" });
   }
 });
 
