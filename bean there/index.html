@@ -1068,18 +1068,9 @@ if (title.length > 50) {
   };
 
   // --- 6. CAROUSEL & SEARCH LOGIC ---
-  const cafes = [
-    {name:"Coffee Nook", img:"https://picsum.photos/600/400?random=1", loc:"Taft Ave"},
-    {name:"GroupHug Cafe", img:"https://picsum.photos/600/400?random=2", loc:"Malate"},
-    {name:"Cooper's ATC Branch", img:"https://picsum.photos/600/400?random=3", loc:"Taft"},
-    {name:"Elsewhere Cafe", img:"https://picsum.photos/600/400?random=4", loc:"Makati"},
-    {name:"UNIT 605", img:"https://picsum.photos/600/400?random=5", loc:"QC"},
-    {name:"Brewtopia's Corner", img:"https://picsum.photos/600/400?random=6", loc:"BGC"},
-    {name:"Cafe Mocha", img:"https://picsum.photos/600/400?random=7", loc:"Quezon City"},
-  ];
-
-  let activeCafes = [...cafes];
-  let currentIndex = 0;
+  let cafes = [];
+let activeCafes = [];
+let currentIndex = 0;
   const carousel = document.getElementById("carousel");
   const dotsContainer = document.getElementById("dots");
   let isAnimating = false;
@@ -1091,12 +1082,52 @@ if (title.length > 50) {
   }
 
   function buildCard(cafe, position) {
-    const card = document.createElement("div");
-    card.className = `cafe-card ${position}`;
-    card.innerHTML = `<img src="${cafe.img}" alt="${cafe.name}"><div class="cafe-meta"><strong>${cafe.name}</strong><div class="location">${cafe.loc}</div></div>`;
-    return card;
+  const card = document.createElement("div");
+  card.className = `cafe-card ${position}`;
+  card.innerHTML = `
+    <img src="${cafe.img}" alt="${cafe.name}">
+    <div class="cafe-meta">
+      <strong>${cafe.name}</strong>
+      <div class="location">${cafe.loc}</div>
+    </div>
+  `;
+
+  // center card opens cafe page on one click
+  if (position === "pos-center") {
+    card.addEventListener("click", () => {
+      if (cafe.id) {
+        window.location.href = `cafe.html?id=${cafe.id}`;
+      }
+    });
   }
 
+  return card;
+}
+async function loadCafes() {
+  try {
+    const res = await fetch('/establishments');
+    const data = await res.json();
+
+    cafes = data.map(cafe => ({
+      id: cafe._id,
+      name: cafe.name || 'Unnamed Cafe',
+      img: Array.isArray(cafe.imageUrl) && cafe.imageUrl.length
+        ? cafe.imageUrl[0]
+        : 'https://placehold.co/600x400?text=Cafe',
+      loc: cafe.location || 'No location'
+    }));
+
+    activeCafes = [...cafes];
+    currentIndex = 0;
+
+    createDots();
+    renderCarousel();
+    startAutoplay();
+  } catch (err) {
+    console.error("Error loading cafes:", err);
+    carousel.innerHTML = "<div style='text-align:center;padding:40px'>Error loading cafes</div>";
+  }
+}
   function renderCarousel() {
     carousel.innerHTML = "";
     if (activeCafes.length === 0) {
@@ -1169,12 +1200,11 @@ if (title.length > 50) {
 
   // --- 7. INITIALIZATION ---
   document.getElementById("nextBtn").onclick = () => slideTo(getIndex(currentIndex + 1));
-  document.getElementById("prevBtn").onclick = () => slideTo(getIndex(currentIndex - 1));
-  carousel.addEventListener("mouseenter", stopAutoplay);
-  carousel.addEventListener("mouseleave", startAutoplay);
-  createDots();
-  renderCarousel();
-  startAutoplay();
+document.getElementById("prevBtn").onclick = () => slideTo(getIndex(currentIndex - 1));
+carousel.addEventListener("mouseenter", stopAutoplay);
+carousel.addEventListener("mouseleave", startAutoplay);
+
+loadCafes();
 });
 </script>
 
