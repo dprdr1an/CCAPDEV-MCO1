@@ -264,17 +264,35 @@
     }
 
     /* HERO */
-    .hero{
-      background-color: #743014;
-      height:577px;
-      margin:24px auto;
-      border-radius:6px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#f3efe6;
-      padding:18px;
-    }
+    .hero {
+    position: relative; /* important */
+    background-color: #743014;
+    height: 577px;
+    margin: 24px auto;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f3efe6;
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  /* image layer */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('icons/kape.jpeg') center/cover no-repeat;
+    opacity: 0.25; /* 🔥 adjust transparency here */
+    z-index: 0;
+  }
+
+  /* make text stay above */
+  .hero .brand {
+    position: relative;
+    z-index: 1;
+  }
 
     .hero .brand{
       font-family:Lora, serif;
@@ -293,7 +311,7 @@
       background:var(--card-blue);
       padding:22px;
       border-radius:6px;
-      
+      font-size: 20px;
       height:300px;
     }
 
@@ -301,7 +319,7 @@
       color:#b33;
       font-family:Lora, serif;
       margin:0 0 10px;
-      font-size: 20px;
+      font-size: 30px;
     }
 
     /* MOST VISITED CAROUSEL */
@@ -474,6 +492,7 @@
       grid-template-columns:1fr 1fr 1fr;
       gap:12px;
       height:250px;
+      font-size: 18px;
     }
 
     .footer h5{
@@ -481,7 +500,7 @@
       color:#fa7a11;
       margin-top: 0;
       margin-bottom: 0;
-      font-size: 20px;
+      font-size: 30px;
     }
 
     /* MOBILE */
@@ -657,7 +676,7 @@
           </div>
           <div class="info">
             <h3>Our Mission</h3>
-            <p style="text-align: justify;">Short mission statement.</p>
+            <p style="text-align: justify;">We exist to help you find not just good coffee, but places you’ll keep coming back to—through real reviews, real people, and real café moments</p>
           </div>
         </div>
 
