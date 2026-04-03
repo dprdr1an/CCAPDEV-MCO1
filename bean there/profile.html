@@ -4,1335 +4,530 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Bean There – Profile</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
-
   <style>
-    :root{
+    /* ─── TOKENS ────────────────────────────────────────────── */
+    :root {
       --bg: #efe8d6;
       --sidebar: #5b5f10;
       --accent: #7f7b2e;
       --muted: #bfb0a8;
       --content-width: 1500px;
-      --review-bg: #dce6f7; /* Light blue from the image */
-      --review-title: #d35f0f; /* Orange cafe name color */
+      --card-bg: #cfe0ff;
+      --profile-name: #c0441a;
     }
 
-    *{box-sizing:border-box}
-    html,body{
-      height:100%;
-      margin:0;
-      font-family:Montserrat, system-ui, sans-serif;
-      background:var(--bg);
-      color:#2b2b2b;
-    }
+    /* ─── RESET ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: Montserrat, system-ui, sans-serif; background: var(--bg); color: #2b2b2b; }
 
-    .frame{
-      width:100%;
-      height:100vh;
-      overflow:hidden;
-    }
+    /* ─── ANIMATIONS ─────────────────────────────────────────── */
+    @keyframes floatUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+    .animate-on-load { opacity:0; animation: floatUp 0.9s ease-out forwards; }
+    .delay-1 { animation-delay: 0.15s; }
+    .delay-2 { animation-delay: 0.35s; }
 
-    .layout{
-      display:grid;
-      grid-template-columns:260px 1fr;
-      height:100%;
-      column-gap:18px;
-    }
+    /* ─── OUTER FRAME ────────────────────────────────────────── */
+    .frame  { width:100%; height:100vh; overflow:hidden; }
+    .layout { display:grid; grid-template-columns:260px 1fr; height:100%; column-gap:18px; }
 
-    /* SIDEBAR */
-    .sidebar{
-      background:var(--sidebar);
-      color:#fff;
-      padding:28px;
-      margin:18px 0 18px 18px;
-      border-radius:22px;
-      height:calc(100% - 36px);
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
+    /* ─── SIDEBAR ────────────────────────────────────────────── */
+    .sidebar { background:var(--sidebar); color:#fff; padding:28px; margin:18px 0 18px 18px; border-radius:22px; height:calc(100% - 36px); display:flex; flex-direction:column; justify-content:space-between; }
+    .logo    { font-family:Lora,serif; font-size:42px; font-weight:700; letter-spacing:1px; }
+    .nav     { margin-top:36px; display:flex; flex-direction:column; gap:26px; }
+    .nav a   { color:#fff; text-decoration:none; font-size:20px; }
+    .nav a:hover, .sidebar .auth div:hover { color:#fa7a11; cursor:pointer; transition:0.3s; }
+    .auth    { font-size:20px; }
 
-    .logo{
-      font-family:Lora, serif;
-      font-size:42px;
-      font-weight:700;
-      letter-spacing:1px;
-    }
-
-    /* Floating + button */
-/*.fab{
-  position: fixed;
-  right: 32px;
-  bottom: 32px;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: none;
-  background: #ee6a45;
-  color: #fff;
-  font-size: 40px;
-  line-height: 64px;
-  font-weight: 700;
-  cursor: pointer;
-  z-index: 2000;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.20);
-}
-.fab:hover{ transform: translateY(-1px); }
-.fab:active{ transform: translateY(0px); } */
-#addReviewFab {
-  position: fixed;   
-  bottom: 30px;      
-  right: 30px;       
-
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
-
-  background-color: #ee6a45;
-  color: white;
-  font-size: 36px;
-  border: none;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-  z-index: 9999;     /* keeps it above everything */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-/* Write Review modal styling */
-.write-review-panel{
-  background-color: #f8f5ee;
-  border-radius: 20px;
-  padding: 30px 26px;
-  width: min(520px, calc(100% - 32px));
-  position: relative;
-}
-
-.write-review-title{
-  font-family: 'Lora', serif;
-  font-size: 34px;
-  margin: 0 0 18px;
-  text-align: center;
-  color: #4a3f35;
-}
-
-.wr-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 12px 0;
-}
-
-.wr-row label {
-  width: auto;           /* ✅ remove fixed width */
-  min-width: 100px;      /* ✅ optional: keeps alignment neat */
-  text-align: left;
-  font-weight: 700;
-  color: #4a3f35;
-}
-
-#wrcafe, #wrCafe, #wrText{
-  font-family: Montserrat, system-ui, sans-serif;
-}
-
-#wrCafe{
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1.5px solid rgba(0,0,0,0.18);
-  background: #fff;
-  box-sizing: border-box;
-  display: block;
-}
-
-#wrText{
-  flex:1;
-  min-height: 120px;
-  border-radius: 14px;
-  border: 1.5px solid rgba(0,0,0,0.18);
-  padding: 14px;
-  resize: none;
-}
-
-.wr-stars{ display:flex; gap:8px; }
-.wr-star{
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid #7f7b2e;
-  background: transparent;
-  cursor: pointer;
-}
-.wr-star.filled{ background:#7f7b2e; }
-
-.wr-tags{ justify-content:center; flex-wrap:wrap; }
-.wr-tag{
-  border: 1.5px solid rgba(0,0,0,0.35);
-  background: transparent;
-  border-radius: 20px;
-  padding: 6px 14px;
-  cursor: pointer;
-}
-.wr-tag.active{
-  background: rgba(127,123,46,0.14);
-  border-color: rgba(127,123,46,0.7);
-}
-
-.wr-actions{ display:flex; justify-content:center; margin-top: 18px; }
-    .nav{
-      margin-top:36px;
-      display:flex;
-      flex-direction:column;
-      gap:26px;
-    }
-
-    .nav a{
-      color:#fff;
-      text-decoration:none;
-      font-size:20px;
-    }
-
-    .auth{font-size:20px}
-
-    .sidebar .nav a:hover,
-    .sidebar .auth div:hover{
-      color:#fa7a11;
-      cursor:pointer;
-      transition:0.3s;
-    }
-    /* Animation Keyframes */
-@keyframes floatUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Animation Classes */
-.animate-on-load {
-  opacity: 0;
-  animation: floatUp 0.9s ease-out forwards;
-}
-
-.delay-1 { animation-delay: 0.15s; }
-.delay-2 { animation-delay: 0.35s; }
-
-/* Ensure both containers share the same base layout */
-#reviewContainer, #repliesContainer {
-  display: flex;
-  width: 100%;
-  min-height: 220px;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Specific fix for the replies container to match the blue box */
-/* Force the replies carousel to match the main review carousel exactly */
-#repliesContainer {
-  background-color: #dce6f7 !important;
-  min-height: 220px;
-  padding: 0;
-}
-
-/* Ensure the review card inside the replies container doesn't add extra margin */
-#repliesContainer .review-card {
-  width: 100%;
-  box-shadow: none; /* Optional: remove shadow if it looks too 'heavy' inside the blue box */
-  margin: 0;
-}
-    /* Custom Login Modal Styles */
-    .login-custom-panel {
-      max-width: 480px;
-      width: 90%;
-      border-radius: 20px;
-      padding: 40px !important;
-    }
-
-    .modal-title {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      font-size: 32px;
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .modal-close-btn {
-      position: absolute;
-      top: 20px;
-      right: 25px;
-      border: 0;
-      background: transparent;
-      font-size: 28px;
-      cursor: pointer;
-      color: #333;
-    }
-
-    .input-group {
-      display: flex;
-      align-items: center;
-      margin-bottom: 25px;
-      gap: 15px;
-    }
-
-    .input-group label {
-      font-size: 20px;
-      min-width: 110px;
-    }
-
-    .input-group input {
-      flex: 1;
-      padding: 5px;
-      border: 0;
-      border-bottom: 1px solid #ccc;
-      font-size: 18px;
-      outline: none;
-    }
-
-    .login-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 30px;
-    }
-
-    .remember-me {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 18px;
-    }
-
-    /* Styling the Checkbox to match the olive theme */
-    .remember-me input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--sidebar);
-      cursor: pointer;
-    }
-
-    .done-btn {
-      padding: 6px 35px;
-      border-radius: 25px;
-      border: 1.5px solid var(--sidebar);
-      background: #fff;
-      font-weight: 700;
-      font-size: 18px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .done-btn:hover {
-      background: #f8f8f0;
-    }
-
-    .nav a{
-      color:#fff;
-      text-decoration:none;
-      font-size:20px;
-    }
-
-    .auth{font-size:20px}
-
-    .sidebar .nav a:hover {
-      color: #fa7a11;    
-      transition: 0.3s ease;
-    }
-
-    .sidebar .auth div:hover {
-      color: #fa7a11;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    /* Modal Styles */
-    .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
-    .modal[hidden] { display: none; }
-    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
-    .modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
-
-    /* MAIN */
-    .main{
+    /* ─── MAIN PANEL ─────────────────────────────────────────── */
+    .main {
       height:calc(100% - 36px);
       margin:18px 18px 0 0;
-      padding:20px 20px;
+      padding:28px 28px 28px;
       border:1.5px solid rgba(127,123,46,0.4);
       border-radius:24px;
       overflow-y:auto;
       position:relative;
     }
 
-    .search-area{
-      flex: 1;          /* ⬅ THIS IS THE KEY */
-      display: flex;
+    /* ─── MODALS — z-index 9000, always on top ───────────────── */
+    .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:9000; }
+    .modal[hidden] { display:none; }
+    .modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.38); }
+    .modal-panel {
+      position:relative; background:#fff;
+      width:min(680px, calc(100% - 48px));
+      border-radius:16px; padding:24px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.22);
+      border:1px solid rgba(0,0,0,0.06);
+      z-index:2; font-family:inherit;
     }
-
-    .search-row{
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      max-width: var(--content-width);
-      margin: 0 auto;          /* center the whole row */
-      margin-bottom: 24px; 
+    .modal-close { background:transparent; border:0; font-size:18px; cursor:pointer; padding:6px; }
+    .modal-close-review {
+      position:absolute; top:18px; right:22px;
+      font-size:28px; color:#4a3f35;
+      border:none; background:transparent; cursor:pointer; line-height:1;
     }
+    .modal-close-review:hover { opacity:0.7; }
+    .btn-secondary:hover { background:rgba(0,0,0,0.04); }
+    .btn-primary { background:var(--accent); color:#fff; border-radius:8px; }
 
-    .search-wrap{
-      flex: 1;                 /* ⬅ key line */
-      display: flex;
+    /* ─── FAB — z-index 800, always below modals ─────────────── */
+    #addReviewFab {
+      position:fixed; bottom:30px; right:30px;
+      width:65px; height:65px; border-radius:50%;
+      background:#ee6a45; color:#fff; font-size:36px;
+      border:none; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; z-index:800;
+      box-shadow:0 4px 14px rgba(0,0,0,0.25);
+      transition:transform 0.15s ease, opacity 0.2s ease;
     }
+    #addReviewFab:hover { transform:translateY(-2px); }
+    #addReviewFab.hidden-fab { opacity:0; pointer-events:none; }
 
-    #q{
-      font-family:Montserrat, system-ui, sans-serif;
+    /* ─── USER MENU (top-right) ─────────────────────────────── */
+    .user-menu { position:absolute; top:20px; right:28px; }
+    .user-mini-btn {
+      width:50px; height:50px; border-radius:50%; padding:0;
+      border:5px solid rgba(127,123,46,0.15); background:#fff;
+      display:inline-flex; align-items:center; justify-content:center;
+      cursor:pointer; box-sizing:border-box;
     }
+    .user-mini-btn img { display:block; width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .user-dropdown {
+      position:absolute; top:calc(100% + 12px); right:0; width:270px;
+      background:#fff; border-radius:12px;
+      box-shadow:0 12px 30px rgba(0,0,0,0.12);
+      border:1px solid rgba(0,0,0,0.06);
+      padding:10px; z-index:1200; font-size:15px;
+    }
+    .ud-header { padding:8px 10px; text-align:left; }
+    .ud-greet  { font-weight:700; color:#111; font-size:15px; }
+    .ud-sub    { color:#6b6b6b; margin-top:4px; font-size:13px; }
+    .ud-divider { height:1px; background:rgba(0,0,0,0.06); margin:8px 0; border-radius:2px; }
+    .ud-list   { list-style:none; padding:0; margin:0; }
+    .ud-item   { width:100%; text-align:left; background:transparent; border:0; padding:10px; border-radius:8px; cursor:pointer; font-weight:600; }
+    .ud-item:hover { background:rgba(127,123,46,0.06); }
+    .ud-signout { padding:8px 10px; text-align:left; }
+    .ud-signout-btn { width:100%; background:transparent; border:0; padding:10px; border-radius:8px; color:#111; cursor:pointer; font-weight:700; }
+    .ud-signout-btn:hover { background:rgba(255,80,60,0.06); }
+    @media(max-width:520px) { .user-dropdown { right:8px; left:8px; width:auto; } }
 
-    .search{
-      width:100%;
+    /* ─── PROFILE HEADER (café page style) ──────────────────── */
+    .profile-header {
+      display:flex; align-items:flex-start; gap:28px;
       max-width:var(--content-width);
-      height: 50px;
-      padding: 0 16px;
-      border-radius:40px;
-      border:1.5px solid rgba(127,123,46,0.4);
-      background:#eee0c5;
-      display:flex;
-      align-items:center;
+      margin:0 auto 32px;
+      padding-bottom:28px;
+      border-bottom:1.5px solid rgba(127,123,46,0.18);
+    }
+    .avatar-large {
+      width:140px; height:140px; flex:0 0 140px;
+      border-radius:50%; overflow:hidden;
+      border:6px solid #e2d9c8; background:#fff;
+      box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    }
+    .avatar-large img { width:100%; height:100%; object-fit:cover; display:block; }
+    .profile-meta { flex:1; min-width:0; padding-top:8px; }
+    .profile-meta h1 {
+      font-family:Lora,serif; font-size:44px; font-weight:700;
+      color:var(--profile-name); margin:0 0 6px;
+      line-height:1.1; letter-spacing:-0.5px;
+    }
+    .handle-row { display:flex; align-items:center; gap:8px; font-size:15px; color:#2b5b6f; font-weight:600; margin-bottom:8px; }
+    .dot { color:#aaa; }
+    #titleText { color:#6b7280; font-weight:500; }
+    #bioText   { margin:0 0 14px; color:var(--muted); font-size:14px; line-height:1.55; }
+    .edit-profile-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 18px; border-radius:20px;
+      border:1.5px solid rgba(127,123,46,0.45);
+      background:transparent; cursor:pointer;
+      font-weight:600; font-size:13px;
+      font-family:Montserrat,sans-serif;
+      transition:background 0.2s;
+    }
+    .edit-profile-btn:hover { background:rgba(127,123,46,0.06); }
+
+    /* ─── SEGMENTED CONTROL ───────────────────────────────────── */
+    .seg-wrap { max-width:var(--content-width); margin:0 auto 24px; }
+    .seg-bar  { display:inline-flex; gap:0; background:rgba(207,224,255,0.5); border-radius:14px; padding:5px; }
+    .seg-btn  {
+      font-family:Montserrat,sans-serif; font-weight:700; font-size:14px;
+      padding:10px 40px; border:none; border-radius:10px;
+      cursor:pointer; background:transparent; color:#5b7ba8;
+      transition:background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .seg-btn.active { background:#fff; color:#253d67; box-shadow:0 2px 8px rgba(0,0,0,0.10); }
+
+    /* ─── SECTION TITLES (café title style) ─────────────────── */
+    .section       { max-width:var(--content-width); margin:0 auto; margin-bottom: 10px; }
+    .section-title {
+      font-family:Lora,serif; font-size:44px; font-weight:700;
+      color:var(--profile-name); margin:0 0 20px; letter-spacing:-0.5px;
     }
 
-    .search input{
-      flex:1;
-      border:0;
-      background:transparent;
-      outline:none;
-      font-size:18px;
-      line-height: 22px;
-      color:#6d6910;
+    /* ─── HORIZONTAL SCROLL TRACK ────────────────────────────── */
+    .h-scroll-track {
+      display:flex; gap:22px;
+      overflow-x:auto; overflow-y:visible;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:18px;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(127,123,46,0.25) transparent;
     }
+    .h-scroll-track::-webkit-scrollbar { height:5px; }
+    .h-scroll-track::-webkit-scrollbar-track { background:transparent; }
+    .h-scroll-track::-webkit-scrollbar-thumb { background:rgba(127,123,46,0.25); border-radius:10px; }
 
-    .search input::placeholder{
-      color:#8a8f7a;
-    }
-
-    .search button{
-      border:0;
-      background:transparent;
-      cursor:pointer;
-    }
-
-    .search button img{
-      width: 18px;
-      height: 18px;
-      display: block;
-    }
-
-    /* modal avatar preview small tweaks */
-#modalAvatarPreview{ border-radius:50%; display:block; }
-#inputAvatar{ font-size:14px; }
-#removeAvatarBtn{ background:transparent; }
-#removeAvatarBtn:hover{ background:rgba(0,0,0,0.04); }
-
-    /* Modal for Edit Profile */
-.modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:1600; }
-.modal[hidden]{ display:none; }
-.modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0.22); border-radius:12px; }
-.modal-panel{
-  position:relative;
-  background: #fff;
-  width: min(680px, calc(100% - 48px));
-  border-radius:12px;
-  padding:18px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.18);
-  border:1px solid rgba(0,0,0,0.06);
-  z-index:2;
-  font-family: inherit;
-}
-
-/* small utility classes */
-.modal-close{ background:transparent;border:0;font-size:18px;cursor:pointer;padding:6px; }
-.btn-secondary:hover{ background: rgba(0,0,0,0.04); }
-.btn-primary{ background:var(--accent); color:#fff; border-radius:8px; }
-
-/* ensure form controls readable on small screens */
-@media(max-width:520px){
-  .modal-panel{ 
-    width: calc(100% - 32px); 
-    padding:14px; 
-  }
-}
-
-    /* PROFILE HEADER */
-    .profile-header{
-      display:flex;
-      align-items:flex-start;
-      gap:22px;
-      max-width:var(--content-width);
-      margin:6px auto 30px;
-    }
-
-    .profile-avatar{
-      flex:0 0 auto;
-    }
-
-    .avatar-large{
-      width:120px;
-      height:120px;
-      border-radius:50%;
-      overflow:hidden;
-      border:8px solid #dfe7e5;
-      background:#fff;
-      flex:0 0 120px;
-    }
-    .avatar-large img{ width:100%; height:100%; object-fit:cover; display:block; }
-
-    .profile-meta{
-      flex:1;
-    }
-    .profile-meta h1{
-      margin-top: 8px; /* Adjust this value (e.g., 2px to 8px) to taste */
-  margin-bottom: 0;
-  font-size: 44px;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-    }
-    .profile-meta .handle{
-      color:#2b5b6f;
-      margin-top:6px;
-      font-size:16px;
-      font-weight:600;
-    }
-    .profile-meta p{
-      margin:10px 0 0;
-      color:var(--muted);
-    }
-
-    .edit-btn{
-      display:inline-block;
-      margin-top:12px;
-      padding:8px 16px;
-      border-radius:20px;
-      border:1.5px solid rgba(127,123,46,0.4);
-      background:transparent;
-      cursor:pointer;
-      font-weight:600;
-    }
-
-    .edit-tag {
-      position: relative;
-      z-index: 5;
-      pointer-events: auto;
-    }
-    /* Sections */
-    .section{
-      max-width:var(--content-width);
-      margin:28px auto;
-    }
-    .section h2{
-      font-size:32px;
-      margin:0 0 18px;
-      letter-spacing:-0.3px;
-      text-align: center;
-    }
-    /* ----- user dropdown ----- */
-    .user-menu{ 
-      position:relative; 
-      display:inline-block; 
-      flex:0 0 auto; 
-    }
-    .user-mini-btn{
-      width:50px;
-      height: 50px;
-      border-radius:50%;
-      padding:0;
-      border:5px solid rgba(127,123,46,0.15);
-      background:#fff;
-
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-
-      box-sizing:border-box;
-    }
-    .user-mini-btn img{ 
-      display:block;
-      width:100%; 
-      height:100%; 
-      object-fit:cover; 
-      border-radius:50%; 
-    }
-
-/* dropdown panel */
-.user-dropdown{
-  position:absolute;
-  top:calc(100% + 12px);
-  right:0;
-  width:270px;
-  background:#fff;
-  border-radius:12px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-  border:1px solid rgba(0,0,0,0.06);
-  padding:10px;
-  z-index:1200;
-  font-size:15px;
-}
-
-/* header */
-.ud-header{ padding:8px 10px; text-align:left; }
-.ud-greet{ font-weight:700; color:#111; font-size:15px; }
-.ud-sub{ color:#6b6b6b; margin-top:4px; font-size:13px; }
-
-/* divider */
-.ud-divider{ height:1px; background:rgba(0,0,0,0.06); margin:8px 0; border-radius:2px; }
-
-/* list */
-.ud-list{ list-style:none; padding:0; margin:0; }
-.ud-item{
-  width:100%;
-  text-align:left;
-  background:transparent;
-  border:0;
-  padding:10px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
-}
-.ud-item:hover{ background:rgba(127,123,46,0.06); }
-
-/* signout */
-.ud-signout{ padding:8px 10px; text-align:left; }
-.ud-signout-btn{
-  width:100%;
-  background:transparent;
-  border:0;
-  padding:10px;
-  border-radius:8px;
-  color:#111;
-  cursor:pointer;
-  font-weight:700;
-}
-.ud-signout-btn:hover{ background:rgba(255,80,60,0.06); }
-
-/* small screens: keep dropdown within viewport */
-@media(max-width:520px){
-  .user-dropdown{ right:8px; left:8px; width:auto; }
-}
-    /* carousel styles */
-    .carousel-wrapper{
-      position: relative;
-      padding: 0 48px; /* space for arrows */
-    }
-
-    .carousel{
-      /* Removed fixed background and height to accommodate review card */
-      position:relative;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width: 100%;
-    }
-
-    /* FIXED: Changed selector from .carousel .arrow to .carousel-wrapper .arrow */
-    /* FIXED: Solid Orange Arrows */
-    .carousel-wrapper .arrow {
-      position: absolute;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #ee6a45 !important; /* Solid orange from your design */
-      color: #fff !important;
-      opacity: 1 !important; /* Forces the arrow to be fully opaque */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      cursor: pointer;
-      top: 50%;
-      transform: translateY(-50%);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 20; /* Ensures arrows stay above the blue box */
-      font-size: 24px;
-      border: none;
-    }
-
-    /* FIXED: Solid Blue Review Container */
-    .carousel {
-      position: relative;
-      display: flex;
-      width: 100%;
-      background-color: #dce6f7 !important; /* Solid light blue */
-      border-radius: 20px;
-      overflow: hidden;
-      opacity: 1 !important; /* Removes the washed-out look */
-      min-height: 180px;
-    }
-    .carousel-wrapper .arrow.left{ left: 0px; }
-    .carousel-wrapper .arrow.right{ right: 0px; }
-
-    /* replies carousel larger height */
-    .carousel.large{ 
-        background: #cfe0ff;
-        border-radius:16px;
-        padding:28px;
-        height:150px; 
-    }
-
-    /* --- NEW REVIEW CARD STYLES --- */
+    /* ─── REVIEW CARD — identical to ratings.html ────────────── */
     .review-card {
-      background-color: var(--review-bg);
-      border-radius: 20px;
-      padding: 20px;
-      display: flex;
-      gap: 20px;
-      width: 100%;
-      text-align: left;
-      position: relative; /* For edit button positioning */
+      flex:0 0 660px;
+      scroll-snap-align:start;
+      background:var(--card-bg);
+      border-radius:22px; padding:22px;
+      display:grid; grid-template-columns:180px 1fr; gap:22px;
+      transition:transform 0.2s ease, box-shadow 0.2s ease;
+      position:relative;        /* needed for absolute top-right badge */
     }
+    .review-card:hover { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.12); }
 
-    .review-img {
-      width: 180px;
-      height: 180px;
-      border-radius: 16px;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
+    .review-img { width:100%; height:180px; border-radius:16px; overflow:hidden; background:#dfe8f5; }
+    .review-img img { width:100%; height:100%; object-fit:cover; }
 
-    .review-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+    .review-content { display:flex; flex-direction:column; gap:8px; }
+    .review-top     { display:flex; justify-content:space-between; font-size:13px; color:#253d67; }
+    .review-title   { font-family:Lora,serif; font-size:26px; color:#d45a2a; display:flex; align-items:center; gap:8px; }
+    .review-location { color:#253d67; font-size:14px; font-weight:600; margin-top:-4px; }
+    .review-text    { font-size:14px; line-height:1.55; flex:1; }
+    .review-tags    { display:flex; gap:10px; font-size:12px; color:#253d67; flex-wrap:wrap; }
+    .tag            { display:inline-flex; align-items:center; gap:5px; }
+    .tag img        { width:13px; height:13px; }
+    .rating         { display:inline-flex; gap:3px; margin-left:4px; }
+    .rating img     { width:17px; height:17px; }
+    .review-actions { display:flex; gap:10px; margin-top:auto; padding-top:8px; align-items:center; }
+    .edited-label   { font-size:11px; color:#718096; font-style:italic; }
 
-    .review-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: #4a5568;
+    /* Top-right action badge (subtle, appears inside card) */
+    .card-top-btn {
+      position:absolute; top:14px; right:14px;
+      width:30px; height:30px; border-radius:50%;
+      border:none; background:rgba(255,255,255,0.65);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; z-index:2;
+      opacity:0.35;
+      transition:opacity 0.2s, background 0.2s;
     }
+    .card-top-btn:hover { opacity:1; background:rgba(255,255,255,0.95); }
+    .card-top-btn img   { width:15px; height:15px; display:block; }
 
-    .review-user {
-      font-weight: 700;
-      color: #2d3748;
-      font-size: 16px;
-    }
-
-    .review-date {
-      display: block;
-      font-size: 13px;
-    }
-    
-    .edited-label {
-        font-size: 11px;
-        color: #718096;
-        font-style: italic;
-    }
-
-    .amenities-list {
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-      color: #4a5568;
-    }
-
-    .amenity-item {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .cafe-title-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 4px;
-    }
-
-    .cafe-name {
-      font-family: Lora, serif;
-      font-weight: 700;
-      font-size: 28px;
-      color: var(--review-title);
-      margin: 0;
-    }
-
-    .rating-beans {
-        font-size: 20px;
-        letter-spacing: 2px;
-    }
-
-    .cafe-address {
-      font-weight: 700;
-      font-size: 15px;
-      color: #2d3748;
-      margin-bottom: 12px;
-    }
-
-    .review-text {
-      font-size: 15px;
-      line-height: 1.5;
-      color: #4a5568;
-      margin: 0 0 20px 0; /* Bottom margin for button space */
-      flex-grow: 1;
-    }
-
-    .edit-review-btn-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: auto;
-    }
-
+    /* Inline action buttons */
     .btn-edit-review {
-      background: transparent;
-      border: 1.5px solid #2d3748;
-      border-radius: 20px;
-      padding: 8px 20px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
+      padding:6px 18px; border-radius:20px;
+      border:1.5px solid var(--accent); background:transparent;
+      font-weight:600; font-size:12px; cursor:pointer;
+      font-family:Montserrat,sans-serif; transition:background 0.2s;
+
+      display: inline-flex;      
+      align-items: center;      
+      gap: 6px;            
+    }
+    .btn-edit-review:hover { background:rgba(127,123,46,0.08); }
+
+    .delete-reply-btn {
+      padding:6px 14px; border-radius:20px;
+      border:1.5px solid #a94442; background:transparent;
+      font-weight:600; font-size:12px; cursor:pointer;
+      font-family:Montserrat,sans-serif; color:#a94442;
+      display:inline-flex; align-items:center; gap:5px;
+      transition:background 0.2s;
+    }
+    .delete-reply-btn:hover { background:rgba(169,68,66,0.06); }
+
+    .empty-state {
+      flex:0 0 auto;
+      padding:40px 60px; text-align:center;
+      color:#666; font-size:15px;
+      background:rgba(207,224,255,0.35); border-radius:22px;
     }
 
-    .btn-edit-review:hover {
-        background: rgba(0,0,0,0.05);
-    }
-
-    .upload-btn {
-      display: inline-block;
-      padding: 8px 14px;
-      border-radius: 20px;
-      border: 1.5px solid #4a3f35;
-      background: white;
-      cursor: pointer;
-      font-size: 14px;
-      transition: 0.2s;
-    }
-
-    .upload-btn:hover {
-      background: #f5f3f0;
-    }
-
-    .file-name {
-      margin-left: 10px;
-      font-size: 13px;
-      color: #777;
-    }
-
-
-    @media(max-width:980px){
-    :root{ --content-width: 820px; }
-    .search{ flex:1 1 calc(100% - 64px); max-width: calc(var(--content-width) - 64px); }
-    .user-mini{ width:48px; height:48px; flex:0 0 48px; }
-    .review-card { flex-direction: column; }
-    .review-img { width: 100%; height: 200px; }
-    .review-header { flex-direction: column; gap: 10px; }
-  }
-
-  @media(max-width:760px){
-    .layout{grid-template-columns:1fr}
-    .sidebar{order:2;height:auto}
-    .main{order:1}
-    .user-mini{ display:none; } /* hide mini on very small screens */
-    .carousel-wrapper { padding: 0; }
-    /* FIXED: Updated selector here too */
-    .carousel-wrapper .arrow { display: none; /* hide arrows on mobile, maybe use swipe later */ }
-  }
-  /* --- NEW: Edit Review Modal Specific Styles --- */
+    /* ─── WRITE / EDIT REVIEW PANEL ──────────────────────────── */
     .edit-review-panel {
-      background-color: #f8f5ee; /* Light beige background from image */
-      border-radius: 20px;
-      padding: 40px 30px;
-      width: min(480px, calc(100% - 32px)); /* Fixed width, responsive */
-      text-align: center;
-      border: none;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      background:#f8f5ee; border-radius:20px; padding:36px 30px;
+      width:min(480px, calc(100% - 32px));
+      text-align:center; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1);
     }
-
-    .edit-review-header {
-      position: relative;
-      margin-bottom: 30px;
-    }
-
-    .edit-review-header h3 {
-      font-family: 'Lora', serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: #4a3f35; /* Dark brown color */
-      margin: 0;
-      line-height: 1.2;
-    }
-
-    .edit-review-header h3 span {
-      display: block;
-      font-size: 24px;
-      margin-top: 5px;
-    }
-
-    .modal-close-review{
-  position: absolute;
-  top: 18px;
-  right: 22px;
-  font-size: 28px;
-  color: #4a3f35;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.modal-close-review:hover{
-  opacity: 0.7;
-}
-
-    #editReviewText {
-  flex: 1;
-  min-height: 120px;
-  border-radius: 14px;
-  border: 1.5px solid rgba(0,0,0,0.18);
-  padding: 14px;
-  resize: none;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 16px;
-  color: #4a3f35;
-  background: #fff;
-  outline: none;
-  text-align: left;
-}
-#editReviewTags {
-  position: relative;
-  z-index: 4;
-}
-
-#editReviewForm .wr-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 12px 0;
-}
-
-#editReviewForm .wr-row label {
-  width: 120px;
-  font-weight: 700;
-  color: #4a3f35;
-}
-    #editReviewText::placeholder {
-      color: #b0aba5;
-    }
-
-    .edit-review-footer {
-      margin-top: 30px;
-    }
-
+    .edit-review-header { position:relative; margin-bottom:24px; }
+    .edit-review-header h3 { font-family:'Lora',serif; font-size:30px; font-weight:700; color:#4a3f35; margin:0; line-height:1.2; }
+    .edit-review-footer { margin-top:24px; }
     .btn-save-review {
-      background-color: transparent;
-      color: #4a3f35;
-      border: 2px solid #4a3f35; /* Dark brown border */
-      border-radius: 30px;
-      padding: 10px 50px;
-      font-size: 20px;
-      font-weight: 700;
-      font-family: 'Montserrat', sans-serif;
-      cursor: pointer;
-      transition: all 0.2s;
+      background:transparent; color:#4a3f35; border:2px solid #4a3f35;
+      border-radius:30px; padding:10px 50px; font-size:18px; font-weight:700;
+      font-family:'Montserrat',sans-serif; cursor:pointer; transition:all 0.2s;
     }
+    .btn-save-review:hover { background:#4a3f35; color:#fff; }
 
-    .btn-save-review:hover {
-      background-color: #4a3f35;
-      color: #fff;
-    }
-    .wr-tag{
-      border: 1.5px solid rgba(0,0,0,0.35);
-      background: transparent;
-      border-radius: 20px;
-      padding: 6px 14px;
-      cursor: pointer;
-      pointer-events: auto;
-    }
+    /* Form rows */
+    .wr-row  { display:flex; align-items:center; gap:10px; margin:12px 0; }
+    .wr-row label { min-width:100px; text-align:left; font-weight:700; color:#4a3f35; }
+    #wrcafe, #wrCafe, #wrText, #editReviewText { font-family:Montserrat,system-ui,sans-serif; }
+    #wrCafe { flex:1; width:100%; min-width:0; padding:8px 10px; border-radius:10px; border:1.5px solid rgba(0,0,0,0.18); background:#fff; }
+    #wrText, #editReviewText { flex:1; min-height:120px; border-radius:14px; border:1.5px solid rgba(0,0,0,0.18); padding:14px; resize:none; font-size:16px; color:#4a3f35; background:#fff; outline:none; text-align:left; }
+    #editReviewText::placeholder { color:#b0aba5; }
+    .wr-stars { display:flex; gap:8px; }
+    .wr-star  { width:22px; height:22px; border-radius:50%; border:2px solid #7f7b2e; background:transparent; cursor:pointer; }
+    .wr-star.filled { background:#7f7b2e; }
+    .wr-tags  { justify-content:center; flex-wrap:wrap; }
+    .wr-tag   { border:1.5px solid rgba(0,0,0,0.35); background:transparent; border-radius:20px; padding:6px 14px; cursor:pointer; pointer-events:auto; }
+    .wr-tag.active { background:rgba(127,123,46,0.14); border-color:rgba(127,123,46,0.7); }
+    .edit-tag { position:relative; z-index:5; pointer-events:auto; }
+    #editReviewTags { position:relative; z-index:4; }
+    #editReviewForm .wr-row { display:flex; align-items:center; gap:14px; margin:12px 0; }
+    #editReviewForm .wr-row label { width:120px; font-weight:700; color:#4a3f35; }
+    .upload-btn { display:inline-block; padding:8px 14px; border-radius:20px; border:1.5px solid #4a3f35; background:white; cursor:pointer; font-size:14px; transition:0.2s; }
+    .upload-btn:hover { background:#f5f3f0; }
+    .file-name { margin-left:10px; font-size:13px; color:#777; }
 
-    /* ✅ UNIFIED AUTH MODAL STYLE */
-    .auth-panel {
-      background-color: #f8f5ee;
-      border-radius: 20px;
-      padding: 40px 30px;
-      width: min(480px, calc(100% - 32px));
-      text-align: center;
-      border: none;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
+    /* ─── AUTH PANELS ─────────────────────────────────────────── */
+    .auth-panel { background:#f8f5ee; border-radius:20px; padding:40px 30px; width:min(480px, calc(100% - 32px)); text-align:center; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1); }
+    .auth-title { font-family:'Lora',serif; font-size:32px; font-weight:700; color:#4a3f35; margin:0 0 30px; line-height:1.2; }
+    .auth-group { display:flex; align-items:center; gap:14px; margin:14px 0; }
+    .auth-group label { min-width:110px; font-weight:700; color:#4a3f35; text-align:left; }
+    .auth-group input { flex:1; padding:10px; border-radius:10px; border:1.5px solid rgba(0,0,0,0.18); background:#fff; font-size:15px; outline:none; }
+    .auth-btn { margin-top:20px; padding:10px 40px; border-radius:30px; border:2px solid #4a3f35; background:transparent; font-size:18px; font-weight:700; cursor:pointer; color:#4a3f35; }
+    .auth-btn:hover { background:#4a3f35; color:#fff; }
+    .remember-row { justify-content:flex-start; gap:8px; margin-top:6px; }
+    .remember-row input[type="checkbox"] { width:16px; height:16px; accent-color:#5b5f10; cursor:pointer; }
+    .remember-row label { min-width:auto; font-weight:500; color:#4a3f35; cursor:pointer; }
 
-    /* title */
-    .auth-title {
-      font-family: 'Lora', serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: #4a3f35;
-      margin: 0 0 30px;
-      line-height: 1.2;
-    }
+    /* Modal avatar preview */
+    #modalAvatarPreview { border-radius:50%; display:block; }
+    #inputAvatar  { font-size:14px; }
+    #removeAvatarBtn { background:transparent; }
+    #removeAvatarBtn:hover { background:rgba(0,0,0,0.04); }
 
-    /* inputs */
-    .auth-group {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin: 14px 0;
+    /* ─── RESPONSIVE ──────────────────────────────────────────── */
+    @media(max-width:980px) {
+      :root { --content-width:820px; }
+      .review-card { flex:0 0 90vw; grid-template-columns:1fr; }
+      .review-img  { height:200px; }
+      .review-top  { flex-direction:column; gap:8px; }
+      .profile-meta h1 { font-size:34px; }
+      .section-title   { font-size:34px; }
     }
-
-    .auth-group label {
-      min-width: 110px;
-      font-weight: 700;
-      color: #4a3f35;
-      text-align: left;
+    @media(max-width:760px) {
+      .layout  { grid-template-columns:1fr; }
+      .sidebar { order:2; height:auto; }
+      .main    { order:1; }
+      .user-menu { display:none; }
     }
-
-    .auth-group input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1.5px solid rgba(0,0,0,0.18);
-      background: #fff;
-      font-size: 15px;
-      outline: none;
-    }
-
-    /* button */
-    .auth-btn {
-      margin-top: 20px;
-      padding: 10px 40px;
-      border-radius: 30px;
-      border: 2px solid #4a3f35;
-      background: transparent;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      color: #4a3f35;
-    }
-
-    .auth-btn:hover {
-      background: #4a3f35;
-      color: #fff;
-    }
-
-    .remember-row {
-      justify-content: flex-start;
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    .remember-row input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      accent-color: #5b5f10; /* matches your theme */
-      cursor: pointer;
-    }
-
-    .remember-row label {
-      min-width: auto;
-      font-weight: 500;
-      color: #4a3f35;
-      cursor: pointer;
-    }
-
-    .handle-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 6px;
-      font-size: 15px;
-      color: #2b5b6f;
-      font-weight: 600;
-    }
-
-    .dot {
-      color: #aaa;
-    }
-
-    #titleText {
-      color: #6b7280;
-      font-weight: 500;
+    @media(max-width:520px) {
+      .modal-panel { width:calc(100% - 32px); padding:14px; }
     }
   </style>
 </head>
-
 <body>
-  <div class="frame">
-    <div class="layout">
 
-      <aside class="sidebar animate-on-load delay-1">
-        <div>
-          <div class="logo">bean<br>there</div>
-          <nav class="nav">
-            <a href="index.html">Home</a>
-            <a href="profile.html">Profile</a>
-            <a href="tbv.html">TBV</a>
-            <a href="ratings.html">Ratings</a>
-          </nav>
+<div class="frame">
+  <div class="layout">
+
+    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+    <aside class="sidebar animate-on-load delay-1">
+      <div>
+        <div class="logo">bean<br>there</div>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="tbv.html">TBV</a>
+          <a href="ratings.html">Ratings</a>
+        </nav>
+      </div>
+      <div class="auth" id="authSection">
+        <div id="loginBtn"  style="margin-bottom:14px">Log in</div>
+        <div id="signupBtn">Sign up</div>
+      </div>
+      <div class="auth" id="userSection" style="display:none;">
+        <div id="welcomeUser" style="margin-bottom:14px"></div>
+        <div id="logoutBtn">Log out</div>
+      </div>
+    </aside>
+
+    <!-- ═══════════════ MAIN ═══════════════ -->
+    <main class="main animate-on-load delay-2">
+
+      <!-- User mini-menu (top right) -->
+      <div class="user-menu" id="userMenu">
+        <button id="userMenuBtn" class="user-mini-btn"
+                aria-haspopup="true" aria-expanded="false"
+                aria-controls="userDropdown" title="Open account menu">
+          <img id="avatarMiniImg" src="icons/noprof.jpg" alt="profile mini">
+        </button>
+        <div id="userDropdown" class="user-dropdown" role="menu" aria-labelledby="userMenuBtn" hidden>
+          <div class="ud-header">
+            <div class="ud-greet">Hi!</div>
+            <div class="ud-sub">Member</div>
+          </div>
+          <div class="ud-divider" role="separator"></div>
+          <ul class="ud-list" role="menu">
+            <li role="none"><button role="menuitem" class="ud-item" data-action="profile">Profile</button></li>
+            <li role="none"><button role="menuitem" class="ud-item" data-action="contact">Contact Us</button></li>
+            <li role="none"><button role="menuitem" class="ud-item" data-action="support">Support Us</button></li>
+          </ul>
+          <div class="ud-divider" role="separator"></div>
+          <div class="ud-signout">
+            <button role="menuitem" class="ud-signout-btn" data-action="signout">Sign Out</button>
+          </div>
         </div>
-        <div class="auth" id="authSection">
-          <div id="loginBtn" style="margin-bottom:14px">Log in</div>
-          <div id="signupBtn">Sign up</div>
+      </div>
+
+      <!-- Not logged in -->
+      <div id="profileMessage" style="display:none; text-align:center; margin-top:60px; font-size:18px;">
+        <h2>You're not logged in 👤</h2>
+        <p>Please log in or sign up to view your profile.</p>
+      </div>
+
+      <!-- ─── PROFILE HEADER ─── -->
+      <div class="profile-header" id="profileHeaderEl" style="display:none;">
+        <div class="avatar-large">
+          <img id="avatarLargeImg" src="icons/noprof.jpg" alt="profile photo">
         </div>
-        <div class="auth" id="userSection" style="display:none;">
-          <div id="welcomeUser" style="margin-bottom:14px"></div>
-          <div id="logoutBtn">Log out</div>
+        <div class="profile-meta">
+          <h1 id="nameText">Full Name</h1>
+          <div class="handle-row">
+            <span id="handleText">@username</span>
+            <span class="dot">·</span>
+            <span id="titleText">Member</span>
+          </div>
+          <p id="bioText">No bio added yet.</p>
+          <button class="edit-profile-btn" id="editProfileBtn"> <img src="icons/edit.png" width="13" style="opacity:0.75;"> Edit profile</button>
         </div>
-      </aside>
+      </div>
 
-      <main class="main animate-on-load delay-2">
+      <!-- ─── REVIEWS TAB ─── -->
+      <section class="section" id="tabReviews">
+        <h2 class="section-title">My Reviews</h2>
+        <div class="h-scroll-track" id="reviewContainer"></div>
+      </section>
 
+      <!-- ─── REPLIES TAB ─── -->
+      <section class="section" id="tabReplies">
+        <h2 class="section-title">My Replies</h2>
+        <div class="h-scroll-track" id="repliesContainer"></div>
+      </section>
 
+    </main>
+  </div><!-- /.layout -->
+</div><!-- /.frame -->
 
-            <div class="user-menu" id="userMenu" style="position:absolute; top:20px; right:28px;">
-              <button id="userMenuBtn" class="user-mini-btn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" title="Open account menu">
-                <img id="avatarMiniImg"src="icons/noprof.jpg" alt="profile mini">
-              </button>
+<!-- ═══════════════ FAB ═══════════════ -->
+<button id="addReviewFab" aria-label="Write a review" title="Write a review" style="display:none;">+</button>
 
-              <div id="userDropdown" class="user-dropdown" role="menu" aria-labelledby="userMenuBtn" hidden>
-                <div class="ud-header">
-                  <div class="ud-greet">Hi, Erylle Jerica Galinato!</div>
-                  <div class="ud-sub">Student</div>
-                </div>
-
-                <div class="ud-divider" role="separator"></div>
-
-                <ul class="ud-list" role="menu">
-                  <li role="none"><button role="menuitem" class="ud-item" data-action="profile">Profile</button></li>
-                  <li role="none"><button role="menuitem" class="ud-item" data-action="contact">Contact Us</button></li>
-                  <li role="none"><button role="menuitem" class="ud-item" data-action="support">Support Us</button></li>
-                </ul>
-
-                <div class="ud-divider" role="separator"></div>
-
-                <div class="ud-signout">
-                  <button role="menuitem" class="ud-signout-btn" data-action="signout">Sign Out</button>
-                </div>
-              </div> 
-            </div>
-
-        <div id="profileMessage" style="display:none; text-align:center; margin-top:40px; font-size:18px;">
-          <h2>You’re not logged in 👤</h2>
-          <p>Please log in or sign up to view your profile.</p>
-        </div>
-
-        <div class="profile-header">
-          <div class="avatar-large">
-  <img id="avatarLargeImg" src="icons/noprof.jpg" alt="profile large">
-</div>
-          <div id="editProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+<!-- ═══════════════ EDIT PROFILE MODAL ═══════════════ -->
+<div id="editProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
   <div class="modal-backdrop" data-close></div>
-
   <div class="modal-panel" role="document">
     <header style="display:flex;align-items:center;justify-content:space-between;">
       <h3 id="modalTitle" style="margin:0">Edit profile</h3>
       <button class="modal-close" aria-label="Close" data-close>✕</button>
     </header>
-
     <form id="editProfileForm" style="margin-top:14px;">
       <div style="display:flex;gap:14px;align-items:center;">
-        <div style="flex:0 0 auto; text-align:center;">
-          <div style="width:84px; height:84px; border-radius:50%; overflow:hidden; border:2px solid #e6eaea; display:inline-block;">
-            <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+        <div style="flex:0 0 auto;text-align:center;">
+          <div style="width:84px;height:84px;border-radius:50%;overflow:hidden;border:2px solid #e6eaea;display:inline-block;">
+            <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%;height:100%;object-fit:cover;display:block;">
           </div>
         </div>
-
         <div style="flex:1;">
           <label for="inputAvatar" style="display:block;font-weight:600;margin-bottom:6px;">Profile picture</label>
           <input id="inputAvatar" type="file" accept="image/*" />
-          <div id="avatarHelp" style="font-size:13px;color:#666;margin-top:6px;">PNG/JPG, max 3 MB. Preview shown above.</div>
-
+          <div style="font-size:13px;color:#666;margin-top:6px;">PNG/JPG, max 3 MB.</div>
           <div style="margin-top:8px;">
             <button type="button" id="removeAvatarBtn" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Remove photo</button>
           </div>
         </div>
       </div>
-
       <label for="inputUsername" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Username</label>
       <input id="inputUsername" type="text" placeholder="@your_username" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;" required>
-
       <label for="inputTitle" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Job Title</label>
       <input id="inputTitle" type="text" placeholder="Job Title" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;">
       <label for="inputBio" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Short bio</label>
-      <textarea id="inputBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;"></textarea>
-
+      <textarea id="inputBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;font-family:inherit;"></textarea>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
         <button type="button" class="btn-secondary" data-close style="padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Cancel</button>
-        <button type="submit" class="btn-primary" style="padding:8px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;">Save</button>
+        <button type="submit" class="btn-primary"   style="padding:8px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;">Save</button>
       </div>
     </form>
   </div>
 </div>
 
-
-
-  <div class="profile-meta">
-    <h1 id="nameText">Full Name</h1>
-
-    <div class="handle-row">
-      <span id="handleText">username</span>
-      <span class="dot">·</span>
-      <span id="titleText">Member</span>
-    </div>
-
-    <p id="bioText">No bio added yet.</p>
+<!-- ═══════════════ LOG IN MODAL ═══════════════ -->
+<div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeLogIn"></div>
+  <div class="modal-panel auth-panel">
+    <button id="xLogIn" class="modal-close-review">✕</button>
+    <h2 class="auth-title">Log in</h2>
+    <form id="logInForm">
+      <div class="auth-group"><label>Username:</label><input id="loginUser" type="text" required></div>
+      <div class="auth-group"><label>Password:</label><input id="loginPass" type="password" required></div>
+      <div class="auth-group remember-row"><input type="checkbox" id="rememberMe"><label for="rememberMe">Remember me</label></div>
+      <button type="submit" class="auth-btn">Log in</button>
+    </form>
   </div>
+</div>
 
-        </div>
-
-        <section class="section">
-          <h2>My reviews</h2>
-          <div class="carousel-wrapper">
-            <div class="arrow left" id="prevReviewBtn">‹</div>
-            <div class="arrow right" id="nextReviewBtn">›</div>
-            
-            <div class="carousel" aria-hidden="false" id="reviewContainer">
-                </div>
-          </div>
-        </section>
-
-        <section class="section" style="margin-top: 40px;">
-  <h2>Replies to other reviews</h2>
-  <div class="carousel-wrapper">
-    <div class="arrow left" id="prevReplyBtn">‹</div>
-    <div class="arrow right" id="nextReplyBtn">›</div>
-    
-    <div class="carousel" id="repliesContainer">
-    </div>
-  </div>
-</section>
-
-      </main>
-<!-- Floating + button -->
-<button id="addReviewFab" class="fab" aria-label="Write a review" title="Write a review">
-  +
-</button>
-      <div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
-    <div class="modal-backdrop" id="closeLogIn"></div>
-    <div class="modal-panel auth-panel">
-      <button id="xLogIn" class="modal-close-review">✕</button>
-      <h2 class="auth-title">Log in</h2>
-
-      <form id="logInForm">
-
-        <div class="auth-group">
-          <label>Username:</label>
-          <input id="loginUser" type="text" required>
-        </div>
-
-        <div class="auth-group">
-          <label>Password:</label>
-          <input id="loginPass" type="password" required>
-        </div>
-
-        <div class="auth-group remember-row">
-          <input type="checkbox" id="rememberMe">
-          <label for="rememberMe">Remember me</label>
-        </div>
-
-        <button type="submit" class="auth-btn">Log in</button>
-
-      </form>
-    </div>
-  </div>
-  <div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
+<!-- ═══════════════ SIGN UP MODAL ═══════════════ -->
+<div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" id="closeSignUp"></div>
-    <div class="modal-panel auth-panel">
-      <button id="xSignUp" class="modal-close-review">✕</button>
-
-      <h2 class="auth-title">Sign Up</h2>
-
-      <form id="signUpForm">
-
-        <div class="auth-group">
-          <label>Name:</label>
-          <input id="regName" type="text" required>
-        </div>
-
-        <div class="auth-group">
-          <label>Username:</label>
-          <input id="regUser" type="text" required>
-        </div>
-
-        <div class="auth-group">
-          <label>Password:</label>
-          <input id="regPass" type="password" required>
-        </div>
-
-        <div class="auth-group">
-          <label>Confirm:</label>
-          <input id="regConfirm" type="password" required>
-        </div>
-
-        <div class="auth-group">
-          <label>Job Title:</label>
-          <input id="regTitle" type="text">
-        </div>
-
-        <div class="auth-group">
-          <label>Bio:</label>
-          <input id="regBio" type="text">
-        </div>
-
-        <div class="auth-group">
-          <label>Photo:</label>
-          <input id="regAvatar" type="file" accept="image/*">
-        </div>
-
-        <button type="submit" class="auth-btn">Sign Up</button>
-      </form>
-    </div>
+  <div class="modal-panel auth-panel">
+    <button id="xSignUp" class="modal-close-review">✕</button>
+    <h2 class="auth-title">Sign Up</h2>
+    <form id="signUpForm">
+      <div class="auth-group"><label>Name:</label>      <input id="regName"    type="text" required></div>
+      <div class="auth-group"><label>Username:</label>  <input id="regUser"    type="text" required></div>
+      <div class="auth-group"><label>Password:</label>  <input id="regPass"    type="password" required></div>
+      <div class="auth-group"><label>Confirm:</label>   <input id="regConfirm" type="password" required></div>
+      <div class="auth-group"><label>Job Title:</label> <input id="regTitle"   type="text"></div>
+      <div class="auth-group"><label>Bio:</label>       <input id="regBio"     type="text"></div>
+      <div class="auth-group"><label>Photo:</label>     <input id="regAvatar"  type="file" accept="image/*"></div>
+      <button type="submit" class="auth-btn">Sign Up</button>
+    </form>
   </div>
+</div>
 
-    </div>
-  </div>
-  <!-- Write Review Modal -->
+<!-- ═══════════════ WRITE REVIEW MODAL ═══════════════ -->
 <div id="writeReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" data-close-write></div>
-
   <div class="modal-panel edit-review-panel" role="document">
-
     <header class="edit-review-header">
       <h3>Write Review</h3>
       <button class="modal-close-review" data-close-write>✕</button>
     </header>
-
     <form id="writeReviewForm">
       <div class="wr-row">
         <label for="wrCafe">Select cafe:</label>
-        <select id="wrCafe">
-          <option value="" selected disabled>Select…</option>
-        </select>
+        <select id="wrCafe"><option value="" selected disabled>Select…</option></select>
       </div>
-
       <div class="wr-row">
         <label>Stars:</label>
-        <div class="wr-stars" id="wrStars" aria-label="Star rating">
-          <!-- we’ll fill this with JS -->
-        </div>
+        <div class="wr-stars" id="wrStars" aria-label="Star rating"></div>
         <input type="hidden" id="wrRating" value="0" required>
       </div>
-
       <div class="wr-row">
-        <label>Add photo/s:</label>
+        <label>Photo:</label>
         <input id="wrPhoto" type="file" accept="image/*" style="display:none;">
         <label for="wrPhoto" class="upload-btn">📸 Add Photo</label>
         <span id="fileName" class="file-name">No file chosen</span>
       </div>
-
       <div class="wr-row">
         <textarea id="wrText" placeholder="Write your review here"></textarea>
       </div>
-
       <div class="wr-row wr-tags">
         <button type="button" class="wr-tag" data-tag="ac">Air-conditioned</button>
         <button type="button" class="wr-tag" data-tag="socket">Socket</button>
         <button type="button" class="wr-tag" data-tag="wifi">Wi-Fi</button>
         <button type="button" class="wr-tag" data-tag="altmilk">Alt Milk</button>
       </div>
-
       <div class="edit-review-footer">
         <button type="submit" class="btn-save-review">Save</button>
       </div>
@@ -1340,1337 +535,608 @@
   </div>
 </div>
 
-  <div id="editReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
+<!-- ═══════════════ EDIT REVIEW MODAL ═══════════════ -->
+<div id="editReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" data-close-review></div>
   <div class="modal-panel edit-review-panel">
     <header class="edit-review-header">
       <h3 id="editReviewTitle">Edit Review</h3>
       <button class="modal-close-review" aria-label="Close" data-close-review>✕</button>
     </header>
-
     <form id="editReviewForm">
       <div class="wr-row">
         <label>Stars:</label>
         <div class="wr-stars" id="editReviewStars"></div>
         <input type="hidden" id="editReviewRating" value="0">
       </div>
-
       <div class="wr-row">
         <label for="editReviewText">Review:</label>
         <textarea id="editReviewText" rows="6" placeholder="Write your edit here.."></textarea>
       </div>
-
       <div class="wr-row wr-tags" id="editReviewTags">
         <button type="button" class="wr-tag edit-tag">Air-conditioned</button>
         <button type="button" class="wr-tag edit-tag">Socket</button>
         <button type="button" class="wr-tag edit-tag">Wi-Fi</button>
         <button type="button" class="wr-tag edit-tag">Alt Milk</button>
       </div>
-
-           <div class="edit-review-footer">
+      <div class="edit-review-footer">
         <button type="submit" class="btn-save-review">Save</button>
       </div>
     </form>
   </div>
 </div>
 
+<!-- ═══════════════ DELETE REPLY MODAL ═══════════════ -->
 <div id="deleteModal" class="modal" hidden>
   <div class="modal-backdrop" id="closeDeleteModal"></div>
-
   <div class="modal-panel auth-panel">
     <button id="xDeleteModal" class="modal-close-review">✕</button>
-
     <h2 class="auth-title">Delete Reply</h2>
-
-    <p style="margin-bottom:20px; color:#4a3f35;">
-      Are you sure you want to delete this reply?
-    </p>
-
-    <div style="display:flex; justify-content:center; gap:12px;">
-      <button id="cancelDelete" class="auth-btn">Cancel</button>
-      <button id="confirmDelete" class="auth-btn" style="border-color:#a94442; color:#a94442;">
-        Delete
-      </button>
+    <p style="margin-bottom:20px;color:#4a3f35;">Are you sure you want to delete this reply?</p>
+    <div style="display:flex;justify-content:center;gap:12px;">
+      <button id="cancelDelete"  class="auth-btn">Cancel</button>
+      <button id="confirmDelete" class="auth-btn" style="border-color:#a94442;color:#a94442;">Delete</button>
     </div>
   </div>
 </div>
 
+
+<!-- ══════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════ -->
+
+<!-- S1: FAB visibility — hide when any modal opens -->
+<script>
+(function() {
+  const fab = document.getElementById('addReviewFab');
+  let count = 0;
+  document.querySelectorAll('.modal').forEach(m => {
+    new MutationObserver(() => {
+      if (!m.hidden) { count++; fab.classList.add('hidden-fab'); }
+      else           { count = Math.max(0, count - 1); if (!count) fab.classList.remove('hidden-fab'); }
+    }).observe(m, { attributes:true, attributeFilter:['hidden'] });
+  });
+})();
+</script>
+
+<!-- S3: Auth UI + Login / Signup -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
-  const logInModal = document.getElementById('logInModal');
+  const logInModal  = document.getElementById('logInModal');
   const signUpModal = document.getElementById('signUpModal');
-  const logInForm = document.getElementById('logInForm');
-  const signUpForm = document.getElementById('signUpForm');
-
-  const userMenuBtn = document.getElementById('userMenuBtn');
-  const panel = document.getElementById('userDropdown');
-  const editBtn = document.getElementById('editProfileBtn');
-  const modal = document.getElementById('editProfileModal');
-  const closeTriggers = modal ? modal.querySelectorAll('[data-close]') : [];
-  const form = document.getElementById('editProfileForm');
-  const inputUsername = document.getElementById('inputUsername');
-  const inputBio = document.getElementById('inputBio');
-  const handleText = document.getElementById('handleText');
-  const bioText = document.getElementById('bioText');
-
-  const inputAvatar = document.getElementById('inputAvatar');
-  const removeAvatarBtn = document.getElementById('removeAvatarBtn');
-  const avatarLarge = document.getElementById('avatarLargeImg');
-  const avatarMini = document.getElementById('avatarMiniImg');
-
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-
-  console.log(loginBtn);
-  // --- AUTH UI ---
+  const logInForm   = document.getElementById('logInForm');
+  const signUpForm  = document.getElementById('signUpForm');
+  const loginBtn    = document.getElementById('loginBtn');
+  const signupBtn   = document.getElementById('signupBtn');
   const authSection = document.getElementById("authSection");
   const userSection = document.getElementById("userSection");
   const welcomeUser = document.getElementById("welcomeUser");
-  const logoutBtn = document.getElementById("logoutBtn");
-  
-  welcomeUser.onclick = () => {
-    window.location.href = "profile.html";
-  };
+  const logoutBtn   = document.getElementById("logoutBtn");
+
+  welcomeUser.onclick = () => { window.location.href = "profile.html"; };
+
+  function setProfileVisible(show) {
+    document.getElementById('profileHeaderEl').style.display = show ? '' : 'none';
+    document.getElementById('tabReviews').style.display      = show ? '' : 'none';
+    document.getElementById('tabReplies').style.display      = show ? '' : 'none';
+    document.getElementById('addReviewFab').style.display    = show ? '' : 'none';
+    document.getElementById('profileMessage').style.display  = show ? 'none' : 'block';
+  }
 
   function updateUI() {
-  const ownerUsername = localStorage.getItem("beanthere_owner_username");
-  const userUsername = localStorage.getItem("beanthere_profile_username");
-  const userMenu = document.getElementById("userMenu");
+    const ownerUsername = localStorage.getItem("beanthere_owner_username");
+    const userUsername  = localStorage.getItem("beanthere_profile_username");
+    const userMenu      = document.getElementById("userMenu");
 
-  if (ownerUsername) {
-    authSection.style.display = "none";
-    userMenu.style.display = "none"
-    userSection.style.display = "block";
-    welcomeUser.textContent = ownerUsername;
-    welcomeUser.onclick = () => {
-      window.location.href = "cafeprofile.html";
-    };
-
-    document.getElementById('profileMessage').style.display = 'block';
-    document.querySelector('.profile-header').style.display = 'none';
-    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-    document.getElementById('addReviewFab').style.display = 'none';
-    return;
-  }
-
-  if (userUsername) {
-    authSection.style.display = "none";
-    userMenu.style.display = "none"
-    userSection.style.display = "block";
-    welcomeUser.textContent = userUsername;
-    welcomeUser.onclick = () => {
-      window.location.href = "profile.html";
-    };
-
-    const fullName = localStorage.getItem('beanthere_profile_fullname');
-    const bio = localStorage.getItem('beanthere_profile_bio');
-    const title = localStorage.getItem('beanthere_profile_title');
-    const avatar = localStorage.getItem('beanthere_profile_avatar');
-
-    document.getElementById('profileMessage').style.display = 'none';
-    document.querySelector('.profile-header').style.display = '';
-    document.querySelectorAll('.section').forEach(s => s.style.display = '');
-    document.getElementById('addReviewFab').style.display = '';
-
-    document.getElementById('nameText').textContent = fullName || userUsername;
-    const cleanUsername = userUsername.replace(/^@+/, "");
-    document.getElementById('handleText').textContent = `@${cleanUsername}`;
-    document.getElementById('titleText').textContent = title || "Member";
-    document.getElementById('bioText').textContent = bio || "No bio added yet.";
-    document.querySelector('.ud-greet').textContent = `Hi, ${fullName || userUsername}!`;
-    document.querySelector('.ud-sub').textContent = title || 'Member';
-
-    const avatarSrc = avatar || 'icons/noprof.jpg';
-    document.getElementById('avatarLargeImg').src = avatarSrc;
-    document.getElementById('avatarMiniImg').src = avatarSrc;
-  } else {
-    authSection.style.display = "block";
-    userMenu.style.display = "none"
-    userSection.style.display = "none";
-    welcomeUser.onclick = null;
-
-    document.getElementById('profileMessage').style.display = 'block';
-    document.querySelector('.profile-header').style.display = 'none';
-    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-    document.getElementById('addReviewFab').style.display = 'none';
-  }
-}
-
-  // run on load
-  updateUI();
-
-    logoutBtn.onclick = async () => {
-  try {
-    await fetch('/logout', {
-      method: 'POST',
-      credentials: 'include'
-    });
-
-    localStorage.removeItem('beanthere_owner_username');
-    localStorage.removeItem('beanthere_profile_fullname');
-    localStorage.removeItem('beanthere_profile_username');
-    localStorage.removeItem('beanthere_profile_bio');
-    localStorage.removeItem('beanthere_profile_title');
-    localStorage.removeItem('beanthere_profile_avatar');
-
-    window.location.href = 'index.html';
-  } catch (err) {
-    console.error(err);
-    alert("Error logging out");
-  }
-};
-
-  // --- 2. MODAL CONTROLS ---
-  loginBtn.onclick = () => logInModal.hidden = false;
-  signupBtn.onclick = () => signUpModal.hidden = false;
-
-  document.getElementById('closeLogIn').onclick = () => logInModal.hidden = true;
-  document.getElementById('xLogIn').onclick = () => logInModal.hidden = true;
-  document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
-  document.getElementById('xSignUp').onclick = () => signUpModal.hidden = true;
-
-  function normalizeUsername(username) {
-    username = username.trim();
-    if (!username.startsWith('@')) {
-      username = '@' + username;
-    }
-    return username;
-  }
-
-  function fileToDataURL(file) {
-    return new Promise((resolve, reject) => {
-      if (!file) {
-        resolve("");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // --- 3. CHECK EXISTING SESSION ---
-  async function checkSessionOnLoad() {
-  try {
-    const ownerResponse = await fetch('/session-owner', {
-      credentials: 'include'
-    });
-
-    if (ownerResponse.ok) {
-      const ownerResult = await ownerResponse.json();
-
-      if (ownerResult.loggedIn && ownerResult.owner) {
-        localStorage.setItem('beanthere_owner_username', ownerResult.owner.username || '');
-        localStorage.removeItem('beanthere_profile_fullname');
-        localStorage.removeItem('beanthere_profile_username');
-        localStorage.removeItem('beanthere_profile_bio');
-        localStorage.removeItem('beanthere_profile_title');
-        localStorage.removeItem('beanthere_profile_avatar');
-        updateUI();
-        return;
-      }
-    }
-
-    const userResponse = await fetch('/session-user', {
-      credentials: 'include'
-    });
-
-    if (!userResponse.ok) return;
-
-    const userResult = await userResponse.json();
-    if (userResult.loggedIn) {
-      localStorage.removeItem('beanthere_owner_username');
-      localStorage.setItem('beanthere_profile_fullname', userResult.user.fullName || '');
-      localStorage.setItem('beanthere_profile_username', userResult.user.username || '');
-      localStorage.setItem('beanthere_profile_bio', userResult.user.bio || '');
-      localStorage.setItem('beanthere_profile_title', userResult.user.title || 'Member');
-      localStorage.setItem('beanthere_profile_avatar', userResult.user.avatar || '');
-      updateUI();
-    }
-  } catch (err) {
-    console.error('No active session found.');
-  }
-}
-
-  checkSessionOnLoad();
-
-  // --- 4. LOGIN HANDLER ---
-  logInForm.onsubmit = async function(e) {
-  e.preventDefault();
-
-  const username = document.getElementById('loginUser').value.trim();
-  const password = document.getElementById('loginPass').value.trim();
-  const rememberMe = document.getElementById('rememberMe').checked;
-
-  const normalizedUsername = username.startsWith('@') ? username : '@' + username;
-
-  if (!/^@[A-Za-z0-9_]{3,20}$/.test(normalizedUsername)) {
-    alert("Please enter a valid username.");
-    return;
-  }
-
-  if (password.length < 6 || password.length > 50) {
-    alert("Password must be 6 to 50 characters.");
-    return;
-  }
-
-  try {
-    const response = await fetch('/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        username,
-        password,
-        rememberMe
-      })
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      if (result.role === "owner") {
-        localStorage.setItem('beanthere_owner_username', result.username || normalizedUsername);
-        localStorage.removeItem('beanthere_profile_fullname');
-        localStorage.removeItem('beanthere_profile_username');
-        localStorage.removeItem('beanthere_profile_bio');
-        localStorage.removeItem('beanthere_profile_title');
-        localStorage.removeItem('beanthere_profile_avatar');
-
-        updateUI();
-        alert("Owner login successful!");
-        window.location.href = 'cafeprofile.html';
-      } else {
-        localStorage.removeItem('beanthere_owner_username');
-        localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
-        localStorage.setItem('beanthere_profile_username', result.user.username || '');
-        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
-        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
-        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
-
-        updateUI();
-        alert("Login successful! Welcome back.");
-        window.location.href = 'profile.html';
-      }
-    } else {
-      alert(result.message || "Invalid username or password.");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Error connecting to server.");
-  }
-};
-
-  // --- 5. SIGNUP HANDLER ---
-  signUpForm.onsubmit = async function(e) {
-    e.preventDefault();
-
-    const fullName = document.getElementById('regName').value.trim();
-    const username = normalizeUsername(document.getElementById('regUser').value);
-    const password = document.getElementById('regPass').value;
-    const confirm = document.getElementById('regConfirm').value;
-    const bio = document.getElementById('regBio').value.trim() || "No bio added yet.";
-    const title = document.getElementById('regTitle').value.trim() || "Member";
-    const avatarFile = document.getElementById('regAvatar').files[0];
-
-    if (fullName.length < 2 || fullName.length > 60) {
-  alert("Full name must be 2 to 60 characters.");
-  return;
-}
-
-if (!/^@[A-Za-z0-9_]{3,20}$/.test(username)) {
-  alert("Username must start with @ and be 3 to 20 characters using only letters, numbers, and underscores.");
-  return;
-}
-
-if (password.length < 6 || password.length > 50) {
-  alert("Password must be 6 to 50 characters.");
-  return;
-}
-
-if (bio.length > 160) {
-  alert("Bio must be 160 characters or less.");
-  return;
-}
-
-if (title.length > 50) {
-  alert("Job title must be 50 characters or less.");
-  return;
-}
-
-    if (password !== confirm) {
-      alert("Passwords do not match!");
+    if (ownerUsername) {
+      authSection.style.display = "none"; userMenu.style.display = "none";
+      userSection.style.display = "block"; welcomeUser.textContent = ownerUsername;
+      welcomeUser.onclick = () => { window.location.href = "cafeprofile.html"; };
+      setProfileVisible(false);
+      document.getElementById('addReviewFab').style.display = 'none';
       return;
     }
+    if (userUsername) {
+      authSection.style.display = "none"; userMenu.style.display = "none";
+      userSection.style.display = "block"; welcomeUser.textContent = userUsername;
+      welcomeUser.onclick = () => { window.location.href = "profile.html"; };
+      setProfileVisible(true);
 
-    try {
-      const avatar = await fileToDataURL(avatarFile);
+      const fullName = localStorage.getItem('beanthere_profile_fullname');
+      const bio      = localStorage.getItem('beanthere_profile_bio');
+      const title    = localStorage.getItem('beanthere_profile_title');
+      const avatar   = localStorage.getItem('beanthere_profile_avatar');
 
-      const response = await fetch('/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fullName,
-          username,
-          password,
-          bio,
-          title,
-          avatar
-        })
-      });
+      document.getElementById('nameText').textContent   = fullName || userUsername;
+      document.getElementById('handleText').textContent = `@${userUsername.replace(/^@+/, "")}`;
+      document.getElementById('titleText').textContent  = title || "Member";
+      document.getElementById('bioText').textContent    = bio   || "No bio added yet.";
+      document.querySelector('.ud-greet').textContent   = `Hi, ${fullName || userUsername}!`;
+      document.querySelector('.ud-sub').textContent     = title || 'Member';
 
-      const result = await response.text();
-
-      if (response.ok) {
-        alert("Signup successful! You can now log in.");
-        signUpForm.reset();
-        signUpModal.hidden = true;
-        logInModal.hidden = false;
-      } else {
-        alert(result);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error connecting to server.");
+      const src = avatar || 'icons/noprof.jpg';
+      document.getElementById('avatarLargeImg').src = src;
+      document.getElementById('avatarMiniImg').src  = src;
+    } else {
+      authSection.style.display = "block"; userMenu.style.display = "none";
+      userSection.style.display = "none";  welcomeUser.onclick = null;
+      setProfileVisible(false);
     }
-  };
-
-     if (panel) {
-    
   }
 
+  updateUI();
+
+  logoutBtn.onclick = async () => {
+    try {
+      await fetch('/logout', { method:'POST', credentials:'include' });
+      ['beanthere_owner_username','beanthere_profile_fullname','beanthere_profile_username',
+       'beanthere_profile_bio','beanthere_profile_title','beanthere_profile_avatar']
+        .forEach(k => localStorage.removeItem(k));
+      window.location.href = 'index.html';
+    } catch(e) { alert("Error logging out"); }
+  };
+
+  loginBtn.onclick  = () => { logInModal.hidden  = false; };
+  signupBtn.onclick = () => { signUpModal.hidden = false; };
+  document.getElementById('closeLogIn').onclick  = () => { logInModal.hidden  = true; };
+  document.getElementById('xLogIn').onclick      = () => { logInModal.hidden  = true; };
+  document.getElementById('closeSignUp').onclick = () => { signUpModal.hidden = true; };
+  document.getElementById('xSignUp').onclick     = () => { signUpModal.hidden = true; };
+
+  function fileToDataURL(file) {
+    return new Promise((res, rej) => {
+      if (!file) { res(""); return; }
+      const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsDataURL(file);
+    });
+  }
+
+  async function checkSessionOnLoad() {
+    try {
+      const oRes = await fetch('/session-owner', { credentials:'include' });
+      if (oRes.ok) { const o = await oRes.json(); if (o.loggedIn && o.owner) { localStorage.setItem('beanthere_owner_username', o.owner.username || ''); updateUI(); return; } }
+      const uRes = await fetch('/session-user', { credentials:'include' });
+      if (!uRes.ok) return;
+      const u = await uRes.json();
+      if (u.loggedIn) {
+        localStorage.removeItem('beanthere_owner_username');
+        localStorage.setItem('beanthere_profile_fullname', u.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', u.user.username || '');
+        localStorage.setItem('beanthere_profile_bio',      u.user.bio      || '');
+        localStorage.setItem('beanthere_profile_title',    u.user.title    || 'Member');
+        localStorage.setItem('beanthere_profile_avatar',   u.user.avatar   || '');
+        updateUI();
+      }
+    } catch(e) { console.error('No active session.'); }
+  }
+  checkSessionOnLoad();
+
+  logInForm.onsubmit = async function(e) {
+    e.preventDefault();
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value.trim();
+    const rememberMe = document.getElementById('rememberMe').checked;
+    const norm = username.startsWith('@') ? username : '@' + username;
+    if (!/^@[A-Za-z0-9_]{3,20}$/.test(norm)) { alert("Please enter a valid username."); return; }
+    if (password.length < 6 || password.length > 50) { alert("Password must be 6–50 characters."); return; }
+    try {
+      const res = await fetch('/login', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username, password, rememberMe }) });
+      const result = await res.json();
+      if (res.ok) {
+        if (result.role === "owner") {
+          localStorage.setItem('beanthere_owner_username', result.username || norm);
+          ['beanthere_profile_fullname','beanthere_profile_username','beanthere_profile_bio','beanthere_profile_title','beanthere_profile_avatar'].forEach(k => localStorage.removeItem(k));
+        } else {
+          localStorage.removeItem('beanthere_owner_username');
+          localStorage.setItem('beanthere_profile_fullname', result.fullName || '');
+          localStorage.setItem('beanthere_profile_username', result.username || norm);
+          localStorage.setItem('beanthere_profile_bio',      result.bio      || '');
+          localStorage.setItem('beanthere_profile_title',    result.title    || 'Member');
+          localStorage.setItem('beanthere_profile_avatar',   result.avatar   || '');
+        }
+        logInModal.hidden = true; updateUI(); loadReviewsFromDB(); loadMyReplies();
+      } else { alert(result.message || 'Login failed.'); }
+    } catch(e) { alert('Error logging in.'); }
+  };
+
+  signUpForm.onsubmit = async function(e) {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim(), username = document.getElementById('regUser').value.trim(),
+          password = document.getElementById('regPass').value.trim(), confirm = document.getElementById('regConfirm').value.trim(),
+          title = document.getElementById('regTitle').value.trim(), bio = document.getElementById('regBio').value.trim(),
+          avatar = document.getElementById('regAvatar').files[0];
+    if (password !== confirm) { alert("Passwords do not match."); return; }
+    const avatarData = await fileToDataURL(avatar);
+    try {
+      const res = await fetch('/register', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ fullName:name, username, password, title, bio, avatar:avatarData }) });
+      const result = await res.json();
+      if (res.ok) {
+        localStorage.removeItem('beanthere_owner_username');
+        localStorage.setItem('beanthere_profile_fullname', result.fullName || name);
+        localStorage.setItem('beanthere_profile_username', result.username || username);
+        localStorage.setItem('beanthere_profile_bio',      result.bio      || bio);
+        localStorage.setItem('beanthere_profile_title',    result.title    || title || 'Member');
+        localStorage.setItem('beanthere_profile_avatar',   result.avatar   || avatarData || '');
+        signUpModal.hidden = true; updateUI();
+      } else { alert(result.message || 'Sign up failed.'); }
+    } catch(e) { alert('Error signing up.'); }
+  };
 });
 </script>
-<script>
-(function(){
-  const editBtn = document.getElementById('editProfileBtn');
-  const modal = document.getElementById('editProfileModal');
-  const closeTriggers = modal ? modal.querySelectorAll('[data-close]') : [];
-  const form = document.getElementById('editProfileForm');
-  const inputUsername = document.getElementById('inputUsername');
-  const inputBio = document.getElementById('inputBio');
-  const inputTitle = document.getElementById('inputTitle');
-  const handleText = document.getElementById('handleText');
-  const bioText = document.getElementById('bioText');
 
+<!-- S4: Edit Profile Modal -->
+<script>
+(function() {
+  const editBtn     = document.getElementById('editProfileBtn');
+  const modal       = document.getElementById('editProfileModal');
+  if (!modal) return;
+  const closeTriggers = modal.querySelectorAll('[data-close]');
+  const form        = document.getElementById('editProfileForm');
+  const inputUsername = document.getElementById('inputUsername');
+  const inputBio    = document.getElementById('inputBio');
+  const inputTitle  = document.getElementById('inputTitle');
+  const handleText  = document.getElementById('handleText');
+  const bioText     = document.getElementById('bioText');
   const inputAvatar = document.getElementById('inputAvatar');
   const removeAvatarBtn = document.getElementById('removeAvatarBtn');
   const avatarLarge = document.getElementById('avatarLargeImg');
-  const avatarMini = document.getElementById('avatarMiniImg');
+  const avatarMini  = document.getElementById('avatarMiniImg');
   const modalPreview = document.getElementById('modalAvatarPreview');
+  const DEFAULT_SRC = 'icons/noprof.jpg';
 
-  const DEFAULT_LARGE_SRC = avatarLarge ? avatarLarge.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
-  const DEFAULT_MINI_SRC  = avatarMini ? avatarMini.getAttribute('src') || 'icons/noprof.jpg' : 'icons/noprof.jpg';
-
-  function openModal(){
-    if(!modal) return;
-
+  const open  = () => {
     inputUsername.value = handleText ? handleText.textContent : '';
-    inputBio.value = bioText ? bioText.textContent : '';
-    inputTitle.value = localStorage.getItem('beanthere_profile_title') || 'Member';
+    inputBio.value      = bioText    ? bioText.textContent    : '';
+    inputTitle.value    = localStorage.getItem('beanthere_profile_title') || 'Member';
+    if (modalPreview) modalPreview.src = localStorage.getItem('beanthere_profile_avatar') || DEFAULT_SRC;
+    modal.hidden = false; setTimeout(() => inputUsername.focus(), 30);
+  };
+  const close = () => { modal.hidden = true; if (inputAvatar) inputAvatar.value = ''; };
+  const norm  = v => { v = (v||'').trim(); return v.charAt(0) !== '@' ? '@'+v : v; };
 
-    const savedAvatar = localStorage.getItem('beanthere_profile_avatar');
-    if (modalPreview) {
-      modalPreview.src = savedAvatar || DEFAULT_LARGE_SRC;
-    }
+  if (editBtn) editBtn.addEventListener('click', e => { e.preventDefault(); open(); });
+  closeTriggers.forEach(b => b.addEventListener('click', e => { e.preventDefault(); close(); }));
+  modal.addEventListener('click', e => { if (e.target === modal.querySelector('.modal-backdrop')) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
 
-    modal.hidden = false;
-    setTimeout(() => inputUsername.focus(), 30);
-  }
-
-  function closeModal(){
-    if(!modal) return;
-    modal.hidden = true;
-    if(editBtn) editBtn.focus();
-    if(inputAvatar) inputAvatar.value = '';
-  }
-
-  function normalizeUsername(val){
-    if(!val) return '';
-    val = val.trim();
-    if(val.length === 0) return '';
-    if(val.charAt(0) !== '@') return '@' + val;
-    return val;
-  }
-
-  if(inputAvatar){
-    inputAvatar.addEventListener('change', function(){
-      const file = inputAvatar.files && inputAvatar.files[0];
-      if(!file) return;
-
-      const maxBytes = 3 * 1024 * 1024;
-
-      if(!file.type.startsWith('image/')){
-        alert('Please choose an image file (png, jpg, gif).');
-        inputAvatar.value = '';
-        return;
-      }
-
-      if(file.size > maxBytes){
-        alert('Image too large. Please pick an image under 3 MB.');
-        inputAvatar.value = '';
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function(ev){
-        if(modalPreview) modalPreview.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  if(removeAvatarBtn){
-    removeAvatarBtn.addEventListener('click', function(e){
-      e.preventDefault();
-      localStorage.removeItem('beanthere_profile_avatar');
-
-      if(avatarLarge) avatarLarge.src = DEFAULT_LARGE_SRC;
-      if(avatarMini) avatarMini.src = DEFAULT_MINI_SRC;
-      if(modalPreview) modalPreview.src = DEFAULT_LARGE_SRC;
-      if(inputAvatar) inputAvatar.value = '';
-
-      alert('Profile photo removed.');
-    });
-  }
-
-  if(editBtn){
-    editBtn.addEventListener('click', function(e){
-      e.preventDefault();
-      openModal();
-    });
-  }
-
-  closeTriggers.forEach(btn => {
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      closeModal();
-    });
+  if (inputAvatar) inputAvatar.addEventListener('change', function() {
+    const f = this.files[0]; if (!f) return;
+    if (!f.type.startsWith('image/')) { alert('Please choose an image file.'); this.value=''; return; }
+    if (f.size > 3*1024*1024)         { alert('Image too large (max 3 MB).');  this.value=''; return; }
+    const r = new FileReader(); r.onload = ev => { if (modalPreview) modalPreview.src = ev.target.result; }; r.readAsDataURL(f);
   });
 
-  if(modal){
-    modal.addEventListener('click', function(e){
-      const backdrop = modal.querySelector('.modal-backdrop');
-      if(e.target === backdrop) closeModal();
-    });
-  }
-
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && modal && !modal.hidden){
-      closeModal();
-    }
+  if (removeAvatarBtn) removeAvatarBtn.addEventListener('click', e => {
+    e.preventDefault(); localStorage.removeItem('beanthere_profile_avatar');
+    [avatarLarge, avatarMini, modalPreview].forEach(el => { if (el) el.src = DEFAULT_SRC; });
+    if (inputAvatar) inputAvatar.value = '';
+    alert('Profile photo removed.');
   });
 
-  if(form){
-    form.addEventListener('submit', async function(e){
-      e.preventDefault();
-
-      let usernameVal = inputUsername.value || '';
-      let bioVal = inputBio.value || '';
-      let titleVal = inputTitle.value || 'Member';
-
-      usernameVal = normalizeUsername(usernameVal);
-
-      if(usernameVal.length < 2){
-        alert('Please enter a valid username.');
-        inputUsername.focus();
-        return;
-      }
-
-      let avatarData = "";
-      const file = inputAvatar.files && inputAvatar.files[0];
-
-      if (file) {
-        avatarData = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = ev => resolve(ev.target.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
-
-      try {
-        const response = await fetch('/update-profile', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: usernameVal,
-            bio: bioVal,
-            title: titleVal,
-            avatar: avatarData
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          alert(result.message || 'Failed to update profile.');
-          return;
-        }
-
-        localStorage.setItem('beanthere_profile_username', result.user.username || '');
-        localStorage.setItem('beanthere_profile_bio', result.user.bio || '');
-        localStorage.setItem('beanthere_profile_title', result.user.title || 'Member');
-        localStorage.setItem('beanthere_profile_avatar', result.user.avatar || '');
-
-        if(handleText) handleText.textContent = result.user.username || '';
-        if(bioText) bioText.textContent = result.user.bio || '';
-
-        const dropdownSub = document.querySelector('.ud-sub');
-        if(dropdownSub) dropdownSub.textContent = result.user.title || 'Member';
-
-        if(result.user.avatar){
-          if(avatarLarge) avatarLarge.src = result.user.avatar;
-          if(avatarMini) avatarMini.src = result.user.avatar;
-          if(modalPreview) modalPreview.src = result.user.avatar;
-        }
-
-        alert('Profile updated successfully!');
-        closeModal();
-      } catch (err) {
-        console.error(err);
-        alert('Error updating profile.');
-      }
-    });
-  }
-})();
-</script>
-
-<script>
-(function(){
-  const btn = document.getElementById('userMenuBtn');
-  const panel = document.getElementById('userDropdown');
-
-  if(!btn || !panel) return;
-
-  function openPanel(){
-    panel.hidden = false;
-    btn.setAttribute('aria-expanded','true');
-    const first = panel.querySelector('[role="menuitem"]');
-    if(first) first.focus();
-  }
-
-  function closePanel(){
-    panel.hidden = true;
-    btn.setAttribute('aria-expanded','false');
-    btn.focus();
-  }
-
-  function togglePanel(){
-    if(panel.hidden) openPanel();
-    else closePanel();
-  }
-
-  btn.addEventListener('click', function(e){
-    e.stopPropagation();
-    togglePanel();
-  });
-
-  document.addEventListener('click', function(e){
-    if(!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)){
-      closePanel();
-    }
-  });
-
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && !panel.hidden){
-      closePanel();
-    }
-  });
-
-  panel.addEventListener('click', function(e){
-    const actionBtn = e.target.closest('button[data-action]');
-    if(!actionBtn) return;
-
-    const action = actionBtn.getAttribute('data-action');
-
-    if(action === 'profile') {
-      window.location.href = 'profile.html';
-    } else if(action === 'contact') {
-      window.location.href = 'contact.html';
-    } else if(action === 'support') {
-      window.location.href = 'support.html';
-    } else if (action === 'signout') {
-  fetch('/logout', {
-    method: 'POST',
-    credentials: 'include'
-  })
-    .then(() => {
-      // clear BOTH owner and user data
-      localStorage.removeItem('beanthere_owner_username');
-      localStorage.removeItem('beanthere_profile_fullname');
-      localStorage.removeItem('beanthere_profile_username');
-      localStorage.removeItem('beanthere_profile_bio');
-      localStorage.removeItem('beanthere_profile_title');
-      localStorage.removeItem('beanthere_profile_avatar');
-
-      alert('Logged out successfully');
-
-      // redirect to homepage
-      window.location.href = 'index.html';
-    })
-    .catch(err => {
-      console.error(err);
-      alert('Error logging out');
-    });
-}
-  });
-
-  panel.addEventListener('keydown', function(e){
-    const focusable = Array.from(panel.querySelectorAll('[role="menuitem"]'));
-    if(!focusable.length) return;
-
-    const idx = focusable.indexOf(document.activeElement);
-
-    if(e.key === 'ArrowDown'){
-      e.preventDefault();
-      const next = focusable[(idx + 1) % focusable.length];
-      next.focus();
-    } else if(e.key === 'ArrowUp'){
-      e.preventDefault();
-      const prev = focusable[(idx - 1 + focusable.length) % focusable.length];
-      prev.focus();
-    }
-  });
-})();
-</script>
-
-  <script>
-
-    let selectedReviewId = null;
-    let selectedReplyText = null;
-
-    let reviewsData = [];
-
-    const tagIcons = {
-      "Air-conditioned": "icons/ac.png",
-      "Socket": "icons/socket.png",
-      "Wi-Fi": "icons/wifi.png",
-      "Alt Milk": "icons/oat.png"
-    };
-
-    let currentReviewIndex = 0;
-    async function loadReviewsFromDB() {
-        try {
-            const response = await fetch('/my-reviews', {
-              credentials: 'include'
-            });
-            const result = await response.json();
-
-            // make sure it's always an array
-            const dbReviews = Array.isArray(result)
-              ? result
-              : result.reviews || [];
-
-            reviewsData = dbReviews.map((review, index) => ({
-  id: review._id || index + 1,
-  cafeName: review.establishmentName,
-  location: review.location || "Location not available",
-  rating: review.rating,
-  date: review.datePosted || "No date",
-  editedOn: null,
-  text: review.reviewText,
-  image: review.photoUrl || review.image || "apdev-tbv/cafe4.jpg",
-  tags: review.tags || [],
-}));
-
-            currentReviewIndex = 0;
-            renderReview(currentReviewIndex);
-            updateReviewArrows();
-        } catch (err) {
-            console.error("Failed to load reviews:", err);
-        }
-    }
-
-    async function loadMyReplies() {
-      try {
-        const res = await fetch('/my-replies', {
-          credentials: 'include'
-        });
-
-        const replies = await res.json();
-
-        // save to your existing array
-        repliesData.length = 0; // clear
-        replies.forEach(r => {
-          repliesData.push({
-            reviewId: r.reviewId,       // the parent review's _id for deletion
-            text: r.text,
-            datePosted: r.date,
-            establishmentName: r.establishmentName,
-            image: r.image || "apdev-tbv/cafe4.jpg",
-            replyToUser: r.replyToUser || "Anonymous"
-          });
-        });
-        currentReplyIndex = 0;
-        renderSampleReplies();
-
-      } catch (err) {
-        console.error("Error loading replies:", err);
-      }
-    }
-
-    const repliesData = [];
-
-    const editReviewStars = document.getElementById('editReviewStars');
-  const editReviewRating = document.getElementById('editReviewRating');
-  let currentEditRating = 0;
-    const repliesContainer = document.getElementById('repliesContainer');
-    const prevReplyBtn = document.getElementById('prevReplyBtn');
-    const nextReplyBtn = document.getElementById('nextReplyBtn');
-    let currentReplyIndex = 0;
-
-    
-
-    function renderEditStars() {
-    editReviewStars.innerHTML = '';
-
-    for (let i = 1; i <= 5; i++) {
-        const star = document.createElement('div');
-        star.classList.add('wr-star');
-
-        if (i <= currentEditRating) {
-            star.classList.add('filled');
-        }
-
-        star.addEventListener('click', () => {
-            currentEditRating = i;
-            editReviewRating.value = i;
-            renderEditStars();
-        });
-
-        editReviewStars.appendChild(star);
-    }
-}
-
-
-    function renderSampleReplies() {
-    if (repliesData.length === 0) {
-       repliesContainer.innerHTML = `<p style="margin:0; color:#666;">No replies yet.</p>`;
-        prevReplyBtn.style.opacity = "0.5";
-        prevReplyBtn.style.cursor = "default";
-        nextReplyBtn.style.opacity = "0.5";
-        nextReplyBtn.style.cursor = "default";
-        return;
-    }
-
-    const reply = repliesData[currentReplyIndex];
-    const username = getCurrentUsername();
-
-    const replyHtml = `
-      <div class="review-card" style="box-shadow: none; width: 100%;">
-        <img src="${reply.image}" class="review-img">
-
-        <div class="review-content" style="position: relative;">
-          
-          <div class="review-header">
-            <div>
-              <span class="review-user">${getCurrentUsername()}</span>
-              <span style="color:#888;"> replied to </span>
-              <span class="review-user">${reply.replyToUser}</span>
-              <span class="review-date">${reply.datePosted}</span>
-            </div>
-          </div>
-
-          <!-- 🔥 DELETE BUTTON -->
-          <button 
-            class="delete-reply-btn" 
-            data-review-id="${reply.reviewId}"
-            data-text="${reply.text.replace(/"/g, '&quot;')}"
-            style="
-              position: absolute;
-              top: 8px;
-              right: 10px;
-              background: none;
-              border: none;
-              cursor: pointer;
-              font-size: 16px;
-              color: #999;
-            "
-          >
-            <img src="icons/delete.png" width="16">
-          </button>
-
-          <h3 class="cafe-name">${reply.establishmentName}</h3>
-
-          <p class="review-text">${reply.text}</p>
-        </div>
-      </div>
-    `;
-    repliesContainer.innerHTML = replyHtml;
-
-    prevReplyBtn.style.opacity = currentReplyIndex === 0 ? "0.5" : "1";
-    prevReplyBtn.style.cursor = currentReplyIndex === 0 ? "default" : "pointer";
-
-    nextReplyBtn.style.opacity = currentReplyIndex === repliesData.length - 1 ? "0.5" : "1";
-    nextReplyBtn.style.cursor = currentReplyIndex === repliesData.length - 1 ? "default" : "pointer";
-}
-
-    prevReplyBtn.addEventListener('click', () => {
-        if (currentReplyIndex > 0) {
-            currentReplyIndex--;
-            renderSampleReplies();
-        }
-    });
-
-    nextReplyBtn.addEventListener('click', () => {
-        if (currentReplyIndex < repliesData.length - 1) {
-            currentReplyIndex++;
-            renderSampleReplies();
-        }
-    });
-
-    renderSampleReplies();
-
-    
-    const reviewContainer = document.getElementById('reviewContainer');
-    const prevBtn = document.getElementById('prevReviewBtn');
-    const nextBtn = document.getElementById('nextReviewBtn');
-
-    const editReviewModal = document.getElementById('editReviewModal');
-    const editReviewForm = document.getElementById('editReviewForm');
-    const editReviewText = document.getElementById('editReviewText');
-    const editReviewTitle = document.getElementById('editReviewTitle');
-    const closeReviewTriggers = document.querySelectorAll('[data-close-review]');
-    const editTagButtons = document.querySelectorAll('#editReviewModal .edit-tag');
-  const modalPreview = document.getElementById('modalAvatarPreview');
-    let reviewIdToEdit = null;
-    editTagButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        btn.classList.toggle('active');
-    });
-});
-
-    function getCurrentUsername() {
-        const storedUser = localStorage.getItem('beanthere_profile_username');
-        return storedUser ? storedUser : '@erylle_g';
-    }
-
-    function getBeanRatingHtml(rating) {
-    let beansHtml = '';
-
-    for (let i = 0; i < 5; i++) {
-      if (i < rating) {
-        beansHtml += `<img src="icons/bean.png" style="width:18px;height:18px;">`;
-      } else {
-        beansHtml += `<img src="icons/bean.png" style="width:18px;height:18px; opacity:0.3; filter:grayscale(1);">`;
-      }
-    }
-
-    return beansHtml;
-  }
-
-    function renderReview(index) {
-        if (reviewsData.length === 0) {
-            reviewContainer.innerHTML = `<p style="margin:0; color:#666;">No reviews yet.</p>`;
-            return;
-        }
-
-        if (index < 0 || index >= reviewsData.length) return;
-
-        const review = reviewsData[index];
-        const username = getCurrentUsername();
-        const beansHtml = getBeanRatingHtml(review.rating);
-
-        const tagsHtml = (review.tags || []).map(tag => {
-        const icon = tagIcons[tag];
-
-        return `
-          <div class="amenity-item">
-            ${icon ? `<img src="${icon}" style="width:14px;height:14px;">` : ""}
-            ${tag}
-          </div>
-        `;
-      }).join("");
-
-        let editedHtml = '';
-        if (review.editedOn) {
-            editedHtml = `<span class="edited-label">edited on ${review.editedOn}</span>`;
-        }
-
-        const reviewHtml = `
-            <div class="review-card" data-id="${review.id}">
-              <img src="${review.image}" alt="${review.cafeName}" class="review-img">
-              <div class="review-content" style="position: relative;">
-                <div class="review-header">
-                  <div>
-                    <div class="review-user">${username.replace('@', '')}</div>
-                    <span class="review-date">${review.date}</span>
-                    ${editedHtml}
-                  </div>
-                  <div class="amenities-list">
-                    ${tagsHtml}
-                  </div>
-                </div>
-
-                <div class="cafe-title-row">
-                    <h3 class="cafe-name">${review.cafeName}</h3>
-                    <span class="rating-beans">${beansHtml}</span>
-                </div>
-                <div class="cafe-address">${review.location}</div>
-                <p class="review-text">${review.text}</p>
-
-                <div class="edit-review-btn-container">
-                    <button class="btn-edit-review" id="editReviewBtn-${review.id}">Edit Review</button>
-                </div>
-              </div>
-            </div>
-        `;
-
-        reviewContainer.innerHTML = reviewHtml;
-
-        document.getElementById(`editReviewBtn-${review.id}`).addEventListener('click', function() {
-            openReviewModal(review.id);
-        });
-    }
-
-    function updateReviewArrows() {
-        prevBtn.style.opacity = currentReviewIndex === 0 ? "0.5" : "1";
-        prevBtn.style.cursor = currentReviewIndex === 0 ? "default" : "pointer";
-
-        nextBtn.style.opacity = currentReviewIndex === reviewsData.length - 1 ? "0.5" : "1";
-        nextBtn.style.cursor = currentReviewIndex === reviewsData.length - 1 ? "default" : "pointer";
-    }
-
-    function openReviewModal(reviewId) {
-    const review = reviewsData.find(r => r.id === reviewId);
-    if (!review) return;
-
-    reviewIdToEdit = reviewId;
-    editReviewText.value = review.text || '';
-
-    currentEditRating = review.rating || 0;
-    editReviewRating.value = currentEditRating;
-    renderEditStars();
-
-    editTagButtons.forEach(btn => {
-    const tagText = btn.textContent.trim();
-    btn.classList.toggle('active', (review.tags || []).includes(tagText));
-});
-
-    editReviewTitle.textContent = "Edit Review";
-    editReviewModal.hidden = false;
-    setTimeout(() => editReviewText.focus(), 50);
-}
-
-    function closeReviewModal() {
-        editReviewModal.hidden = true;
-        reviewIdToEdit = null;
-        editReviewText.value = '';
-    }
-
-    closeReviewTriggers.forEach(trigger => {
-        trigger.addEventListener('click', function(e) {
-            e.preventDefault();
-            closeReviewModal();
-        });
-    });
-
-    document.addEventListener('keydown', function(e){
-        if(e.key === 'Escape' && !editReviewModal.hidden) {
-            closeReviewModal();
-        }
-    });
-
-    editReviewForm.addEventListener('submit', async function(e) {
+  if (form) form.addEventListener('submit', async function(e) {
     e.preventDefault();
-    if (reviewIdToEdit === null) return;
-
-    const newText = editReviewText.value.trim();
-    const newRating = Number(editReviewRating.value);
-
-    const selectedTags = Array.from(document.querySelectorAll('.edit-tag'))
-    .filter(btn => btn.classList.contains('active'))
-    .map(btn => btn.textContent.trim());
-
-    if (!newText || !newRating) {
-        alert('Please complete the stars and review.');
-        return;
-    }
-
+    let u = norm(inputUsername.value); if (u.length < 2) { alert('Please enter a valid username.'); inputUsername.focus(); return; }
+    const bioVal = inputBio.value || '', titleVal = inputTitle.value || 'Member';
+    let avatarData = '';
+    const f = inputAvatar.files && inputAvatar.files[0];
+    if (f) avatarData = await new Promise((res,rej) => { const r=new FileReader(); r.onload=ev=>res(ev.target.result); r.onerror=rej; r.readAsDataURL(f); });
     try {
-        const response = await fetch('/edit-review', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                reviewId: reviewIdToEdit,
-                reviewText: newText,
-                rating: newRating,
-                tags: selectedTags
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            alert(result.message || 'Failed to update review.');
-            return;
-        }
-
-        await loadReviewsFromDB();
-        closeReviewModal();
-    } catch (err) {
-        console.error(err);
-        alert('Error updating review.');
-    }
-});
-
-    prevBtn.addEventListener('click', () => {
-        if (currentReviewIndex > 0) {
-            currentReviewIndex--;
-            renderReview(currentReviewIndex);
-            updateReviewArrows();
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
-        if (currentReviewIndex < reviewsData.length - 1) {
-            currentReviewIndex++;
-            renderReview(currentReviewIndex);
-            updateReviewArrows();
-        }
-    });
-
-    loadReviewsFromDB();
-    loadMyReplies();
-
+      const res = await fetch('/update-profile', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:u, bio:bioVal, title:titleVal, avatar:avatarData }) });
+      const result = await res.json();
+      if (!res.ok) { alert(result.message || 'Failed to update profile.'); return; }
+      localStorage.setItem('beanthere_profile_username', result.user.username || '');
+      localStorage.setItem('beanthere_profile_bio',      result.user.bio      || '');
+      localStorage.setItem('beanthere_profile_title',    result.user.title    || 'Member');
+      localStorage.setItem('beanthere_profile_avatar',   result.user.avatar   || '');
+      if (handleText) handleText.textContent = result.user.username || '';
+      if (bioText)    bioText.textContent    = result.user.bio      || '';
+      const sub = document.querySelector('.ud-sub'); if (sub) sub.textContent = result.user.title || 'Member';
+      if (result.user.avatar) { [avatarLarge, avatarMini, modalPreview].forEach(el => { if (el) el.src = result.user.avatar; }); }
+      alert('Profile updated successfully!'); close();
+    } catch(e) { alert('Error updating profile.'); }
+  });
+})();
 </script>
+
+<!-- S5: User dropdown -->
 <script>
-const fab = document.getElementById('addReviewFab');
-const writeModal = document.getElementById('writeReviewModal');
-const writeForm = document.getElementById('writeReviewForm');
-
-document.getElementById('wrPhoto').addEventListener('change', function() {
-  const file = this.files[0];
-  const fileName = document.getElementById('fileName');
-  
-  if (!file) {
-    fileName.textContent = 'No file chosen';
-    return;
-  }
-
-  if (!file.type.startsWith('image/')) {
-    fileName.textContent = '✕ Invalid file type';
-    fileName.style.color = 'red';
-    this.value = '';
-    return;
-  }
-
-  fileName.textContent = '✓ ' + file.name;
-  fileName.style.color = 'green';
-});
-
-const starsContainer = document.getElementById('wrStars');
-const ratingInput = document.getElementById('wrRating');
-const tagButtons = document.querySelectorAll('#writeReviewModal .wr-tag');
-let currentRating = 0;
-
-// OPEN MODAL
-fab.addEventListener('click', () => {
-  writeModal.hidden = false;
-});
-
-// CLOSE MODAL
-document.querySelectorAll('[data-close-write]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    writeModal.hidden = true;
+(function() {
+  const btn   = document.getElementById('userMenuBtn');
+  const panel = document.getElementById('userDropdown');
+  if (!btn || !panel) return;
+  const open  = () => { panel.hidden=false; btn.setAttribute('aria-expanded','true');  const f=panel.querySelector('[role="menuitem"]'); if(f) f.focus(); };
+  const close = () => { panel.hidden=true;  btn.setAttribute('aria-expanded','false'); btn.focus(); };
+  btn.addEventListener('click', e => { e.stopPropagation(); panel.hidden ? open() : close(); });
+  document.addEventListener('click', e => { if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) close(); });
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && !panel.hidden) close(); });
+  panel.addEventListener('click', e => {
+    const a = e.target.closest('button[data-action]'); if (!a) return;
+    const action = a.getAttribute('data-action');
+    if (action==='profile') window.location.href='profile.html';
+    else if (action==='contact') window.location.href='contact.html';
+    else if (action==='support') window.location.href='support.html';
+    else if (action==='signout') fetch('/logout',{method:'POST',credentials:'include'}).then(()=>{
+      ['beanthere_owner_username','beanthere_profile_fullname','beanthere_profile_username',
+       'beanthere_profile_bio','beanthere_profile_title','beanthere_profile_avatar'].forEach(k=>localStorage.removeItem(k));
+      alert('Logged out successfully'); window.location.href='index.html';
+    }).catch(()=>alert('Error logging out'));
   });
-});
-
-// create 5 stars
-for (let i = 1; i <= 5; i++) {
-  const star = document.createElement('div');
-  star.classList.add('wr-star');
-
-  star.addEventListener('click', () => {
-    currentRating = i;
-    ratingInput.value = i;
-    updateStars();
+  panel.addEventListener('keydown', e => {
+    const items = Array.from(panel.querySelectorAll('[role="menuitem"]')); if (!items.length) return;
+    const idx = items.indexOf(document.activeElement);
+    if (e.key==='ArrowDown') { e.preventDefault(); items[(idx+1)%items.length].focus(); }
+    else if (e.key==='ArrowUp') { e.preventDefault(); items[(idx-1+items.length)%items.length].focus(); }
   });
-
-  starsContainer.appendChild(star);
-}
-
-// update filled stars
-function updateStars() {
-  const stars = document.querySelectorAll('.wr-star');
-
-  stars.forEach((star, index) => {
-    if (index < currentRating) {
-      star.classList.add('filled');
-    } else {
-      star.classList.remove('filled');
-    }
-  });
-}
-
-// tag buttons
-tagButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    btn.classList.toggle('active');
-  });
-});
-
-// SUBMIT REVIEW
-writeForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const cafe    = document.getElementById('wrCafe').value;
-  const rating = Number(document.getElementById('wrRating').value);
-  const text    = document.getElementById('wrText').value.trim();
-  const photo   = document.getElementById('wrPhoto').files[0];
-
-  if (!cafe)         { alert("Please select a cafe.");       return; }
-  if (rating === 0) { alert("Please select a star rating."); return; }
-  if (!text)         { alert("Please write a review.");       return; }
-  if (!photo)        { alert("Please upload a photo.");       return; }
-
-  const selectedTags = Array.from(tagButtons)
-    .filter(btn => btn.classList.contains('active'))
-    .map(btn => btn.textContent.trim());
-
-  const today = new Date().toISOString().split('T')[0];
-
-  const photoUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(photo);
-  });
-
-  try {
-    const response = await fetch('/add-review', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        establishmentName: cafe,
-        rating,
-        reviewText: text,
-        tags: selectedTags.join(','),
-        datePosted: today,
-        photoUrl
-      })
-    });
-
-    const result = await response.text();
-
-    if (!response.ok) {
-      alert('Failed to save review: ' + result);
-      return;
-    }
-
-    alert('Review added successfully!');
-    writeModal.hidden = true;
-
-    // reset form
-    writeForm.reset();
-    currentRating = 0;
-    ratingInput.value = 0;
-    updateStars();
-    tagButtons.forEach(btn => btn.classList.remove('active'));
-
-    // easiest way to make it appear in "My reviews"
-    loadReviewsFromDB();
-    loadMyReplies();
-  } catch (err) {
-    console.error(err);
-    alert('Error saving review.');
-  }
-});
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const select = document.getElementById("wrCafe");
-
-  try {
-    const res = await fetch('/establishments');
-    const establishments = await res.json();
-
-    establishments.forEach(est => {
-      const option = document.createElement("option");
-      option.value = est.name;
-      option.textContent = `${est.name} (${est.location})`;
-      select.appendChild(option);
-    });
-
-  } catch (err) {
-    console.error("Error loading cafes:", err);
-  }
-});
-
-const fileInput = document.getElementById("wrPhoto");
-const fileNameText = document.getElementById("fileName");
-
-fileInput.addEventListener("change", () => {
-  fileNameText.textContent = fileInput.files[0]
-    ? fileInput.files[0].name
-    : "No file chosen";
-});
-
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".delete-reply-btn");
-  if (!btn) return;
-
-  selectedReviewId = btn.dataset.reviewId;
-  selectedReplyText = btn.dataset.text;
-
-  document.getElementById("deleteModal").hidden = false;
-});
-
-const deleteModal = document.getElementById("deleteModal");
-
-document.getElementById("cancelDelete").onclick = () => {
-  deleteModal.hidden = true;
-  selectedReviewId = null;
-  selectedReplyText = null;
-};
-
-document.getElementById("closeDeleteModal").onclick = () => {
-  deleteModal.hidden = true;
-};
-
-document.getElementById("xDeleteModal").onclick = () => {
-  deleteModal.hidden = true;
-};
-
-document.getElementById("confirmDelete").onclick = async () => {
-  if (!selectedReviewId || !selectedReplyText) return;
-
-  try {
-    const res = await fetch("/delete-reply", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ reviewId: selectedReviewId, text: selectedReplyText })
-    });
-
-    if (res.ok) {
-      deleteModal.hidden = true;
-      selectedReviewId = null;
-      selectedReplyText = null;
-
-      // Remove the card from the DOM and reload replies
-      await loadMyReplies();
-
-    } else {
-      alert("Failed to delete");
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("Error deleting reply.");
-  }
-};
-
+})();
 </script>
+
+<!-- S6: Reviews + Replies render engine -->
+<script>
+  let selectedReviewId  = null;
+  let selectedReplyText = null;
+  let reviewsData       = [];
+  let repliesData       = [];
+
+  const tagIcons = {
+    "Air-conditioned": "icons/ac.png",
+    "Socket":          "icons/socket.png",
+    "Wi-Fi":           "icons/wifi.png",
+    "Alt Milk":        "icons/oat.png"
+  };
+
+  function getCurrentUsername() { return localStorage.getItem('beanthere_profile_username') || '@user'; }
+
+  function getBeans(rating) {
+    return Array.from({length:5}, (_,i) =>
+      `<img src="icons/bean.png" style="width:17px;height:17px;${i>=rating?'opacity:0.3;filter:grayscale(1);':''}">`
+    ).join('');
+  }
+
+  /* ── LOAD ── */
+  async function loadReviewsFromDB() {
+    try {
+      const res  = await fetch('/my-reviews', { credentials:'include' });
+      const data = await res.json();
+      const arr  = Array.isArray(data) ? data : data.reviews || [];
+      reviewsData = arr.map((r, i) => ({
+        id:       r._id || i+1,
+        cafeName: r.establishmentName,
+        location: r.location || "",
+        rating:   r.rating,
+        date:     r.datePosted || "No date",
+        editedOn: null,
+        text:     r.reviewText,
+        image:    r.photoUrl || r.image || "apdev-tbv/cafe4.jpg",
+        tags:     r.tags || [],
+      }));
+      renderAllReviews();
+    } catch(e) { console.error("Failed to load reviews:", e); }
+  }
+
+  async function loadMyReplies() {
+    try {
+      const res  = await fetch('/my-replies', { credentials:'include' });
+      const data = await res.json();
+      repliesData = data.map(r => ({
+        reviewId:          r.reviewId,
+        text:              r.text,
+        datePosted:        r.date,
+        establishmentName: r.establishmentName,
+        image:             r.image || "apdev-tbv/cafe4.jpg",
+        replyToUser:       r.replyToUser || "Anonymous"
+      }));
+      renderAllReplies();
+    } catch(e) { console.error("Error loading replies:", e); }
+  }
+
+  /* ── RENDER REVIEWS ── */
+  function renderAllReviews() {
+    const c = document.getElementById('reviewContainer');
+    if (!reviewsData.length) { c.innerHTML = '<div class="empty-state">No reviews yet — write your first one!</div>'; return; }
+    const username = getCurrentUsername().replace(/^@+/,'');
+    c.innerHTML = reviewsData.map(rev => {
+      const beans   = getBeans(rev.rating);
+      const tags    = (rev.tags||[]).map(t => { const ic=tagIcons[t]; return `<span class="tag">${ic?`<img src="${ic}" alt="${t}">`:''}${t}</span>`; }).join('');
+      const edited  = rev.editedOn ? `<span class="edited-label"> · edited ${rev.editedOn}</span>` : '';
+      return `
+        <div class="review-card" data-id="${rev.id}">
+          <div class="review-img"><img src="${rev.image}" alt="${rev.cafeName}"></div>
+          <div class="review-content">
+            <div class="review-top">
+              <div><strong>${username}</strong><br>${rev.date}${edited}</div>
+              <div class="review-tags">${tags}</div>
+            </div>
+            <div class="review-title">${rev.cafeName}<span class="rating">${beans}</span></div>
+            ${rev.location ? `<div class="review-location">${rev.location}</div>` : ''}
+            <div class="review-text">${rev.text}</div>
+            <div class="review-actions">
+              <button class="btn-edit-review card-edit-inline" data-id="${rev.id}"> <img src="icons/edit.png" width="13" style="opacity:0.75;"> Edit Review</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    c.querySelectorAll('.card-edit-inline').forEach(b =>
+      b.addEventListener('click', () => openReviewModal(b.dataset.id))
+    );
+  }
+
+  /* ── RENDER REPLIES ── */
+  function renderAllReplies() {
+    const c = document.getElementById('repliesContainer');
+    if (!repliesData.length) { c.innerHTML = '<div class="empty-state">No replies yet.</div>'; return; }
+    const username = getCurrentUsername().replace(/^@+/,'');
+    c.innerHTML = repliesData.map(rep => `
+      <div class="review-card">
+        <div class="review-img"><img src="${rep.image}" alt="${rep.establishmentName}"></div>
+        <div class="review-content">
+          <div class="review-top">
+            <div>
+              <strong>${username}</strong>
+              <span style="color:#888;font-weight:400;"> replied to </span>
+              <strong>${rep.replyToUser}</strong><br>
+              <span style="font-size:12px;">${rep.datePosted||''}</span>
+            </div>
+          </div>
+          <div class="review-title">${rep.establishmentName}</div>
+          <div class="review-text">${rep.text}</div>
+          <div class="review-actions">
+            <button class="delete-reply-btn del-inline"
+              data-review-id="${rep.reviewId}"
+              data-text="${rep.text.replace(/"/g,'&quot;')}">
+              <img src="icons/delete.png" width="13" style="opacity:0.75;"> Delete Reply
+            </button>
+          </div>
+        </div>
+      </div>`).join('');
+
+    c.querySelectorAll('.del-inline').forEach(b =>
+      b.addEventListener('click', () => {
+        selectedReviewId  = b.dataset.reviewId;
+        selectedReplyText = b.dataset.text;
+        document.getElementById('deleteModal').hidden = false;
+      })
+    );
+  }
+
+  /* ── EDIT REVIEW MODAL ── */
+  const editReviewModal  = document.getElementById('editReviewModal');
+  const editReviewForm   = document.getElementById('editReviewForm');
+  const editReviewText   = document.getElementById('editReviewText');
+  const editReviewTitle  = document.getElementById('editReviewTitle');
+  const editReviewStars  = document.getElementById('editReviewStars');
+  const editReviewRating = document.getElementById('editReviewRating');
+  const closeRevTriggers = document.querySelectorAll('[data-close-review]');
+  const editTagBtns      = document.querySelectorAll('#editReviewModal .edit-tag');
+  let currentEditRating  = 0;
+  let reviewIdToEdit     = null;
+
+  editTagBtns.forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
+
+  function renderEditStars() {
+    editReviewStars.innerHTML = '';
+    for (let i=1; i<=5; i++) {
+      const s = document.createElement('div'); s.classList.add('wr-star');
+      if (i <= currentEditRating) s.classList.add('filled');
+      s.addEventListener('click', () => { currentEditRating=i; editReviewRating.value=i; renderEditStars(); });
+      editReviewStars.appendChild(s);
+    }
+  }
+
+  function openReviewModal(id) {
+    const rev = reviewsData.find(r => String(r.id) === String(id));
+    if (!rev) return;
+    reviewIdToEdit = id; editReviewText.value = rev.text || '';
+    currentEditRating = rev.rating || 0; editReviewRating.value = currentEditRating;
+    renderEditStars();
+    editTagBtns.forEach(b => b.classList.toggle('active', (rev.tags||[]).includes(b.textContent.trim())));
+    editReviewTitle.textContent = "Edit Review";
+    editReviewModal.hidden = false; setTimeout(() => editReviewText.focus(), 50);
+  }
+
+  function closeReviewModal() { editReviewModal.hidden=true; reviewIdToEdit=null; editReviewText.value=''; }
+  closeRevTriggers.forEach(t => t.addEventListener('click', e => { e.preventDefault(); closeReviewModal(); }));
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && !editReviewModal.hidden) closeReviewModal(); });
+
+  editReviewForm.addEventListener('submit', async function(e) {
+    e.preventDefault(); if (reviewIdToEdit===null) return;
+    const newText   = editReviewText.value.trim();
+    const newRating = Number(editReviewRating.value);
+    const tags      = Array.from(editTagBtns).filter(b=>b.classList.contains('active')).map(b=>b.textContent.trim());
+    if (!newText || !newRating) { alert('Please complete the stars and review.'); return; }
+    try {
+      const res = await fetch('/edit-review', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reviewId:reviewIdToEdit, reviewText:newText, rating:newRating, tags }) });
+      const result = await res.json();
+      if (!res.ok) { alert(result.message || 'Failed to update review.'); return; }
+      await loadReviewsFromDB(); closeReviewModal();
+    } catch(e) { alert('Error updating review.'); }
+  });
+
+  /* ── DELETE REPLY ── */
+  const deleteModal = document.getElementById("deleteModal");
+  document.getElementById("cancelDelete").onclick    = () => { deleteModal.hidden=true; selectedReviewId=null; selectedReplyText=null; };
+  document.getElementById("closeDeleteModal").onclick= () => { deleteModal.hidden=true; };
+  document.getElementById("xDeleteModal").onclick    = () => { deleteModal.hidden=true; };
+  document.getElementById("confirmDelete").onclick   = async () => {
+    if (!selectedReviewId || !selectedReplyText) return;
+    try {
+      const res = await fetch("/delete-reply", { method:"DELETE", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ reviewId:selectedReviewId, text:selectedReplyText }) });
+      if (res.ok) { deleteModal.hidden=true; selectedReviewId=null; selectedReplyText=null; await loadMyReplies(); }
+      else alert("Failed to delete");
+    } catch(e) { alert("Error deleting reply."); }
+  };
+
+  /* ── INITIAL LOAD ── */
+  loadReviewsFromDB();
+  loadMyReplies();
+</script>
+
+<!-- S7: FAB → Write Review -->
+<script>
+(function() {
+  const fab        = document.getElementById('addReviewFab');
+  const writeModal = document.getElementById('writeReviewModal');
+  const writeForm  = document.getElementById('writeReviewForm');
+  const tagButtons = document.querySelectorAll('#writeReviewModal .wr-tag');
+  const ratingInput = document.getElementById('wrRating');
+  const starsContainer = document.getElementById('wrStars');
+  let currentRating = 0;
+
+  fab.addEventListener('click', () => { writeModal.hidden = false; });
+  document.querySelectorAll('[data-close-write]').forEach(b => b.addEventListener('click', () => { writeModal.hidden=true; }));
+
+  for (let i=1; i<=5; i++) {
+    const s = document.createElement('div'); s.classList.add('wr-star');
+    s.addEventListener('click', () => { currentRating=i; ratingInput.value=i; updateStars(); });
+    starsContainer.appendChild(s);
+  }
+  function updateStars() { document.querySelectorAll('#wrStars .wr-star').forEach((s,i) => s.classList.toggle('filled', i < currentRating)); }
+
+  tagButtons.forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
+
+  document.getElementById('wrPhoto').addEventListener('change', function() {
+    const f = this.files[0], fn = document.getElementById('fileName');
+    if (!f) { fn.textContent='No file chosen'; return; }
+    if (!f.type.startsWith('image/')) { fn.textContent='✕ Invalid file type'; fn.style.color='red'; this.value=''; return; }
+    fn.textContent='✓ '+f.name; fn.style.color='green';
+  });
+  document.getElementById('wrPhoto').addEventListener('change', () => {
+    const f = document.getElementById('wrPhoto').files[0];
+    document.getElementById('fileName').textContent = f ? f.name : 'No file chosen';
+  });
+
+  writeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cafe   = document.getElementById('wrCafe').value;
+    const rating = Number(document.getElementById('wrRating').value);
+    const text   = document.getElementById('wrText').value.trim();
+    const photo  = document.getElementById('wrPhoto').files[0];
+    if (!cafe)   { alert("Please select a cafe.");       return; }
+    if (!rating) { alert("Please select a star rating."); return; }
+    if (!text)   { alert("Please write a review.");       return; }
+    if (!photo)  { alert("Please upload a photo.");       return; }
+    const tags = Array.from(tagButtons).filter(b=>b.classList.contains('active')).map(b=>b.textContent.trim());
+    const today = new Date().toISOString().split('T')[0];
+    const photoUrl = await new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(photo); });
+    try {
+      const res = await fetch('/add-review', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ establishmentName:cafe, rating, reviewText:text, tags:tags.join(','), datePosted:today, photoUrl }) });
+      const result = await res.text();
+      if (!res.ok) { alert('Failed to save review: '+result); return; }
+      alert('Review added successfully!');
+      writeModal.hidden=true; writeForm.reset(); currentRating=0; ratingInput.value=0; updateStars();
+      tagButtons.forEach(b=>b.classList.remove('active'));
+      loadReviewsFromDB(); loadMyReplies();
+    } catch(e) { alert('Error saving review.'); }
+  });
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const select = document.getElementById("wrCafe");
+    try {
+      const res = await fetch('/establishments');
+      const ests = await res.json();
+      ests.forEach(est => { const o=document.createElement("option"); o.value=est.name; o.textContent=`${est.name} (${est.location})`; select.appendChild(o); });
+    } catch(e) { console.error("Error loading cafes:", e); }
+  });
+})();
+</script>
+
 </body>
 </html>
