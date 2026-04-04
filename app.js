@@ -665,11 +665,18 @@ app.post("/update-profile", async (req, res) => {
       return res.status(401).json({ message: "Not logged in" });
     }
 
-    let { username, bio, title, avatar } = req.body;
+    let { fullName, username, bio, title, avatar } = req.body;
 
+    fullName = (fullName || "").trim();
     username = normalizeUsername(username);
     bio = (bio || "").trim();
     title = (title || "").trim();
+
+    if (!isValidFullName(fullName)) {
+      return res.status(400).json({
+        message: "Full name must be 2 to 60 characters."
+      });
+    }
 
     if (!isValidUsername(username)) {
       return res.status(400).json({ message: "Username must start with @ and be 3 to 20 characters using only letters, numbers, and underscores." });
@@ -695,6 +702,7 @@ app.post("/update-profile", async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.session.user.id,
       {
+        fullName,
         username,
         bio: bio || "",
         title: title || "Member",

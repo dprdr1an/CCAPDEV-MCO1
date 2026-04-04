@@ -426,37 +426,37 @@
 <!-- ═══════════════ EDIT PROFILE MODAL ═══════════════ -->
 <div id="editProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
   <div class="modal-backdrop" data-close></div>
-  <div class="modal-panel" role="document">
-    <header style="display:flex;align-items:center;justify-content:space-between;">
-      <h3 id="modalTitle" style="margin:0">Edit profile</h3>
-      <button class="modal-close" aria-label="Close" data-close>✕</button>
-    </header>
-    <form id="editProfileForm" style="margin-top:14px;">
-      <div style="display:flex;gap:14px;align-items:center;">
-        <div style="flex:0 0 auto;text-align:center;">
-          <div style="width:84px;height:84px;border-radius:50%;overflow:hidden;border:2px solid #e6eaea;display:inline-block;">
-            <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%;height:100%;object-fit:cover;display:block;">
-          </div>
-        </div>
-        <div style="flex:1;">
-          <label for="inputAvatar" style="display:block;font-weight:600;margin-bottom:6px;">Profile picture</label>
-          <input id="inputAvatar" type="file" accept="image/*" />
-          <div style="font-size:13px;color:#666;margin-top:6px;">PNG/JPG, max 3 MB.</div>
-          <div style="margin-top:8px;">
-            <button type="button" id="removeAvatarBtn" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Remove photo</button>
-          </div>
-        </div>
+  <div class="modal-panel auth-panel" role="document">
+    <button class="modal-close-review" aria-label="Close" data-close>✕</button>
+    <h2 id="modalTitle" class="auth-title">Edit Profile</h2>
+
+    <!-- Avatar preview centered at top -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px;">
+      <div style="width:90px;height:90px;border-radius:50%;overflow:hidden;border:3px solid #e6eaea;">
+        <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%;height:100%;object-fit:cover;display:block;">
       </div>
-      <label for="inputUsername" style="display:block;margin-top:14px;margin-bottom:6px;font-weight:600;">Username</label>
-      <input id="inputUsername" type="text" placeholder="@your_username" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;" required>
-      <label for="inputTitle" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Job Title</label>
-      <input id="inputTitle" type="text" placeholder="Job Title" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;">
-      <label for="inputBio" style="display:block;margin-top:12px;margin-bottom:6px;font-weight:600;">Short bio</label>
-      <textarea id="inputBio" rows="4" placeholder="Write a short bio..." style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);font-size:15px;font-family:inherit;"></textarea>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
-        <button type="button" class="btn-secondary" data-close style="padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent;cursor:pointer;">Cancel</button>
-        <button type="submit" class="btn-primary"   style="padding:8px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;">Save</button>
+      <input id="inputAvatar" type="file" accept="image/*" style="font-size:13px;">
+      <button type="button" id="removeAvatarBtn" style="padding:4px 14px;border-radius:20px;border:1px solid rgba(0,0,0,0.12);background:transparent;cursor:pointer;font-size:13px;">Remove photo</button>
+    </div>
+
+    <form id="editProfileForm">
+      <div class="auth-group">
+        <label for="inputFullName">Full Name:</label>
+        <input id="inputFullName" type="text" placeholder="Your full name" required>
       </div>
+      <div class="auth-group">
+        <label for="inputUsername">Username:</label>
+        <input id="inputUsername" type="text" placeholder="@your_username" required>
+      </div>
+      <div class="auth-group">
+        <label for="inputTitle">Job Title:</label>
+        <input id="inputTitle" type="text" placeholder="e.g. Coffee Lover">
+      </div>
+      <div class="auth-group" style="align-items:flex-start;">
+        <label for="inputBio" style="padding-top:10px;">Bio:</label>
+        <textarea id="inputBio" rows="3" placeholder="Write a short bio..." style="flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.18);background:#fff;font-size:15px;font-family:inherit;outline:none;resize:none;"></textarea>
+      </div>
+      <button type="submit" class="auth-btn">Save</button>
     </form>
   </div>
 </div>
@@ -767,28 +767,32 @@ document.addEventListener("DOMContentLoaded", () => {
 <script>
 (function() {
   const editBtn     = document.getElementById('editProfileBtn');
-  const modal       = document.getElementById('editProfileModal');
+  const modal         = document.getElementById('editProfileModal');
   if (!modal) return;
   const closeTriggers = modal.querySelectorAll('[data-close]');
-  const form        = document.getElementById('editProfileForm');
+  const form          = document.getElementById('editProfileForm');
+  const inputFullName = document.getElementById('inputFullName');
   const inputUsername = document.getElementById('inputUsername');
-  const inputBio    = document.getElementById('inputBio');
-  const inputTitle  = document.getElementById('inputTitle');
-  const handleText  = document.getElementById('handleText');
-  const bioText     = document.getElementById('bioText');
-  const inputAvatar = document.getElementById('inputAvatar');
+  const inputBio      = document.getElementById('inputBio');
+  const inputTitle    = document.getElementById('inputTitle');
+  const nameText      = document.getElementById('nameText');
+  const handleText    = document.getElementById('handleText');
+  const bioText       = document.getElementById('bioText');
+  const inputAvatar   = document.getElementById('inputAvatar');
   const removeAvatarBtn = document.getElementById('removeAvatarBtn');
-  const avatarLarge = document.getElementById('avatarLargeImg');
-  const avatarMini  = document.getElementById('avatarMiniImg');
-  const modalPreview = document.getElementById('modalAvatarPreview');
-  const DEFAULT_SRC = 'icons/noprof.jpg';
+  const avatarLarge   = document.getElementById('avatarLargeImg');
+  const avatarMini    = document.getElementById('avatarMiniImg');
+  const modalPreview  = document.getElementById('modalAvatarPreview');
+  const DEFAULT_SRC   = 'icons/noprof.jpg';
 
-  const open  = () => {
-    inputUsername.value = handleText ? handleText.textContent : '';
-    inputBio.value      = bioText    ? bioText.textContent    : '';
-    inputTitle.value    = localStorage.getItem('beanthere_profile_title') || 'Member';
+  const open = () => {
+    inputFullName.value = localStorage.getItem('beanthere_profile_fullname') || '';
+    inputUsername.value = localStorage.getItem('beanthere_profile_username') || '';
+    inputBio.value      = localStorage.getItem('beanthere_profile_bio')      || '';
+    inputTitle.value    = localStorage.getItem('beanthere_profile_title')    || 'Member';
     if (modalPreview) modalPreview.src = localStorage.getItem('beanthere_profile_avatar') || DEFAULT_SRC;
-    modal.hidden = false; setTimeout(() => inputUsername.focus(), 30);
+    modal.hidden = false;
+    setTimeout(() => inputFullName.focus(), 30);
   };
   const close = () => { modal.hidden = true; if (inputAvatar) inputAvatar.value = ''; };
   const norm  = v => { v = (v||'').trim(); return v.charAt(0) !== '@' ? '@'+v : v; };
@@ -814,22 +818,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (form) form.addEventListener('submit', async function(e) {
     e.preventDefault();
-    let u = norm(inputUsername.value); if (u.length < 2) { alert('Please enter a valid username.'); inputUsername.focus(); return; }
-    const bioVal = inputBio.value || '', titleVal = inputTitle.value || 'Member';
+    const fullNameVal = inputFullName.value.trim();
+    if (!fullNameVal) { alert('Please enter your full name.'); inputFullName.focus(); return; }
+    let u = norm(inputUsername.value);
+    if (u.length < 2) { alert('Please enter a valid username.'); inputUsername.focus(); return; }
+    const bioVal   = inputBio.value   || '';
+    const titleVal = inputTitle.value || 'Member';
     let avatarData = '';
     const f = inputAvatar.files && inputAvatar.files[0];
     if (f) avatarData = await new Promise((res,rej) => { const r=new FileReader(); r.onload=ev=>res(ev.target.result); r.onerror=rej; r.readAsDataURL(f); });
     try {
-      const res = await fetch('/update-profile', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:u, bio:bioVal, title:titleVal, avatar:avatarData }) });
+      const res = await fetch('/update-profile', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: fullNameVal, username: u, bio: bioVal, title: titleVal, avatar: avatarData })
+      });
       const result = await res.json();
       if (!res.ok) { alert(result.message || 'Failed to update profile.'); return; }
+      localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
       localStorage.setItem('beanthere_profile_username', result.user.username || '');
       localStorage.setItem('beanthere_profile_bio',      result.user.bio      || '');
       localStorage.setItem('beanthere_profile_title',    result.user.title    || 'Member');
       localStorage.setItem('beanthere_profile_avatar',   result.user.avatar   || '');
+      if (nameText)   nameText.textContent   = result.user.fullName || '';
       if (handleText) handleText.textContent = result.user.username || '';
       if (bioText)    bioText.textContent    = result.user.bio      || '';
       const sub = document.querySelector('.ud-sub'); if (sub) sub.textContent = result.user.title || 'Member';
+      const greet = document.querySelector('.ud-greet'); if (greet) greet.textContent = `Hi, ${result.user.fullName || result.user.username}!`;
       if (result.user.avatar) { [avatarLarge, avatarMini, modalPreview].forEach(el => { if (el) el.src = result.user.avatar; }); }
       alert('Profile updated successfully!'); close();
     } catch(e) { alert('Error updating profile.'); }
