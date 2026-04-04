@@ -779,6 +779,80 @@ app.delete("/delete-reply", async (req, res) => {
   }
 });
 
+/* =========================
+   TBV ROUTES
+========================= */
+
+// GET USER'S TBV LIST
+app.get("/tbv", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
+
+    const user = await User.findById(req.session.user.id).populate("tbv");
+    res.json(user.tbv || []);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching TBV" });
+  }
+});
+
+// ADD ESTABLISHMENT TO TBV
+app.post("/tbv/add", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
+
+    const { establishmentId } = req.body;
+
+    if (!establishmentId) {
+      return res.status(400).json({ message: "Missing establishmentId" });
+    }
+
+    const user = await User.findById(req.session.user.id);
+
+    // Prevent duplicates
+    if (!user.tbv.map(id => id.toString()).includes(establishmentId)) {
+      user.tbv.push(establishmentId);
+      await user.save();
+    }
+
+    res.json({ message: "Added to TBV" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error adding to TBV" });
+  }
+});
+
+// REMOVE ESTABLISHMENT FROM TBV
+app.post("/tbv/remove", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
+
+    const { establishmentId } = req.body;
+
+    if (!establishmentId) {
+      return res.status(400).json({ message: "Missing establishmentId" });
+    }
+
+    const user = await User.findById(req.session.user.id);
+    user.tbv = user.tbv.filter(id => id.toString() !== establishmentId);
+    await user.save();
+
+    res.json({ message: "Removed from TBV" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error removing from TBV" });
+  }
+});
+
 const PORT = 3000;
 
 // start server after DB connection

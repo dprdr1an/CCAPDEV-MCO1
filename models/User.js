@@ -7,7 +7,14 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     bio: { type: String, default: "" },
     title: { type: String, default: "Member" },
-    avatar: { type: String, default: "" }
+    avatar: { type: String, default: "" },
+
+    tbv: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Establishment"
+      }
+    ]
   },
   { timestamps: true }
 );

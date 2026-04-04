@@ -91,8 +91,13 @@
 
     /* ── CAFE HEADER ── */
     .cafe-header{
-      max-width: var(--content-width);
-      margin: 0 auto 22px;
+      display:block;
+    }
+    .cafe-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
     }
     .cafe-name-row{
       display: flex;
@@ -352,6 +357,22 @@
     .modal-close-review:hover{
       opacity: 0.7;
     }
+
+    .tbv-btn{
+      display: inline-flex;      
+      align-items: center;      
+      gap: 6px; 
+      
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(127,123,46,0.5);
+      background: transparent;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      color:#4a4a3a;
+      transition: 0.2s;
+    }
   </style>
 </head>
 
@@ -393,14 +414,17 @@
 
       <!-- Cafe Header -->
       <div class="cafe-header">
-        <div class="cafe-name-row">
-          <h1 class="cafe-name" id="cafeName">Loading…</h1>
-          <div class="cafe-score">
-            <img src="icons/bean.png" alt="bean" style="width:20px;height:20px;">
-            <span id="cafeRating">—</span>
+        <div class="cafe-top">
+          <div class="cafe-name-row">
+            <h1 class="cafe-name" id="cafeName">Loading…</h1>
+            <div class="cafe-score">
+              <img src="icons/bean.png" alt="bean" style="width:20px;height:20px;">
+              <span id="cafeRating">—</span>
+            </div>
           </div>
+          <button id="addToTBVBtn" class="tbv-btn"> <img src="icons/add.png" width="13" style="opacity:0.75;"> Add to TBV</button>
         </div>
-        <div id="cafeLocation" style="font-size:15px; color:#6b6151; margin-top:4px;"></div>
+        <div id="cafeLocation" style="font-size:15px; color:#6b6151; margin-top:10px; margin-bottom:18px;"></div>
       </div>
 
       <!-- Photo Grid -->
@@ -867,6 +891,45 @@ if (password.length < 6 || password.length > 50) {
   loadReviews();
 
 });
+
+const addToTBVBtn = document.getElementById("addToTBVBtn");
+
+addToTBVBtn.onclick = async () => {
+  try {
+    // get cafe ID from URL
+    const params = new URLSearchParams(window.location.search);
+    const establishmentId = params.get("id");
+
+    if (!establishmentId) {
+      alert("Cafe not found.");
+      return;
+    }
+
+    const res = await fetch("/tbv/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({ establishmentId })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      alert(result.message || "Error adding to TBV");
+      return;
+    }
+
+    // UX feedback
+    addToTBVBtn.textContent = "Added";
+    addToTBVBtn.disabled = true;
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to add to TBV");
+  }
+};
 </script>
 </body>
 </html>
