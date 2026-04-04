@@ -810,10 +810,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   if (removeAvatarBtn) removeAvatarBtn.addEventListener('click', e => {
-    e.preventDefault(); localStorage.removeItem('beanthere_profile_avatar');
+    e.preventDefault();
+    localStorage.setItem('beanthere_avatar_removed', 'true');
+    localStorage.removeItem('beanthere_profile_avatar');
     [avatarLarge, avatarMini, modalPreview].forEach(el => { if (el) el.src = DEFAULT_SRC; });
     if (inputAvatar) inputAvatar.value = '';
-    alert('Profile photo removed.');
   });
 
   if (form) form.addEventListener('submit', async function(e) {
@@ -824,9 +825,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (u.length < 2) { alert('Please enter a valid username.'); inputUsername.focus(); return; }
     const bioVal   = inputBio.value   || '';
     const titleVal = inputTitle.value || 'Member';
-    let avatarData = '';
+
+    let avatarData = undefined;
     const f = inputAvatar.files && inputAvatar.files[0];
-    if (f) avatarData = await new Promise((res,rej) => { const r=new FileReader(); r.onload=ev=>res(ev.target.result); r.onerror=rej; r.readAsDataURL(f); });
+    if (f) {
+      avatarData = await new Promise((res,rej) => { const r=new FileReader(); r.onload=ev=>res(ev.target.result); r.onerror=rej; r.readAsDataURL(f); });
+    } else if (localStorage.getItem('beanthere_avatar_removed') === 'true') {
+      avatarData = '';
+    }
+
     try {
       const res = await fetch('/update-profile', {
         method: 'POST', credentials: 'include',
@@ -835,17 +842,23 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const result = await res.json();
       if (!res.ok) { alert(result.message || 'Failed to update profile.'); return; }
+
+      localStorage.removeItem('beanthere_avatar_removed');
       localStorage.setItem('beanthere_profile_fullname', result.user.fullName || '');
       localStorage.setItem('beanthere_profile_username', result.user.username || '');
       localStorage.setItem('beanthere_profile_bio',      result.user.bio      || '');
       localStorage.setItem('beanthere_profile_title',    result.user.title    || 'Member');
       localStorage.setItem('beanthere_profile_avatar',   result.user.avatar   || '');
+
+      const newSrc = result.user.avatar || DEFAULT_SRC;
+      [avatarLarge, avatarMini, modalPreview].forEach(el => { if (el) el.src = newSrc; });
+
       if (nameText)   nameText.textContent   = result.user.fullName || '';
       if (handleText) handleText.textContent = result.user.username || '';
       if (bioText)    bioText.textContent    = result.user.bio      || '';
       const sub = document.querySelector('.ud-sub'); if (sub) sub.textContent = result.user.title || 'Member';
       const greet = document.querySelector('.ud-greet'); if (greet) greet.textContent = `Hi, ${result.user.fullName || result.user.username}!`;
-      if (result.user.avatar) { [avatarLarge, avatarMini, modalPreview].forEach(el => { if (el) el.src = result.user.avatar; }); }
+
       alert('Profile updated successfully!'); close();
     } catch(e) { alert('Error updating profile.'); }
   });

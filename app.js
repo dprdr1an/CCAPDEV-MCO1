@@ -706,7 +706,7 @@ app.post("/update-profile", async (req, res) => {
         username,
         bio: bio || "",
         title: title || "Member",
-        ...(avatar ? { avatar } : {})
+        ...(avatar !== undefined ? { avatar } : {})
       },
       { new: true }
     );
