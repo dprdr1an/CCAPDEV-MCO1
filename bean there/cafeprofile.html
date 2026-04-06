@@ -365,7 +365,10 @@
 
       <div class="ec-row">
         <label for="inputCafeBio">Bio</label>
-        <textarea id="inputCafeBio" placeholder="Write a short bio..."></textarea>
+        <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
+          <textarea id="inputCafeBio" placeholder="Write a short bio..."></textarea>
+          <div id="bioCounter" style="font-size:12px; color:#888; text-align:right;">0 / 300</div>
+        </div>
       </div>
 
       <div class="ec-actions">
@@ -506,8 +509,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       currentCafeData = cafe;
 
       document.getElementById('cafeName').textContent   = cafe.name     || 'Cafe Name';
-      document.getElementById('cafeHandle').textContent = cafe.handle   || '';
-      document.getElementById('cafeBio').textContent    = cafe.bio      || 'No bio yet.';
+      document.getElementById('cafeHandle').textContent = cafe.ownerUsername || '';
+
+      // FIX: trim before checking so whitespace-only bios fall back correctly,
+      // and display the trimmed value so leading/trailing spaces are never shown
+      const trimmedBio = typeof cafe.bio === 'string' ? cafe.bio.trim() : '';
+      document.getElementById('cafeBio').textContent = trimmedBio.length > 0
+        ? trimmedBio
+        : 'No bio yet.';
+
       document.getElementById('cafeLocation').textContent = cafe.location || '';
 
       // photo grid
@@ -643,9 +653,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   const inputCafeBio   = document.getElementById('inputCafeBio');
   const inputCafeImage = document.getElementById('inputCafeImage');
 
+  // FIX: character counter so owners know the 300-char limit
+  function updateBioCounter() {
+    const counter = document.getElementById('bioCounter');
+    if (!counter) return;
+    const len = inputCafeBio.value.length;
+    counter.textContent = `${len} / 300`;
+    counter.style.color = len > 300 ? '#c0441a' : '#888';
+  }
+  inputCafeBio.addEventListener('input', updateBioCounter);
+
   function openCafeModal() {
     if (!currentCafeData) return;
-    inputCafeBio.value = currentCafeData.bio || '';
+
+    // FIX: use trimmed bio so the textarea never shows leading/trailing spaces.
+    // If bio is undefined (old documents) this safely becomes empty string.
+    inputCafeBio.value = typeof currentCafeData.bio === 'string'
+      ? currentCafeData.bio.trim()
+      : '';
+
+    // Update character counter on open
+    updateBioCounter();
 
     const grid   = document.getElementById('cafePhotosGrid');
     const images = Array.isArray(currentCafeData.imageUrl) ? currentCafeData.imageUrl : [];
@@ -684,6 +712,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   editCafeForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    // FIX: validate bio length on the client before sending — matches backend limit
+    const bioValue = inputCafeBio.value.trim();
+    if (bioValue.length > 300) {
+      alert(`Bio is too long (${bioValue.length}/300 characters). Please shorten it.`);
+      return;
+    }
+
     const files = Array.from(inputCafeImage.files).slice(0, 5);
     let newImages = null;
     if (files.length > 0) {
@@ -698,19 +733,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const res = await fetch('/update-cafe', {
-  method: 'POST',
-  credentials: 'include',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ bio: inputCafeBio.value.trim(), imageUrl: newImages })
-});
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bio: bioValue, imageUrl: newImages })
+      });
+
       const result = await res.json();
       if (!res.ok) { alert(result.message || 'Failed to update cafe.'); return; }
 
+      // FIX: immediately apply the confirmed saved data from the response
+      // so the UI never shows a stale bio between close and re-fetch
+      if (result.cafe) {
+        currentCafeData = { ...currentCafeData, ...result.cafe };
+
+        const savedBio = typeof result.cafe.bio === 'string' ? result.cafe.bio.trim() : '';
+        document.getElementById('cafeBio').textContent = savedBio.length > 0
+          ? savedBio
+          : 'No bio yet.';
+
+        if (result.cafe.imageUrl) {
+          const grid = document.getElementById('cafePhotoGrid');
+          const images = Array.isArray(result.cafe.imageUrl) ? result.cafe.imageUrl : [];
+          grid.innerHTML = images.map(src => `<img src="${src}" alt="${currentCafeData.name}">`).join('');
+        }
+      }
+
       closeCafeModal();
+      // FIX: still re-fetch to ensure full consistency (reviews, rating, etc.)
       await loadOwnerCafe();
       alert('Cafe updated successfully!');
     } catch (err) {
-      console.error(err);
+      console.error('[editCafeForm] error:', err);
       alert('Error updating cafe.');
     }
   });

@@ -385,6 +385,50 @@
     .faded { opacity: 0.3; filter: grayscale(1); }
     .active { opacity: 1; filter: none; transform: scale(1.2); }
 
+
+    /* ── SORT BAR ── */
+    .sort-bar {
+      max-width: var(--content-width);
+      margin: 10px auto 6px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sort-bar label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5b5f10;
+    }
+
+    .sort-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(127,123,46,0.45);
+      background: transparent;
+      box-shadow: 0 2px 8px rgba(127,123,46,0.07);
+      transition: background 0.2s;
+      gap: 6px;
+    }
+
+    .sort-select-wrap:hover {
+      background: rgba(127,123,46,0.06);
+    }
+
+    .sort-select-wrap select {
+      border: none;
+      background: transparent;
+      font-family: Montserrat, system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a4a3a;
+      cursor: pointer;
+      outline: none;
+    }
+
     /* MOBILE */
     @media(max-width:880px){
       .layout{grid-template-columns:1fr}
@@ -535,7 +579,19 @@
             </button>
           </div>
         </div>
-        
+
+        <div class="sort-bar">
+          <label for="sortSelect">Sort by</label>
+          <div class="sort-select-wrap">
+            <select id="sortSelect">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="highest">Highest Rated</option>
+              <option value="lowest">Lowest Rated</option>
+            </select>
+          </div>
+        </div>
+
         <div class="reviews" id="reviewsContainer"></div>
       </main>
 
@@ -1121,27 +1177,43 @@ function renderReviews(data) {
 const searchInput = document.getElementById("q");
 const searchBtn = document.getElementById("searchBtn");
 
+const sortSelect = document.getElementById("sortSelect");
+
+function sortReviews(list) {
+  const sorted = [...list];
+  const val = sortSelect.value;
+  if (val === "newest") {
+    sorted.sort((a, b) => new Date(b.datePosted || 0) - new Date(a.datePosted || 0));
+  } else if (val === "oldest") {
+    sorted.sort((a, b) => new Date(a.datePosted || 0) - new Date(b.datePosted || 0));
+  } else if (val === "highest") {
+    sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  } else if (val === "lowest") {
+    sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+  }
+  return sorted;
+}
+
 function handleSearch() {
   const query = searchInput.value.toLowerCase().trim();
 
-  if (!query) {
-    renderReviews(allReviews);
-    return;
+  let results = allReviews;
+
+  if (query) {
+    results = allReviews.filter(review => {
+      return (
+        review.establishmentName?.toLowerCase().includes(query) ||
+        review.username?.toLowerCase().includes(query) ||
+        review.reviewText?.toLowerCase().includes(query) ||
+        review.location?.toLowerCase().includes(query) ||
+        (review.tags || []).some(tag =>
+          tag.toLowerCase().includes(query)
+        )
+      );
+    });
   }
 
-  const filtered = allReviews.filter(review => {
-    return (
-      review.establishmentName?.toLowerCase().includes(query) ||
-      review.username?.toLowerCase().includes(query) ||
-      review.reviewText?.toLowerCase().includes(query) ||
-      review.location?.toLowerCase().includes(query) ||
-      (review.tags || []).some(tag =>
-        tag.toLowerCase().includes(query)
-      )
-    );
-  });
-
-  renderReviews(filtered);
+  renderReviews(sortReviews(results));
 }
 
 searchBtn.addEventListener("click", handleSearch);
@@ -1151,6 +1223,8 @@ searchInput.addEventListener("keydown", (e) => {
 });
 
 searchInput.addEventListener("input", handleSearch);
+
+sortSelect.addEventListener("change", handleSearch);
 
 function requireLogin() {
   const user = localStorage.getItem("beanthere_profile_username");

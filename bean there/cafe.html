@@ -430,6 +430,13 @@
 
       <!-- Photo Grid -->
       <div class="photo-grid" id="photoGrid"></div>
+      <p id="cafeBio" style="
+          color: #bfb0a8;
+          font-size: 15px;
+          margin-top: -10px;
+          margin-bottom: 20px;
+          max-width: 1000px;
+        "></p>
 
       <!-- Reviews -->
       <div class="reviews">
@@ -814,6 +821,9 @@ if (password.length < 6 || password.length > 50) {
       document.title = `Bean There – ${cafe.name}`;
       document.getElementById('cafeName').textContent     = cafe.name     || 'Unnamed Cafe';
       document.getElementById('cafeLocation').textContent = cafe.location || '';
+      const trimmedBio = typeof cafe.bio === 'string' ? cafe.bio.trim() : '';
+        document.getElementById('cafeBio').textContent =
+          trimmedBio.length > 0 ? trimmedBio : 'No description yet.';
 
       const images = cafe.imageUrl?.length ? cafe.imageUrl : [];
       const grid = document.getElementById('photoGrid');

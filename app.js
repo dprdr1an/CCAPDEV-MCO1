@@ -95,7 +95,10 @@ app.get("/owner-establishment", async (req, res) => {
       return res.status(404).json({ message: "Establishment not found" });
     }
 
-    res.json(owner.establishmentId);
+    res.json({
+      ...owner.establishmentId.toObject(),
+      ownerUsername: owner.username
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error fetching owner establishment" });
@@ -121,25 +124,51 @@ app.post("/update-cafe", async (req, res) => {
     if (!req.session.owner) {
       return res.status(401).json({ message: "Owner not logged in" });
     }
+
     const owner = await Owner.findById(req.session.owner.id);
     if (!owner) {
       return res.status(404).json({ message: "Owner not found" });
     }
+
+    // FIX: guard against owner with no linked establishment
+    // (findByIdAndUpdate(undefined, ...) returns null silently)
+    if (!owner.establishmentId) {
+      return res.status(400).json({ message: "No establishment linked to this owner account" });
+    }
+
     const { bio, imageUrl } = req.body;
+
+    // FIX: validate bio length consistently with /update-profile
+    const cleanBio = typeof bio === "string" ? bio.trim() : "";
+    if (cleanBio.length > 300) {
+      return res.status(400).json({ message: "Bio must be 300 characters or less." });
+    }
+
+    // FIX: use explicit $set so the update is unambiguous across all
+    // Mongoose versions, and add runValidators so schema rules are enforced
+    const updatePayload = {
+      $set: {
+        bio: cleanBio,
+        ...(Array.isArray(imageUrl) && imageUrl.length > 0 ? { imageUrl } : {})
+      }
+    };
+
+    console.log(`[update-cafe] owner=${req.session.owner.id} estId=${owner.establishmentId} bio="${cleanBio}"`);
+
     const updatedCafe = await Establishment.findByIdAndUpdate(
       owner.establishmentId,
-      {
-        bio: bio || "",
-        ...(imageUrl ? { imageUrl } : {})
-      },
-      { new: true }
+      updatePayload,
+      { new: true, runValidators: true }
     );
+
     if (!updatedCafe) {
       return res.status(404).json({ message: "Establishment not found" });
     }
+
+    console.log(`[update-cafe] saved bio="${updatedCafe.bio}"`);
     res.json({ message: "Cafe updated successfully", cafe: updatedCafe });
   } catch (err) {
-    console.error(err);
+    console.error("[update-cafe] error:", err);
     res.status(500).json({ message: "Error updating cafe" });
   }
 });

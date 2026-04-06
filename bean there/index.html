@@ -482,6 +482,152 @@
       height: 12px;
     }
 
+    /* ── ALL CAFES SECTION ───────────────────────────────── */
+
+    /* Outer section wrapper */
+    .all-cafes-section {
+      margin: 26px auto;
+      padding: 32px 28px 36px;
+      border-radius: 6px;
+
+      background: transparent;
+
+      position: relative;   /* ✅ REQUIRED */
+      isolation: isolate;   /* ✅ keeps effects inside */
+      overflow: hidden;     /* ✅ prevents bleed */
+    }
+
+    /* title */
+    .all-cafes-section h4 {
+      text-align: center;
+      margin: 0 0 24px;
+      font-family: Lora, serif;
+      font-size: 30px;
+      color: #d45a2a;
+      letter-spacing: 0.3px;
+    }
+
+    /* Vertical list container */
+    .cafe-list {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .cafe-list-card {
+      background: #cfe0ff;
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cafe-list-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Left: name + location stacked */
+    .cafe-list-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .cafe-list-name {
+      font-family: Lora, serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #d45a2a;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cafe-list-location {
+      color: #253d67;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Right: rating top, TBV button below — right-aligned */
+    .cafe-list-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .cafe-list-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .cafe-list-rating img {
+      width: 14px;
+      height: 14px;
+      display: block;
+    }
+
+    .cafe-list-rating .rating-avg {
+      font-size: 12px;
+      color: #253d67;
+      font-weight: 600;
+      margin-left: 5px;
+    }
+
+    .cafe-list-no-rating {
+      font-size: 12px;
+      color: #5b7ba8;
+    }
+
+    /* TBV button — matches cafe.html .tbv-btn exactly */
+    .tbv-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(127,123,46,0.5);
+      background: transparent;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      color: #4a4a3a;
+      transition: 0.2s;
+      font-family: Montserrat, sans-serif;
+    }
+
+    .tbv-btn:hover {
+      background: rgba(127,123,46,0.08);
+    }
+
+    .tbv-btn.small {
+      padding: 6px 14px;
+      font-size: 12px;
+    }
+
+    .cafe-list-empty {
+      text-align: center;
+      color: #5b7ba8;
+      font-size: 15px;
+      padding: 32px 0;
+    }
+
     /* FOOTER */
     .footer{
       margin:26px auto;
@@ -695,6 +841,16 @@
           </div>
         </section>
 
+        <!-- ── EXPLORE ALL CAFES ────────────────────────────── -->
+        <!-- Sits directly below the carousel; scrollable list    -->
+        <section class="all-cafes-section content-section">
+          <h4>Explore All Cafes</h4>
+          <div class="cafe-list" id="cafeList">
+            <p class="cafe-list-empty">Loading cafes…</p>
+          </div>
+        </section>
+        <!-- ────────────────────────────────────────────────── -->
+
         <section class="footer content-section">
           <div>
             <h5>Support Us</h5>
@@ -702,7 +858,7 @@
           </div>
           <div>
             <h5>Contact Us</h5>
-            <p><strong>Email:</strong><br>beanthere@gmail.com<br><br>
+            <p><strong>Email:</strong><br><a class="__cf_email__" data-cfemail="127077737c667a77607752757f737b7e3c717d7f"><span class="__cf_email__" data-cfemail="2c4e494d425844495e496c4b414d4540024f4341">[email&#160;protected]</span></a><br><br>
             <strong>Instagram:</strong><br>@beantheredonethat</p>
           </div>
           <div>
@@ -790,7 +946,7 @@
       </form>
     </div>
 </div>
- <script>
+ <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   document.addEventListener("DOMContentLoaded", () => {
 
   // --- 1. SELECTORS ---
@@ -1096,6 +1252,11 @@ let currentIndex = 0;
   let isAnimating = false;
   let autoplay;
 
+  // ── ALL CAFES: ratings lookup map ──────────────────────
+  // Built once from /reviews; keyed by lowercase establishment name.
+  // Shape: { [nameLower]: { total: Number, count: Number } }
+  let ratingsMap = {};
+
   function getIndex(i) {
     const n = activeCafes.length || 1;
     return ((i % n) + n) % n;
@@ -1143,6 +1304,11 @@ async function loadCafes() {
     createDots();
     renderCarousel();
     startAutoplay();
+
+    // ── ALL CAFES: fetch ratings then render the full list ──
+    await loadRatingsMap();
+    renderAllCafes(cafes);
+
   } catch (err) {
     console.error("Error loading cafes:", err);
     carousel.innerHTML = "<div style='text-align:center;padding:40px'>Error loading cafes</div>";
@@ -1216,17 +1382,144 @@ async function loadCafes() {
     currentIndex = 0;
     createDots();
     renderCarousel();
+    // ── ALL CAFES: mirror the same filter ──────────────────
+    renderAllCafes(activeCafes);
+  }
+
+  // ── ALL CAFES FUNCTIONS ─────────────────────────────────
+
+  /**
+   * Fetches all reviews and builds ratingsMap:
+   *   { [establishmentNameLower]: { total, count } }
+   * Called once by loadCafes() so we only hit /reviews once.
+   */
+  async function loadRatingsMap() {
+    try {
+      const res = await fetch('/reviews');
+      if (!res.ok) return;
+      const reviews = await res.json();
+      ratingsMap = {};
+      reviews.forEach(r => {
+        const key = (r.establishmentName || '').trim().toLowerCase();
+        if (!ratingsMap[key]) ratingsMap[key] = { total: 0, count: 0 };
+        ratingsMap[key].total += Number(r.rating) || 0;
+        ratingsMap[key].count += 1;
+      });
+    } catch (e) {
+      console.error('Could not load reviews for ratings map:', e);
+    }
+  }
+
+  /**
+   * Returns the HTML for 5 bean icons representing `avg`.
+   * Filled beans for the whole-number part, half-opacity for
+   * a 0.5 remainder, greyed-out for the rest. Returns a
+   * "no ratings" label if avg is null.
+   */
+  function buildRatingBeans(avg) {
+    if (avg === null) {
+      return '<span class="cafe-list-no-rating">No ratings yet</span>';
+    }
+    const full  = Math.floor(avg);
+    const half  = (avg - full) >= 0.5;
+    let html = '<span class="cafe-list-rating">';
+    for (let i = 0; i < 5; i++) {
+      if (i < full) {
+        html += '<img src="icons/bean.png" alt="bean">';
+      } else if (i === full && half) {
+        html += '<img src="icons/bean.png" alt="bean" style="opacity:0.45">';
+      } else {
+        html += '<img src="icons/bean.png" alt="bean" style="opacity:0.15;filter:grayscale(1)">';
+      }
+    }
+    html += `<span class="rating-avg">${avg.toFixed(1)}</span>`;
+    html += '</span>';
+    return html;
+  }
+
+  /**
+   * Renders a compact clickable card for each cafe in `list`
+   * into #cafeList. Responds to the same search state as the
+   * carousel so both sections stay in sync.
+   */
+  function renderAllCafes(list) {
+    const container = document.getElementById('cafeList');
+    if (!container) return;
+
+    if (!list || list.length === 0) {
+      container.innerHTML = '<p class="cafe-list-empty">No cafes match your search.</p>';
+      return;
+    }
+
+    container.innerHTML = list.map(cafe => {
+      // Look up average from ratingsMap using case-insensitive name match
+      const key  = (cafe.name || '').trim().toLowerCase();
+      const data = ratingsMap[key];
+      const avg  = (data && data.count > 0) ? data.total / data.count : null;
+
+      return `
+        <div class="cafe-list-card" onclick="window.location.href='cafe.html?id=${cafe.id}'">
+          <div class="cafe-list-content">
+            <div class="cafe-list-name">${cafe.name}</div>
+            <div class="cafe-list-location">${cafe.loc}</div>
+          </div>
+          <div class="cafe-list-actions">
+            <button class="tbv-btn small" onclick="addToTBV('${cafe.id}', event)">
+              <img src="icons/add.png" width="12" style="opacity:0.75;"> Add to TBV
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   // --- 7. INITIALIZATION ---
+
+  // Wire prev / next buttons
   document.getElementById("nextBtn").onclick = () => slideTo(getIndex(currentIndex + 1));
-document.getElementById("prevBtn").onclick = () => slideTo(getIndex(currentIndex - 1));
-carousel.addEventListener("mouseenter", stopAutoplay);
-carousel.addEventListener("mouseleave", startAutoplay);
+  document.getElementById("prevBtn").onclick = () => slideTo(getIndex(currentIndex - 1));
 
-loadCafes();
-});
+  // Pause autoplay while the user hovers over the carousel
+  carousel.addEventListener("mouseenter", stopAutoplay);
+  carousel.addEventListener("mouseleave", startAutoplay);
+
+  // Boot everything — fetches establishments, builds carousel + all-cafes list
+  loadCafes();
+
+  }); // end DOMContentLoaded
+
+async function addToTBV(id, event) {
+  event.stopPropagation();
+
+  try {
+    const res = await fetch("/tbv/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ establishmentId: id })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      alert(result.message || "Error adding to TBV");
+      return;
+    }
+
+    // 🔥 Update button UI
+    const btn = event.target.closest("button");
+    if (btn) {
+      btn.innerHTML = "Added";
+      btn.disabled = true;
+      btn.style.opacity = "0.6";
+      btn.style.cursor = "default";
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+}
 </script>
-
 </body>
 </html>
