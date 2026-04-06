@@ -4,6 +4,7 @@ const ReviewSchema = new mongoose.Schema({
   username: { type: String, required: true, trim: true },
   establishmentName: { type: String, required: true, trim: true },
   rating: { type: Number, min: 1, max: 5, required: true },
+  title: { type: String, default: "", trim: true, maxlength: 80 },
   reviewText: { type: String, required: true, trim: true },
   tags: { type: [String], default: [] },
   datePosted: { type: String, default: "" },

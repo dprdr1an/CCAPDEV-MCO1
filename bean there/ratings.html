@@ -330,9 +330,11 @@
       margin-top: -8px;
     }
 
-    .review-text {
-      font-size: 14px;
-      line-height: 1.5;
+    .review-title-text {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2b2b2b;
+      margin-top: 10px;
     }
 
     .review-tags {
@@ -364,11 +366,26 @@
       height: 18px;
     }
 
+    .review-text-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .review-text {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
     .review-actions {
       display: flex;
-      gap: 18px;
-      margin-top: 10px;
       align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      margin-top: 2px;
     }
     .icon-btn {
       display: inline-flex;
@@ -1132,31 +1149,33 @@ function renderReviews(data) {
             <div class="review-tags">${tags}</div>
           </div>
           <div class="review-title" style="cursor:pointer;" data-id="${review.establishmentId}">
-            ${review.establishmentName}
+            ${review.establishmentName || ''}
             <span class="rating">${beans}</span>
           </div>
           <div class="review-location">${review.location || ""}</div>
-          <div class="review-text">${review.reviewText}</div>
-          <div class="review-actions">
-            <div class="icon-btn like-btn">
-              <img src="icons/like.png" class="${isLiked ? 'active' : 'faded'}">
-              <span>${review.likes || 0}</span>
+          <div class="review-title-text">${review.title || 'Untitled Review'}</div>
+          <div class="review-text-row">
+            <div class="review-text">${review.reviewText}</div>
+            <div class="review-actions">
+              <div class="icon-btn like-btn">
+                <img src="icons/like.png" class="${isLiked ? 'active' : 'faded'}">
+                <span>${review.likes || 0}</span>
+              </div>
+              <div class="icon-btn dislike-btn">
+                <img src="icons/dislike.png" class="${isDisliked ? 'active' : 'faded'}">
+                <span>${review.dislikes || 0}</span>
+              </div>
+              <button class="reply-btn" style="
+                padding: 6px 20px;
+                border-radius: 20px;
+                border: 1.5px solid var(--accent);
+                background: transparent;
+                font-weight: 600;
+                font-size: 13px;
+                cursor: pointer;
+                font-family: Montserrat, sans-serif;
+              ">Reply</button>
             </div>
-            <div class="icon-btn dislike-btn">
-              <img src="icons/dislike.png" class="${isDisliked ? 'active' : 'faded'}">
-              <span>${review.dislikes || 0}</span>
-            </div>
-            <button class="reply-btn" style="
-              margin-top: 4px;
-              padding: 6px 20px;
-              border-radius: 20px;
-              border: 1.5px solid var(--accent);
-              background: transparent;
-              font-weight: 600;
-              font-size: 13px;
-              cursor: pointer;
-              font-family: Montserrat, sans-serif;
-            ">Reply</button>
           </div>
         </div>
         ${replies.length > 0 ? `

@@ -79,6 +79,12 @@
       max-width: var(--content-width);
       margin: 0 auto 22px;
     }
+    .cafe-top{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
     .cafe-name-row{
       display: flex;
       align-items: baseline;
@@ -122,27 +128,32 @@
     .cafe-meta{
       margin-bottom: 28px;
     }
-    .cafe-handle{
-      color: #2b5b6f;
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
     .cafe-bio{
       color: var(--muted);
       margin: 0 0 10px;
     }
-    .edit-cafe-btn{
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1.5px solid rgba(127,123,46,0.4);
+    .edit-cafe-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(127,123,46,0.5);
       background: transparent;
-      cursor: pointer;
-      font-weight: 600;
+
+      font-weight: 700;
+      font-size: 14px;
       font-family: Montserrat, sans-serif;
+
+      cursor: pointer;
+      color:#4a4a3a;
+      transition: 0.2s;
     }
-    .edit-cafe-btn:hover{ background: rgba(127,123,46,0.08); }
+
+    .edit-cafe-btn:hover {
+      background: rgba(127,123,46,0.08);
+    }
 
     /* ── REVIEWS (identical to ratings.html) ── */
     .reviews{
@@ -196,7 +207,12 @@
     .tag img{ width:14px; height:14px; }
     .rating{ display:inline-flex; gap:4px; margin-left:6px; }
     .rating img{ width:18px; height:18px; }
-    .review-text{ font-size:14px; line-height:1.5; }
+    .review-title-text {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2b2b2b;
+      margin-top: 10px;
+    }
 
     /* ── EDIT CAFE MODAL (same style as write/edit review in profile.html) ── */
     .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
@@ -265,17 +281,27 @@
       .review-img{ height:200px; }
       .photo-grid{ grid-template-columns:repeat(3,1fr); }
     }
+    .review-text-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .review-text{ flex:1; font-size:14px; line-height:1.5; }
     .review-actions {
       display: flex;
-      gap: 18px;
-      margin-top: 25px;
       align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      margin-top: 2px;
     }
     .icon-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      cursor: pointer;
+      pointer-events: none;
+      cursor: default;
+      opacity: 0.7;
     }
     .icon-btn img {
       width: 20px;
@@ -314,12 +340,18 @@
 
       <!-- Cafe Header: name + rating -->
       <div class="cafe-header">
-        <div class="cafe-name-row">
-          <h1 class="cafe-name" id="cafeName">Loading…</h1>
-          <div class="cafe-score">
-            <img src="icons/bean.png" alt="bean" style="width:20px;height:20px;">
-            <span id="cafeRating">—</span>
+        <div class="cafe-top">
+          <div class="cafe-name-row">
+            <h1 class="cafe-name" id="cafeName">Loading…</h1>
+            <div class="cafe-score">
+              <img src="icons/bean.png" style="width:20px;height:20px;">
+              <span id="cafeRating">—</span>
+            </div>
           </div>
+
+          <button id="editCafeBtn" class="edit-cafe-btn">
+            Edit Cafe
+          </button>
         </div>
         <div id="cafeLocation" style="font-size:15px; color:#6b6151; margin-top:4px;"></div>
       </div>
@@ -329,9 +361,7 @@
 
       <!-- Cafe Meta: handle, bio, edit button -->
       <div class="cafe-meta">
-        <div class="cafe-handle" id="cafeHandle">@cafename</div>
         <p class="cafe-bio" id="cafeBio">Placeholder for short bio</p>
-        <button id="editCafeBtn" class="edit-cafe-btn">Edit Cafe</button>
       </div>
 
       <!-- Reviews -->
@@ -501,15 +531,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadOwnerCafe() {
     try {
      const res = await fetch('/owner-establishment', {
-  credentials: 'include'
-});
+      credentials: 'include'
+    });
       const cafe = await res.json();
       if (!res.ok) { alert(cafe.message || 'Failed to load cafe profile.'); return; }
 
       currentCafeData = cafe;
 
       document.getElementById('cafeName').textContent   = cafe.name     || 'Cafe Name';
-      document.getElementById('cafeHandle').textContent = cafe.ownerUsername || '';
 
       // FIX: trim before checking so whitespace-only bios fall back correctly,
       // and display the trimmed value so leading/trailing spaces are never shown
@@ -599,29 +628,32 @@ document.addEventListener("DOMContentLoaded", async () => {
                   <span class="rating">${buildBeans(r.rating || 0)}</span>
                 </div>
                 <div class="review-location">${r.location || ''}</div>
-                <div class="review-text">${r.reviewText || ''}</div>
-                <div class="review-actions">
-                  <div class="icon-btn">
-                    <img src="icons/like.png" class="active">
-                    <span>${r.likes || 0}</span>
+                <div class="review-title-text">${r.title || 'Untitled Review'}</div>
+                <div class="review-text-row">
+                  <div class="review-text">${r.reviewText || ''}</div>
+                  <div class="review-actions">
+                    <div class="icon-btn">
+                      <img src="icons/like.png" class="active">
+                      <span>${r.likes || 0}</span>
+                    </div>
+                    <div class="icon-btn">
+                      <img src="icons/dislike.png" class="active">
+                      <span>${r.dislikes || 0}</span>
+                    </div>
+                    <button class="reply-btn" data-id="${r._id}" style="
+                      padding: 6px 20px;
+                      border-radius: 20px;
+                      border: 1.5px solid var(--accent);
+                      background: transparent;
+                      font-weight: 600;
+                      font-size: 13px;
+                      cursor: pointer;
+                      font-family: Montserrat, sans-serif;
+                      pointer-events: auto;
+                    ">
+                      Reply
+                    </button>
                   </div>
-                  <div class="icon-btn">
-                    <img src="icons/dislike.png" class="active">
-                    <span>${r.dislikes || 0}</span>
-                  </div>
-                  <button class="reply-btn" data-id="${r._id}" style="
-                    margin-top: 4px;
-                    padding: 6px 20px;
-                    border-radius: 20px;
-                    border: 1.5px solid var(--accent);
-                    background: transparent;
-                    font-weight: 600;
-                    font-size: 13px;
-                    cursor: pointer;
-                    font-family: Montserrat, sans-serif;
-                  ">
-                    Reply
-                  </button>
                 </div>
               </div>
               ${replySection ? `<div style="grid-column: 1 / -1;">${replySection}</div>` : ''}

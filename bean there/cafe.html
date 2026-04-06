@@ -208,7 +208,13 @@
     .rating{ display:inline-flex; gap:4px; margin-left:6px; }
     .rating img{ width:18px; height:18px; }
 
-    .review-text{ font-size:14px; line-height:1.5; }
+    .review-title-text {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2b2b2b;
+      margin-top: 10px;
+    }
+    .review-text{ font-size:14px; line-height:1.5; margin-top:4px; }
 
     /* ── FAB — identical to profile.html ── */
     #addReviewFab{
@@ -888,6 +894,7 @@ if (password.length < 6 || password.length > 50) {
                 <span class="rating">${buildBeans(r.rating || 0)}</span>
               </div>
               <div class="review-location">${r.location || ''}</div>
+              <div class="review-title-text">${r.title || 'Untitled Review'}</div>
               <div class="review-text">${r.reviewText || ''}</div>
             </div>
           </div>`;

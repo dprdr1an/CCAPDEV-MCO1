@@ -561,6 +561,52 @@
       text-overflow: ellipsis;
     }
 
+    .cafe-list-bio {
+      font-size: 13px;
+      color: #4a4a3a;
+      margin-top: 4px;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sort-bar {
+      max-width: var(--content-width);
+      margin: 10px auto 6px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+    }
+    .sort-bar label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5b5f10;
+    }
+    .sort-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(127,123,46,0.45);
+      background: transparent;
+      box-shadow: 0 2px 8px rgba(127,123,46,0.07);
+      transition: background 0.2s;
+      gap: 6px;
+    }
+    .sort-select-wrap:hover { background: rgba(127,123,46,0.06); }
+    .sort-select-wrap select {
+      border: none;
+      background: transparent;
+      font-family: Montserrat, system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a4a3a;
+      cursor: pointer;
+      outline: none;
+    }
+
     /* Right: rating top, TBV button below — right-aligned */
     .cafe-list-actions {
       display: flex;
@@ -631,7 +677,7 @@
     /* FOOTER */
     .footer{
       margin:26px auto;
-      background:var(--muted);
+      background:#c3c071;
       padding:26px;
       border-radius:6px;
       display:grid;
@@ -643,7 +689,7 @@
 
     .footer h5{
       font-family:Lora, serif;
-      color:#fa7a11;
+      color:#d45a2a;
       margin-top: 0;
       margin-bottom: 0;
       font-size: 30px;
@@ -803,15 +849,6 @@
 
       <main class="main animate-on-load delay-2">
 
-        <div class="search-wrap">
-          <div class="search">
-            <input id="q" placeholder="Search cafes, owners, tags..." />
-            <button id="searchBtn">
-              <img src="icons/search.png" alt="search">
-            </button>
-          </div>
-        </div>
-
         <div class="hero content-section">
           <div class="brand">bean there — your coffee guide</div>
         </div>
@@ -844,6 +881,23 @@
         <!-- ── EXPLORE ALL CAFES ────────────────────────────── -->
         <!-- Sits directly below the carousel; scrollable list    -->
         <section class="all-cafes-section content-section">
+          <div class="search-wrap" style="margin-bottom:8px;">
+            <div class="search">
+              <input id="q" placeholder="Search cafes by name, location, description..." />
+              <button id="searchBtn">
+                <img src="icons/search.png" alt="search">
+              </button>
+            </div>
+          </div>
+          <div class="sort-bar">
+            <label for="sortSelect">Sort by</label>
+            <div class="sort-select-wrap">
+              <select id="sortSelect">
+                <option value="highest">Highest Rated</option>
+                <option value="lowest">Lowest Rated</option>
+              </select>
+            </div>
+          </div>
           <h4>Explore All Cafes</h4>
           <div class="cafe-list" id="cafeList">
             <p class="cafe-list-empty">Loading cafes…</p>
@@ -858,7 +912,7 @@
           </div>
           <div>
             <h5>Contact Us</h5>
-            <p><strong>Email:</strong><br><a class="__cf_email__" data-cfemail="127077737c667a77607752757f737b7e3c717d7f"><span class="__cf_email__" data-cfemail="2c4e494d425844495e496c4b414d4540024f4341">[email&#160;protected]</span></a><br><br>
+            <p><strong>Email:</strong><br><a class="__cf_email__" data-cfemail="127077737c667a77607752757f737b7e3c717d7f"><span class="__cf_email__" data-cfemail="2c4e494d425844495e496c4b414d4540024f4341">beanthere@gmail.com</span></a><br><br>
             <strong>Instagram:</strong><br>@beantheredonethat</p>
           </div>
           <div>
@@ -1295,7 +1349,8 @@ async function loadCafes() {
       img: Array.isArray(cafe.imageUrl) && cafe.imageUrl.length
         ? cafe.imageUrl[0]
         : 'https://placehold.co/600x400?text=Cafe',
-      loc: cafe.location || 'No location'
+      loc: cafe.location || 'No location',
+      bio: cafe.bio || ''
     }));
 
     activeCafes = [...cafes];
@@ -1308,6 +1363,50 @@ async function loadCafes() {
     // ── ALL CAFES: fetch ratings then render the full list ──
     await loadRatingsMap();
     renderAllCafes(cafes);
+
+    // ── SEARCH + SORT wiring (runs after cafes are loaded) ──
+    function sortCafes(list) {
+      const sorted = [...list];
+      const val = document.getElementById('sortSelect').value;
+      const ratingsMap_ = ratingsMap; // closure
+      if (val === 'highest') {
+        sorted.sort((a, b) => {
+          const aKey = (a.name||'').trim().toLowerCase();
+          const bKey = (b.name||'').trim().toLowerCase();
+          const aAvg = ratingsMap_[aKey]?.count > 0 ? ratingsMap_[aKey].total / ratingsMap_[aKey].count : -1;
+          const bAvg = ratingsMap_[bKey]?.count > 0 ? ratingsMap_[bKey].total / ratingsMap_[bKey].count : -1;
+          return bAvg - aAvg;
+        });
+      } else if (val === 'lowest') {
+        sorted.sort((a, b) => {
+          const aKey = (a.name||'').trim().toLowerCase();
+          const bKey = (b.name||'').trim().toLowerCase();
+          const aAvg = ratingsMap_[aKey]?.count > 0 ? ratingsMap_[aKey].total / ratingsMap_[aKey].count : 99;
+          const bAvg = ratingsMap_[bKey]?.count > 0 ? ratingsMap_[bKey].total / ratingsMap_[bKey].count : 99;
+          return aAvg - bAvg;
+        });
+      }
+      // newest/oldest: preserve server order (already newest-first by default)
+      return sorted;
+    }
+
+    function handleCafeSearch() {
+      const query = (document.getElementById('q').value || '').toLowerCase().trim();
+      let results = cafes;
+      if (query) {
+        results = cafes.filter(c =>
+          (c.name || '').toLowerCase().includes(query) ||
+          (c.loc  || '').toLowerCase().includes(query) ||
+          (c.bio  || '').toLowerCase().includes(query)
+        );
+      }
+      renderAllCafes(sortCafes(results));
+    }
+
+    document.getElementById('q').addEventListener('input', handleCafeSearch);
+    document.getElementById('searchBtn').addEventListener('click', handleCafeSearch);
+    document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') handleCafeSearch(); });
+    document.getElementById('sortSelect').addEventListener('change', handleCafeSearch);
 
   } catch (err) {
     console.error("Error loading cafes:", err);
@@ -1462,6 +1561,7 @@ async function loadCafes() {
           <div class="cafe-list-content">
             <div class="cafe-list-name">${cafe.name}</div>
             <div class="cafe-list-location">${cafe.loc}</div>
+            ${cafe.bio ? `<div class="cafe-list-bio">${cafe.bio}</div>` : ''}
           </div>
           <div class="cafe-list-actions">
             <button class="tbv-btn small" onclick="addToTBV('${cafe.id}', event)">

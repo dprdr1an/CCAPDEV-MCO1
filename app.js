@@ -446,10 +446,18 @@ app.post("/add-review", async (req, res) => {
       return res.status(401).send("Not logged in");
     }
 
-    const { establishmentName, rating, reviewText, tags, datePosted, photoUrl } = req.body;
+    const { title, establishmentName, rating, reviewText, tags, datePosted, photoUrl } = req.body;
+
+    if (!title || title.trim().length === 0) {
+      return res.status(400).send("Review title is required.");
+    }
+    if (title.trim().length > 80) {
+      return res.status(400).send("Review title must be 80 characters or less.");
+    }
 
     const newReview = new Review({
       username: req.session.user.username,
+      title: title.trim(),
       establishmentName,
       rating,
       reviewText,
@@ -480,7 +488,7 @@ app.post("/edit-review", async (req, res) => {
       return res.status(401).json({ message: "Not logged in" });
     }
 
-    const { reviewId, reviewText, rating, tags } = req.body;
+    const { reviewId, title, reviewText, rating, tags } = req.body;
 
     const updatedReview = await Review.findOneAndUpdate(
       {
@@ -488,6 +496,7 @@ app.post("/edit-review", async (req, res) => {
         username: req.session.user.username
       },
       {
+        ...(title !== undefined ? { title: title.trim() } : {}),
         reviewText,
         rating,
         tags: Array.isArray(tags) ? tags : []

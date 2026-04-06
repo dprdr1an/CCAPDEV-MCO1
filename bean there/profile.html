@@ -183,13 +183,21 @@
 
     /* ─── REVIEW CARD — identical to ratings.html ────────────── */
     .review-card {
-      flex:0 0 660px;
-      scroll-snap-align:start;
-      background:var(--card-bg);
-      border-radius:22px; padding:22px;
-      display:grid; grid-template-columns:180px 1fr; gap:22px;
-      transition:transform 0.2s ease, box-shadow 0.2s ease;
-      position:relative;        /* needed for absolute top-right badge */
+      width: 100%;
+      max-width: var(--content-width);
+      flex: none; /* VERY IMPORTANT */
+      scroll-snap-align: start;
+
+      background: var(--card-bg);
+      border-radius: 22px;
+      padding: 22px;
+
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 22px;
+
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
     }
     .review-card:hover { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.12); }
 
@@ -199,14 +207,17 @@
     .review-content { display:flex; flex-direction:column; gap:8px; }
     .review-top     { display:flex; justify-content:space-between; font-size:13px; color:#253d67; }
     .review-title   { font-family:Lora,serif; font-size:26px; color:#d45a2a; display:flex; align-items:center; gap:8px; }
+    .review-title-text { font-weight:700; font-size:15px; color:#2b2b2b; margin-top:10px; }
     .review-location { color:#253d67; font-size:14px; font-weight:600; margin-top:-4px; }
-    .review-text    { font-size:14px; line-height:1.55; flex:1; }
+    .review-text    { font-size:14px; line-height:1.55; }
     .review-tags    { display:flex; gap:10px; font-size:12px; color:#253d67; flex-wrap:wrap; }
     .tag            { display:inline-flex; align-items:center; gap:5px; }
     .tag img        { width:13px; height:13px; }
     .rating         { display:inline-flex; gap:3px; margin-left:4px; }
     .rating img     { width:17px; height:17px; }
-    .review-actions { display:flex; gap:10px; margin-top:auto; padding-top:8px; align-items:center; }
+    .review-text-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+    .review-text { flex:1; }
+    .review-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; margin-top:2px; }
     .edited-label   { font-size:11px; color:#718096; font-style:italic; }
 
     /* Top-right action badge (subtle, appears inside card) */
@@ -235,7 +246,7 @@
     }
     .btn-edit-review:hover { background:rgba(127,123,46,0.08); }
 
-    .delete-reply-btn {
+    .delete-reply-btn, .delete-review-btn  {
       padding:6px 14px; border-radius:20px;
       border:1.5px solid #a94442; background:transparent;
       font-weight:600; font-size:12px; cursor:pointer;
@@ -243,7 +254,7 @@
       display:inline-flex; align-items:center; gap:5px;
       transition:background 0.2s;
     }
-    .delete-reply-btn:hover { background:rgba(169,68,66,0.06); }
+    .delete-reply-btn:hover, .delete-review-btn:hover  { background:rgba(169,68,66,0.06); }
 
     .empty-state {
       flex:0 0 auto;
@@ -252,6 +263,17 @@
       background:rgba(207,224,255,0.35); border-radius:22px;
     }
 
+    .reply-text {
+      font-size: 15px;
+      color: #2b2b2b;
+      margin-top: 6px;
+    }
+
+    .reply-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 28px;
+    }
     /* ─── WRITE / EDIT REVIEW PANEL ──────────────────────────── */
     .edit-review-panel {
       background:#f8f5ee; border-radius:20px; padding:36px 30px;
@@ -271,7 +293,7 @@
     /* Form rows */
     .wr-row  { display:flex; align-items:center; gap:10px; margin:12px 0; }
     .wr-row label { min-width:100px; text-align:left; font-weight:700; color:#4a3f35; }
-    #wrcafe, #wrCafe, #wrText, #editReviewText { font-family:Montserrat,system-ui,sans-serif; }
+    #wrcafe, #wrCafe, #wrText, #editReviewText, #editReviewTitleInput { font-family:Montserrat,system-ui,sans-serif; }
     #wrCafe { flex:1; width:100%; min-width:0; padding:8px 10px; border-radius:10px; border:1.5px solid rgba(0,0,0,0.18); background:#fff; }
     #wrText, #editReviewText { flex:1; min-height:120px; border-radius:14px; border:1.5px solid rgba(0,0,0,0.18); padding:14px; resize:none; font-size:16px; color:#4a3f35; background:#fff; outline:none; text-align:left; }
     #editReviewText::placeholder { color:#b0aba5; }
@@ -520,7 +542,20 @@
         <span id="fileName" class="file-name">No file chosen</span>
       </div>
       <div class="wr-row">
-        <textarea id="wrText" placeholder="Write your review here"></textarea>
+        <label for="wrTitle">Title:</label>
+        <input id="wrTitle" type="text" maxlength="80"
+          placeholder="e.g. Best study spot in Makati"
+          required
+          style="flex:1; padding:8px 10px; border-radius:10px;
+          border:1.5px solid rgba(0,0,0,0.18); background:#fff;
+          font-family:Montserrat,sans-serif; font-size:15px;">
+      </div>
+
+      <div class="wr-row" style="align-items:flex-start;">
+        <label for="wrText" style="padding-top:10px;">Review:</label>
+        <textarea id="wrText"
+          placeholder="Write your review here"
+          style="flex:1;"></textarea>
       </div>
       <div class="wr-row wr-tags">
         <button type="button" class="wr-tag" data-tag="ac">Air-conditioned</button>
@@ -550,6 +585,12 @@
         <input type="hidden" id="editReviewRating" value="0">
       </div>
       <div class="wr-row">
+        <label for="editReviewTitleInput">Title:</label>
+        <input id="editReviewTitleInput" type="text"
+          style="flex:1; padding:8px 10px; border-radius:10px;
+          border:1.5px solid rgba(0,0,0,0.18); background:#fff;">
+      </div>
+      <div class="wr-row">
         <label for="editReviewText">Review:</label>
         <textarea id="editReviewText" rows="6" placeholder="Write your edit here.."></textarea>
       </div>
@@ -567,6 +608,19 @@
 </div>
 
 <!-- ═══════════════ DELETE REPLY MODAL ═══════════════ -->
+<div id="deleteReviewModal" class="modal" hidden>
+  <div class="modal-backdrop" onclick="document.getElementById('deleteReviewModal').hidden=true;"></div>
+  <div class="modal-panel auth-panel">
+    <button id="xDeleteReviewModal" class="modal-close-review">✕</button>
+    <h2 class="auth-title">Delete Review?</h2>
+    <p style="margin-bottom:20px;color:#4a3f35;">This action cannot be undone.</p>
+    <div style="display:flex;justify-content:center;gap:12px;">
+      <button id="cancelDeleteReview" class="auth-btn">Cancel</button>
+      <button id="confirmDeleteReview" class="auth-btn" style="border-color:#a94442;color:#a94442;">Delete</button>
+    </div>
+  </div>
+</div>
+
 <div id="deleteModal" class="modal" hidden>
   <div class="modal-backdrop" id="closeDeleteModal"></div>
   <div class="modal-panel auth-panel">
@@ -932,6 +986,7 @@ document.addEventListener("DOMContentLoaded", () => {
         rating:   r.rating,
         date:     r.datePosted || "No date",
         editedOn: null,
+        title:    r.title,
         text:     r.reviewText,
         image:    r.photoUrl || r.image || "apdev-tbv/cafe4.jpg",
         tags:     r.tags || [],
@@ -973,17 +1028,30 @@ document.addEventListener("DOMContentLoaded", () => {
               <div><strong>${username}</strong><br>${rev.date}${edited}</div>
               <div class="review-tags">${tags}</div>
             </div>
-            <div class="review-title">${rev.cafeName}<span class="rating">${beans}</span></div>
+            <div class="review-title">
+              ${rev.cafeName}
+              <span class="rating">${beans}</span>
+            </div>
             ${rev.location ? `<div class="review-location">${rev.location}</div>` : ''}
-            <div class="review-text">${rev.text}</div>
-            <div class="review-actions">
-              <button class="btn-edit-review card-edit-inline" data-id="${rev.id}"> <img src="icons/edit.png" width="13" style="opacity:0.75;"> Edit Review</button>
+            <div class="review-title-text">${rev.title || 'Untitled Review'}</div>
+            <div class="review-text-row">
+              <div class="review-text">${rev.text}</div>
+              <div class="review-actions">
+                <button class="btn-edit-review card-edit-inline" data-id="${rev.id}"><img src="icons/edit.png" width="13" style="opacity:0.75;"> Edit</button>
+                <button class="delete-review-btn del-review" data-review-id="${rev.id}"><img src="icons/delete.png" width="13" style="opacity:0.75;"> Delete Review</button>
+              </div>
             </div>
           </div>
         </div>`;
     }).join('');
     c.querySelectorAll('.card-edit-inline').forEach(b =>
       b.addEventListener('click', () => openReviewModal(b.dataset.id))
+    );
+    c.querySelectorAll('.del-review').forEach(btn =>
+      btn.addEventListener('click', () => {
+        selectedReviewId = btn.dataset.reviewId;
+        document.getElementById('deleteReviewModal').hidden = false;
+      })
     );
   }
 
@@ -1005,12 +1073,16 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
           <div class="review-title">${rep.establishmentName}</div>
-          <div class="review-text">${rep.text}</div>
-          <div class="review-actions">
-            <button class="delete-reply-btn del-inline"
+          <div class="reply-text">
+            ${rep.text}
+          </div>
+
+          <div class="reply-actions">
+            <button 
+              class="delete-reply-btn del-inline"
               data-review-id="${rep.reviewId}"
-              data-text="${rep.text.replace(/"/g,'&quot;')}">
-              <img src="icons/delete.png" width="13" style="opacity:0.75;"> Delete Reply
+              data-text="${rep.text}"><img src="icons/delete.png" width="13" style="opacity:0.75;">
+              Delete Reply
             </button>
           </div>
         </div>
@@ -1052,12 +1124,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function openReviewModal(id) {
     const rev = reviewsData.find(r => String(r.id) === String(id));
     if (!rev) return;
-    reviewIdToEdit = id; editReviewText.value = rev.text || '';
-    currentEditRating = rev.rating || 0; editReviewRating.value = currentEditRating;
+
+    reviewIdToEdit = id;
+
+    // ✅ ADD THIS LINE
+    document.getElementById('editReviewTitleInput').value = rev.title || '';
+
+    editReviewText.value = rev.text || '';
+    currentEditRating = rev.rating || 0;
+    editReviewRating.value = currentEditRating;
+
     renderEditStars();
-    editTagBtns.forEach(b => b.classList.toggle('active', (rev.tags||[]).includes(b.textContent.trim())));
+
+    editTagBtns.forEach(b =>
+      b.classList.toggle('active', (rev.tags || []).includes(b.textContent.trim()))
+    );
+
     editReviewTitle.textContent = "Edit Review";
-    editReviewModal.hidden = false; setTimeout(() => editReviewText.focus(), 50);
+    editReviewModal.hidden = false;
+
+    setTimeout(() => editReviewText.focus(), 50);
   }
 
   function closeReviewModal() { editReviewModal.hidden=true; reviewIdToEdit=null; editReviewText.value=''; }
@@ -1067,16 +1153,44 @@ document.addEventListener("DOMContentLoaded", () => {
   editReviewForm.addEventListener('submit', async function(e) {
     e.preventDefault(); if (reviewIdToEdit===null) return;
     const newText   = editReviewText.value.trim();
+    const newTitle  = document.getElementById('editReviewTitleInput').value.trim();
     const newRating = Number(editReviewRating.value);
     const tags      = Array.from(editTagBtns).filter(b=>b.classList.contains('active')).map(b=>b.textContent.trim());
     if (!newText || !newRating) { alert('Please complete the stars and review.'); return; }
     try {
-      const res = await fetch('/edit-review', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reviewId:reviewIdToEdit, reviewText:newText, rating:newRating, tags }) });
+      const res = await fetch('/edit-review', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reviewId:reviewIdToEdit, title:newTitle, reviewText:newText, rating:newRating, tags }) });
       const result = await res.json();
       if (!res.ok) { alert(result.message || 'Failed to update review.'); return; }
       await loadReviewsFromDB(); closeReviewModal();
     } catch(e) { alert('Error updating review.'); }
   });
+
+  /* ── DELETE REVIEW ── */
+  document.getElementById('confirmDeleteReview').onclick = async () => {
+    try {
+      const res = await fetch('/delete-review', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewId: selectedReviewId })
+      });
+      if (!res.ok) throw new Error();
+      document.getElementById('deleteReviewModal').hidden = true;
+      selectedReviewId = null;
+      await loadReviewsFromDB();
+    } catch (err) {
+      alert('Failed to delete review');
+    }
+  };
+  document.getElementById('cancelDeleteReview').onclick = () => {
+    document.getElementById('deleteReviewModal').hidden = true;
+    selectedReviewId = null;
+  };
+
+  document.getElementById("xDeleteReviewModal").onclick = () => {
+    document.getElementById("deleteReviewModal").hidden = true;
+    selectedReviewId = null;
+  };
 
   /* ── DELETE REPLY ── */
   const deleteModal = document.getElementById("deleteModal");
@@ -1135,6 +1249,7 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const cafe   = document.getElementById('wrCafe').value;
     const rating = Number(document.getElementById('wrRating').value);
+    const title = document.getElementById('wrTitle').value.trim();
     const text   = document.getElementById('wrText').value.trim();
     const photo  = document.getElementById('wrPhoto').files[0];
     if (!cafe)   { alert("Please select a cafe.");       return; }
@@ -1145,7 +1260,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const today = new Date().toISOString().split('T')[0];
     const photoUrl = await new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(photo); });
     try {
-      const res = await fetch('/add-review', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ establishmentName:cafe, rating, reviewText:text, tags:tags.join(','), datePosted:today, photoUrl }) });
+      const res = await fetch('/add-review', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ establishmentName:cafe, rating, title, reviewText:text, tags:tags.join(','), datePosted:today, photoUrl }) });
       const result = await res.text();
       if (!res.ok) { alert('Failed to save review: '+result); return; }
       alert('Review added successfully!');
