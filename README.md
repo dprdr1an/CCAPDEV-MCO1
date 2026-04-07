@@ -23,7 +23,7 @@ CRUD Operations
   The system fully implements CRUD operations for its core features:
 
   CREATE
-    - Users can create accounts and submit reviews.
+    -  Users can create accounts and submit reviews.
     - Cafe owners can crate and manage their cafe profiles.
 
   READ
