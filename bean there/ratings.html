@@ -133,6 +133,14 @@
       font-size: 20px;
       min-width: 110px;
     }
+    .clickable-user {
+  cursor: pointer;
+}
+
+.clickable-user:hover {
+  text-decoration: underline;
+  color: #c0441a;
+}
 
     .input-group input {
       flex: 1;
@@ -1111,8 +1119,8 @@ function renderReviews(data) {
             padding: 10px 16px;
             font-size: 13px;
           ">
-            <strong>
-              ${rep.username || 'Anonymous'}
+           <strong class="clickable-user" onclick="goToProfile('${rep.username}')">
+  ${rep.username || 'Anonymous'}
               ${rep.role === "owner" ? `
                 <span style="
                   background: rgba(91, 95, 16, 0.15);
@@ -1161,7 +1169,9 @@ function renderReviews(data) {
         <div class="review-content">
           <div class="review-top">
             <div>
-              <strong>${review.username}</strong><br>
+              <strong class="clickable-user" onclick="goToProfile('${review.username}')">
+  ${review.username}
+</strong><br>
               ${review.datePosted || ""}${edited}
             </div>
             <div class="review-tags">${tags}</div>
@@ -1209,6 +1219,9 @@ function renderReviews(data) {
       window.location.href = `cafe.html?id=${el.dataset.id}`;
     });
   });
+}
+function goToProfile(username) {
+  window.location.href = `profile.html?username=${username}`;
 }
 
 const searchInput = document.getElementById("q");
