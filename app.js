@@ -370,6 +370,102 @@ app.get("/reviews", async (req, res) => {
   }
 });
 
+app.get("/user/:username", async (req, res) => {
+  try {
+    let username = req.params.username;
+
+    // normalize username (always with @)
+    if (!username.startsWith("@")) {
+      username = "@" + username;
+    }
+
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching user" });
+  }
+});
+
+app.get("/reviews/user/:username", async (req, res) => {
+  try {
+    let username = req.params.username;
+
+    // normalize
+    if (!username.startsWith("@")) {
+      username = "@" + username;
+    }
+
+    const reviews = await Review.find({ username });
+
+    const enriched = await Promise.all(
+      reviews.map(async (review) => {
+        const safeName = (review.establishmentName || "")
+          .trim()
+          .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        const est = await Establishment.findOne({
+          name: { $regex: new RegExp(`^${safeName}$`, "i") }
+        });
+
+        return {
+          ...review.toObject(),
+          location: est?.location || "Location not available",
+          image: est?.imageUrl || "apdev-tbv/cafe4.jpg"
+        };
+      })
+    );
+
+    res.json(enriched);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching user reviews" });
+  }
+});
+
+app.get("/replies/user/:username", async (req, res) => {
+  try {
+    let username = req.params.username;
+
+    if (!username.startsWith("@")) {
+      username = "@" + username;
+    }
+
+    const reviews = await Review.find({
+      "replies.username": username
+    });
+
+    const userReplies = [];
+
+    reviews.forEach(review => {
+      review.replies.forEach(reply => {
+        if (reply.username === username) {
+          userReplies.push({
+            text: reply.text,
+            date: reply.date,
+            establishmentName: reply.establishmentName,
+            reviewId: review._id,
+            replyToUser: review.username,
+            image: review.photoUrl || ""
+          });
+        }
+      });
+    });
+
+    res.json(userReplies);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching user replies" });
+  }
+});
 
 app.get("/reviews-by-cafe/:id", async (req, res) => {
   try {

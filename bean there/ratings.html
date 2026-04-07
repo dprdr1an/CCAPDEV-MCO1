@@ -15,7 +15,26 @@
       --muted: #bfb0a8;
       --content-width: 1500px;
     }
-    
+
+    #viewReviewTitle {
+      font-family: Lora, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #2b2b2b;
+      margin: 0 0 8px;
+    }
+
+    #viewReviewMeta {
+      font-size: 13px;
+      color: #666;
+      margin: 0 0 6px;
+    }
+
+    .view-review-panel {
+      width: min(480px, calc(100% - 32px)) !important;
+      max-width: 480px !important;
+      text-align: left !important;
+    }
     
     @keyframes floatUp {
       from { opacity: 0; transform: translateY(40px); }
@@ -721,7 +740,7 @@
 <div id="viewReviewModal" class="modal" hidden>
   <div class="modal-backdrop"></div>
 
-  <div class="modal-panel auth-panel" style="max-width:600px;">
+  <div class="modal-panel auth-panel view-review-panel">
     <button id="xViewReview" class="modal-close-review">✕</button>
 
     <h2 id="viewReviewTitle" style="font-family:Lora,serif;"></h2>
@@ -1190,6 +1209,9 @@ function renderReviews(data) {
         <div class="review-content">
           <div class="review-top">
             <div>
+              <strong class="user-link" data-user="${review.username}">
+                ${review.username}
+              </strong><br>
               <strong class="clickable-user" onclick="goToProfile('${review.username}')">
   ${review.username}
 </strong><br>
@@ -1237,6 +1259,14 @@ function renderReviews(data) {
         ` : ''}
       </div>`;
   }).join("");
+
+  document.querySelectorAll('.user-link').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation(); // prevent modal
+      const username = el.dataset.user;
+      window.location.href = `user.html?username=${encodeURIComponent(username)}`;
+    });
+  });
 
   document.querySelectorAll('.review-card').forEach(card => {
     card.addEventListener('click', (e) => {

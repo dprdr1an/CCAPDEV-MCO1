@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bean There – User Profile</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --bg: #efe8d6;
+      --sidebar: #5b5f10;
+      --accent: #7f7b2e;
+      --muted: #bfb0a8;
+      --content-width: 1500px;
+    }
+
+    /* ─── ANIMATION ──────────────────────────────────────────── */
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-on-load { opacity:0; animation: floatUp 0.9s ease-out forwards; }
+    .delay-1 { animation-delay: 0.15s; }
+    .delay-2 { animation-delay: 0.35s; }
+
+    /* ─── RESET ──────────────────────────────────────────────── */
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Montserrat, system-ui, sans-serif;
+      background: var(--bg);
+      color: #2b2b2b;
+    }
+
+    /* ─── OUTER FRAME ────────────────────────────────────────── */
+    .frame  { width:100%; height:100vh; overflow:hidden; }
+    .layout { display:grid; grid-template-columns:260px 1fr; height:100%; column-gap:18px; }
+
+    /* ─── SIDEBAR ────────────────────────────────────────────── */
+    .sidebar {
+      background: var(--sidebar);
+      color: #fff;
+      padding: 28px;
+      margin: 18px 0 18px 18px;
+      border-radius: 22px;
+      height: calc(100% - 36px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .logo { font-family:Lora,serif; font-size:42px; font-weight:700; letter-spacing:1px; }
+    .nav  { margin-top:36px; display:flex; flex-direction:column; gap:26px; }
+    .nav a { color:#fff; text-decoration:none; font-size:20px; }
+    .auth  { font-size:20px; }
+    .sidebar .nav a:hover,
+    .sidebar .auth div:hover { color:#fa7a11; cursor:pointer; transition:0.3s; }
+
+    /* ─── MAIN ───────────────────────────────────────────────── */
+    .main {
+      height: calc(100% - 36px);
+      margin: 18px 18px 0 0;
+      padding: 24px 28px;
+      border: 1.5px solid rgba(127,123,46,0.4);
+      border-radius: 24px;
+      overflow-y: auto;
+    }
+
+    /* ─── USER HEADER ────────────────────────────────────────── */
+    .user-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      max-width: var(--content-width);
+      margin: 0 auto 32px;
+      padding-bottom: 28px;
+      border-bottom: 1.5px solid rgba(127,123,46,0.18);
+    }
+
+    .user-avatar-wrap {
+      width: 120px;
+      height: 120px;
+      flex: 0 0 120px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 5px solid #e2d9c8;
+      background: #dfe8f5;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    .user-avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .user-info { flex: 1; min-width: 0; padding-top: 8px; }
+
+    #usernameDisplay {
+      font-family: Lora, serif;
+      font-size: 44px;
+      font-weight: 700;
+      color: #c0441a;
+      margin: 0 0 6px;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+
+    #userTitle {
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    #userBio {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    /* ─── SECTION TITLES ─────────────────────────────────────── */
+    .section { max-width: var(--content-width); margin: 0 auto 32px; }
+    .section-title {
+      font-family: Lora, serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #c0441a;
+      margin: 0 0 18px;
+      letter-spacing: -0.5px;
+    }
+
+    /* ─── REVIEW CARDS (from ratings.html) ───────────────────── */
+    .reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .review-card {
+      background: #cfe0ff;
+      border-radius: 22px;
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 22px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+    .review-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
+
+    .review-img {
+      width: 100%;
+      height: 180px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #dfe8f5;
+    }
+    .review-img img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    .review-content { display:flex; flex-direction:column; gap:8px; }
+
+    .review-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #253d67;
+    }
+
+    .edited-label { font-size:11px; color:#718096; font-style:italic; }
+
+    .review-title {
+      font-family: Lora, serif;
+      font-size: 28px;
+      color: #d45a2a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .review-location {
+      color: #253d67;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: -8px;
+    }
+
+    .review-title-text {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2b2b2b;
+      margin-top: 10px;
+    }
+
+    .review-tags { display:flex; gap:14px; font-size:13px; color:#253d67; flex-wrap:wrap; }
+    .tag { display:inline-flex; align-items:center; gap:6px; }
+    .tag img { width:14px; height:14px; }
+
+    .rating { display:inline-flex; gap:4px; margin-left:6px; }
+    .rating img { width:18px; height:18px; }
+
+    .review-text { font-size:14px; line-height:1.5; margin-top:4px; }
+    .see-more-hint { color:#888; font-size:13px; }
+
+    /* ─── SEE MORE BUTTON ────────────────────────────────────── */
+    .see-more-btn {
+      align-self: flex-start;
+      margin-top: 4px;
+      padding: 8px 22px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(127,123,46,0.5);
+      background: transparent;
+      font-family: Montserrat, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a4a3a;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .see-more-btn:hover { background: rgba(127,123,46,0.08); }
+
+    /* ─── REPLY CARDS ────────────────────────────────────────── */
+    .reply-card {
+      background: #cfe0ff;
+      border-radius: 18px;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .reply-meta {
+      font-size: 13px;
+      color: #253d67;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .reply-meta strong { color: #2b2b2b; }
+    .reply-cafe-tag {
+      background: rgba(91,95,16,0.1);
+      color: #5b5f10;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .reply-text {
+      font-size: 14px;
+      line-height: 1.55;
+      color: #2b2b2b;
+    }
+    .reply-date { font-size: 12px; color: #888; margin-top: 2px; }
+
+    /* ─── EMPTY / LOADING STATES ─────────────────────────────── */
+    .state-msg {
+      text-align: center;
+      color: #666;
+      font-size: 15px;
+      padding: 32px 0;
+    }
+
+    /* ─── MODALS ─────────────────────────────────────────────── */
+    .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
+    .modal[hidden] { display:none; }
+    .modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.3); }
+    .modal-panel { position:relative; background:#fff; padding:30px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.2); width:90%; z-index:2001; }
+
+    .auth-panel {
+      background-color: #f8f5ee;
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: min(480px, calc(100% - 32px));
+      text-align: center;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .auth-title {
+      font-family: 'Lora', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #4a3f35;
+      margin: 0 0 30px;
+      line-height: 1.2;
+    }
+    .auth-group { display:flex; align-items:center; gap:14px; margin:14px 0; }
+    .auth-group label { min-width:110px; font-weight:700; color:#4a3f35; text-align:left; }
+    .auth-group input { flex:1; padding:10px; border-radius:10px; border:1.5px solid rgba(0,0,0,0.18); background:#fff; font-size:15px; outline:none; }
+    .auth-btn { margin-top:20px; padding:10px 40px; border-radius:30px; border:2px solid #4a3f35; background:transparent; font-size:18px; font-weight:700; cursor:pointer; color:#4a3f35; }
+    .auth-btn:hover { background:#4a3f35; color:#fff; }
+    .remember-row { justify-content:flex-start; gap:8px; margin-top:6px; }
+    .remember-row input[type="checkbox"] { width:16px; height:16px; flex:none; accent-color:#5b5f10; cursor:pointer; }
+    .remember-row label { min-width:auto; font-weight:500; color:#4a3f35; cursor:pointer; }
+
+    .modal-close-review {
+      position:absolute; top:18px; right:22px;
+      font-size:28px; color:#4a3f35;
+      border:none; background:transparent; cursor:pointer; line-height:1;
+    }
+    .modal-close-review:hover { opacity:0.7; }
+
+    /* Full-review modal */
+    .view-review-panel {
+      max-width: 620px;
+      text-align: left;
+    }
+    #viewReviewCafe {
+      font-family: Lora, serif;
+      font-size: 22px;
+      color: #d45a2a;
+      margin: 0 0 4px;
+    }
+    #viewReviewTitle {
+      font-family: Lora, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #2b2b2b;
+      margin: 0 0 8px;
+    }
+    #viewReviewText {
+    text-align: justify;
+    }
+    #viewReviewMeta  { font-size:13px; color:#666; margin:0 0 6px; }
+    #viewReviewRating { display:inline-flex; gap:3px; margin-bottom:12px; }
+    #viewReviewRating img { width:16px; height:16px; }
+    #viewReviewText  { font-size:15px; line-height:1.65; color:#2b2b2b; margin:0; text-align:justify; }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────── */
+    @media(max-width:880px) {
+      .layout { grid-template-columns:1fr; }
+      .sidebar { order:2; height:auto; }
+      .main    { order:1; }
+      .review-card { grid-template-columns:1fr; }
+      .review-img  { height:200px; }
+      #usernameDisplay { font-size:34px; }
+      .user-avatar-wrap { width:90px; height:90px; flex:0 0 90px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="frame">
+  <div class="layout">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar animate-on-load delay-1">
+      <div>
+        <div class="logo">bean<br>there</div>
+        <nav class="nav">
+          <a href="index.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="tbv.html">TBV</a>
+          <a href="ratings.html">Ratings</a>
+        </nav>
+      </div>
+      <div class="auth" id="authSection">
+        <div id="loginBtn" style="margin-bottom:14px">Log in</div>
+        <div id="signupBtn">Sign up</div>
+      </div>
+      <div class="auth" id="userSection" style="display:none;">
+        <div id="welcomeUser" style="margin-bottom:14px"></div>
+        <div id="logoutBtn">Log out</div>
+      </div>
+    </aside>
+
+    <!-- ═══ MAIN ═══ -->
+    <main class="main animate-on-load delay-2">
+
+      <!-- ── USER HEADER ── -->
+      <div class="user-header">
+        <div class="user-avatar-wrap">
+          <img id="userAvatar" src="icons/noprof.jpg" alt="Profile photo">
+        </div>
+        <div class="user-info">
+          <h1 id="usernameDisplay">Loading…</h1>
+          <div id="userTitle"></div>
+          <p id="userBio"></p>
+        </div>
+      </div>
+
+      <!-- ── REVIEWS SECTION ── -->
+      <section class="section">
+        <h2 class="section-title">Reviews</h2>
+        <div id="reviewsContainer" class="reviews-list">
+          <p class="state-msg">Loading reviews…</p>
+        </div>
+        <div style="display:flex; justify-content:center; margin-top:20px;">
+          <button id="seeMoreReviewsBtn" class="see-more-btn" hidden>See all reviews</button>
+        </div>
+      </section>
+
+      <!-- ── REPLIES SECTION ── -->
+      <section class="section">
+        <h2 class="section-title">Replies</h2>
+        <div id="repliesContainer" class="reviews-list">
+          <p class="state-msg">Loading replies…</p>
+        </div>
+        <div style="display:flex; justify-content:center; margin-top:20px;">
+          <button id="seeMoreRepliesBtn" class="see-more-btn" hidden>See all replies</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════ VIEW REVIEW MODAL ═══════════════ -->
+<div id="viewReviewModal" class="modal" hidden>
+  <div class="modal-backdrop" id="closeViewReview"></div>
+  <div class="modal-panel auth-panel view-review-panel">
+    <button id="xViewReview" class="modal-close-review">✕</button>
+    <h2 id="viewReviewTitle"></h2>
+    <p id="viewReviewMeta"></p>
+    <p id="viewReviewText"></p>
+  </div>
+</div>
+
+<!-- ═══════════════ LOG IN MODAL ═══════════════ -->
+<div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeLogIn"></div>
+  <div class="modal-panel auth-panel">
+    <button id="xLogIn" class="modal-close-review">✕</button>
+    <h2 class="auth-title">Log in</h2>
+    <form id="logInForm">
+      <div class="auth-group"><label>Username:</label><input id="loginUser" type="text" required></div>
+      <div class="auth-group"><label>Password:</label><input id="loginPass" type="password" required></div>
+      <div class="auth-group remember-row">
+        <input type="checkbox" id="rememberMe">
+        <label for="rememberMe">Remember me</label>
+      </div>
+      <button type="submit" class="auth-btn">Log in</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════ SIGN UP MODAL ═══════════════ -->
+<div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-backdrop" id="closeSignUp"></div>
+  <div class="modal-panel auth-panel">
+    <button id="xSignUp" class="modal-close-review">✕</button>
+    <h2 class="auth-title">Sign Up</h2>
+    <form id="signUpForm">
+      <div class="auth-group"><label>Name:</label>      <input id="regName"    type="text" required></div>
+      <div class="auth-group"><label>Username:</label>  <input id="regUser"    type="text" required></div>
+      <div class="auth-group"><label>Password:</label>  <input id="regPass"    type="password" required></div>
+      <div class="auth-group"><label>Confirm:</label>   <input id="regConfirm" type="password" required></div>
+      <div class="auth-group"><label>Job Title:</label> <input id="regTitle"   type="text"></div>
+      <div class="auth-group"><label>Bio:</label>       <input id="regBio"     type="text"></div>
+      <div class="auth-group"><label>Photo:</label>     <input id="regAvatar"  type="file" accept="image/*"></div>
+      <button type="submit" class="auth-btn">Sign Up</button>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ══════════════════════════════════════════════════════════
+     SECTION 1 — AUTH UI (identical to cafe.html)
+  ══════════════════════════════════════════════════════════ */
+
+  const logInModal  = document.getElementById('logInModal');
+  const signUpModal = document.getElementById('signUpModal');
+  const logInForm   = document.getElementById('logInForm');
+  const signUpForm  = document.getElementById('signUpForm');
+  const loginBtn    = document.getElementById('loginBtn');
+  const signupBtn   = document.getElementById('signupBtn');
+  const authSection = document.getElementById('authSection');
+  const userSection = document.getElementById('userSection');
+  const welcomeUser = document.getElementById('welcomeUser');
+  const logoutBtn   = document.getElementById('logoutBtn');
+
+  welcomeUser.onclick = () => { window.location.href = 'profile.html'; };
+
+  function updateUI() {
+    const ownerUsername = localStorage.getItem('beanthere_owner_username');
+    const userUsername  = localStorage.getItem('beanthere_profile_username');
+    if (ownerUsername) {
+      authSection.style.display = 'none';
+      userSection.style.display = 'block';
+      welcomeUser.textContent   = ownerUsername;
+      welcomeUser.onclick = () => { window.location.href = 'cafeprofile.html'; };
+    } else if (userUsername) {
+      authSection.style.display = 'none';
+      userSection.style.display = 'block';
+      welcomeUser.textContent   = userUsername;
+      welcomeUser.onclick = () => { window.location.href = 'profile.html'; };
+    } else {
+      authSection.style.display = 'block';
+      userSection.style.display = 'none';
+      welcomeUser.onclick = null;
+    }
+  }
+  updateUI();
+
+  logoutBtn.onclick = async () => {
+    try {
+      await fetch('/logout', { method:'POST', credentials:'include' });
+      ['beanthere_owner_username','beanthere_profile_fullname','beanthere_profile_username',
+       'beanthere_profile_bio','beanthere_profile_title','beanthere_profile_avatar']
+        .forEach(k => localStorage.removeItem(k));
+      window.location.href = 'index.html';
+    } catch(err) { alert('Error logging out'); }
+  };
+
+  loginBtn.onclick  = () => logInModal.hidden  = false;
+  signupBtn.onclick = () => signUpModal.hidden = false;
+  document.getElementById('closeLogIn').onclick  = () => logInModal.hidden  = true;
+  document.getElementById('xLogIn').onclick      = () => logInModal.hidden  = true;
+  document.getElementById('closeSignUp').onclick = () => signUpModal.hidden = true;
+  document.getElementById('xSignUp').onclick     = () => signUpModal.hidden = true;
+
+  function normalizeUsername(u) {
+    u = u.trim();
+    return u.startsWith('@') ? u : '@' + u;
+  }
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) { resolve(''); return; }
+      const r = new FileReader();
+      r.onload  = e => resolve(e.target.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  async function checkSessionOnLoad() {
+    try {
+      const ownerRes = await fetch('/session-owner', { credentials:'include' });
+      if (ownerRes.ok) {
+        const ownerData = await ownerRes.json();
+        if (ownerData.loggedIn && ownerData.owner) {
+          localStorage.setItem('beanthere_owner_username', ownerData.owner.username || '');
+          ['beanthere_profile_fullname','beanthere_profile_username','beanthere_profile_bio',
+           'beanthere_profile_title','beanthere_profile_avatar'].forEach(k => localStorage.removeItem(k));
+          updateUI(); return;
+        }
+      }
+      const userRes = await fetch('/session-user', { credentials:'include' });
+      if (!userRes.ok) return;
+      const userData = await userRes.json();
+      if (userData.loggedIn) {
+        localStorage.removeItem('beanthere_owner_username');
+        localStorage.setItem('beanthere_profile_fullname', userData.user.fullName || '');
+        localStorage.setItem('beanthere_profile_username', userData.user.username || '');
+        localStorage.setItem('beanthere_profile_bio',     userData.user.bio      || '');
+        localStorage.setItem('beanthere_profile_title',   userData.user.title    || 'Member');
+        localStorage.setItem('beanthere_profile_avatar',  userData.user.avatar   || '');
+        updateUI();
+      }
+    } catch(err) { console.error('No active session found.'); }
+  }
+  checkSessionOnLoad();
+
+  logInForm.onsubmit = async function(e) {
+    e.preventDefault();
+    const username   = document.getElementById('loginUser').value.trim();
+    const password   = document.getElementById('loginPass').value.trim();
+    const rememberMe = document.getElementById('rememberMe').checked;
+    const normalizedUsername = username.startsWith('@') ? username : '@' + username;
+    if (!/^@[A-Za-z0-9_]{3,20}$/.test(normalizedUsername)) { alert('Please enter a valid username.'); return; }
+    if (password.length < 6 || password.length > 50)        { alert('Password must be 6 to 50 characters.'); return; }
+    try {
+      const res  = await fetch('/login', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username, password, rememberMe }) });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.role === 'owner') {
+          localStorage.setItem('beanthere_owner_username', data.username || username);
+          ['beanthere_profile_fullname','beanthere_profile_username','beanthere_profile_bio',
+           'beanthere_profile_title','beanthere_profile_avatar'].forEach(k => localStorage.removeItem(k));
+          logInModal.hidden = true; updateUI();
+          window.location.href = 'cafeprofile.html';
+        } else {
+          localStorage.removeItem('beanthere_owner_username');
+          localStorage.setItem('beanthere_profile_fullname', data.user.fullName || '');
+          localStorage.setItem('beanthere_profile_username', data.user.username || '');
+          localStorage.setItem('beanthere_profile_bio',     data.user.bio      || '');
+          localStorage.setItem('beanthere_profile_title',   data.user.title    || 'Member');
+          localStorage.setItem('beanthere_profile_avatar',  data.user.avatar   || '');
+          logInModal.hidden = true; updateUI();
+        }
+      } else { alert(data.message || 'Invalid username or password.'); }
+    } catch(err) { alert('Error connecting to server.'); }
+  };
+
+  signUpForm.onsubmit = async function(e) {
+    e.preventDefault();
+    const fullName   = document.getElementById('regName').value.trim();
+    const username   = normalizeUsername(document.getElementById('regUser').value);
+    const password   = document.getElementById('regPass').value;
+    const confirm    = document.getElementById('regConfirm').value;
+    const bio        = document.getElementById('regBio').value.trim() || 'No bio added yet.';
+    const title      = document.getElementById('regTitle').value.trim() || 'Member';
+    const avatarFile = document.getElementById('regAvatar').files[0];
+    if (fullName.length < 2 || fullName.length > 60)   { alert('Full name must be 2 to 60 characters.'); return; }
+    if (!/^@[A-Za-z0-9_]{3,20}$/.test(username))       { alert('Username must start with @ and be 3–20 chars (letters, numbers, underscores).'); return; }
+    if (password.length < 6 || password.length > 50)   { alert('Password must be 6 to 50 characters.'); return; }
+    if (password !== confirm)                            { alert('Passwords do not match!'); return; }
+    if (bio.length > 160)                                { alert('Bio must be 160 characters or less.'); return; }
+    if (title.length > 50)                              { alert('Job title must be 50 characters or less.'); return; }
+    try {
+      const avatar = await fileToDataURL(avatarFile);
+      const res    = await fetch('/signup', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ fullName, username, password, bio, title, avatar }) });
+      const result = await res.text();
+      if (res.ok) { alert('Signup successful! You can now log in.'); signUpForm.reset(); signUpModal.hidden = true; logInModal.hidden = false; }
+      else        { alert(result); }
+    } catch(err) { alert('Error connecting to server.'); }
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     SECTION 2 — PAGE DATA
+  ══════════════════════════════════════════════════════════ */
+
+  const params   = new URLSearchParams(window.location.search);
+  let username = params.get('username');
+
+    if (username && username.startsWith('@')) {
+    username = username.slice(1);
+    }
+
+    console.log("FETCHING USER:", username);
+
+  if (!username) {
+    document.getElementById('usernameDisplay').textContent = 'User not found';
+    document.getElementById('reviewsContainer').innerHTML  = '<p class="state-msg">No username specified in URL.</p>';
+    document.getElementById('repliesContainer').innerHTML  = '';
+    return;
+  }
+
+  /* ── HELPERS ── */
+
+  const tagIcons = {
+    "Air-conditioned": "icons/ac.png",
+    "Socket":          "icons/socket.png",
+    "Wi-Fi":           "icons/wifi.png",
+    "Alt Milk":        "icons/oat.png"
+  };
+
+  function buildBeans(rating) {
+    return Array.from({ length: 5 }, (_, i) =>
+      `<img src="icons/bean.png" alt="bean"${i >= rating ? ' style="opacity:0.25;filter:grayscale(1)"' : ''}>`
+    ).join('');
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  /* ── FULL REVIEW MODAL ── */
+
+  const viewModal = document.getElementById('viewReviewModal');
+
+  document.getElementById('xViewReview').onclick        = () => viewModal.hidden = true;
+  document.getElementById('closeViewReview').onclick    = () => viewModal.hidden = true;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !viewModal.hidden) viewModal.hidden = true; });
+
+  function openReviewModal(review) {
+    document.getElementById('viewReviewTitle').textContent =
+        review.title || 'Untitled Review';
+
+    document.getElementById('viewReviewMeta').textContent =
+        `${review.username} • ${review.datePosted || ''}`;
+
+    document.getElementById('viewReviewText').textContent =
+        review.reviewText || '';
+
+    viewModal.hidden = false;
+    }
+
+  /* ── REVIEW CARD BUILDER ── */
+
+  const MAX_TEXT = 120;
+
+  function buildReviewCard(r) {
+    const fullText  = r.reviewText || '';
+    const shortText = fullText.length > MAX_TEXT
+      ? fullText.substring(0, MAX_TEXT) + '…'
+      : fullText;
+    const isTruncated = fullText.length > MAX_TEXT;
+
+    const edited = r.editedAt
+      ? ` <span class="edited-label">· edited ${formatDate(r.editedAt)}</span>`
+      : '';
+
+    const tags = (r.tags || []).map(tag => {
+      const icon = tagIcons[tag];
+      return `<span class="tag">${icon ? `<img src="${icon}" alt="${tag}">` : ''}${tag}</span>`;
+    }).join('');
+
+    return `
+      <div class="review-card" data-id="${r._id || ''}">
+        <div class="review-img">
+          <img src="${r.photoUrl || r.image || 'apdev-tbv/cafe4.jpg'}" alt="${r.establishmentName || ''}">
+        </div>
+        <div class="review-content">
+          <div class="review-top">
+            <div>
+              <strong>${r.username || username}</strong><br>
+              ${r.datePosted || ''}${edited}
+            </div>
+            <div class="review-tags">${tags}</div>
+          </div>
+          <div class="review-title">
+            ${r.establishmentName || ''}
+            <span class="rating">${buildBeans(r.rating || 0)}</span>
+          </div>
+          ${r.location ? `<div class="review-location">${r.location}</div>` : ''}
+          <div class="review-title-text">${r.title || 'Untitled Review'}</div>
+          <div class="review-text">
+            ${shortText}
+            ${isTruncated ? '<span class="see-more-hint"> (See more)</span>' : ''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function wireCardClicks(container, allReviews) {
+    container.querySelectorAll('.review-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        const review = allReviews.find(r => (r._id || '') === id) || allReviews[0];
+        if (review) openReviewModal(review);
+      });
+    });
+  }
+
+  /* ── LOAD USER PROFILE ── */
+
+  async function loadUserProfile() {
+    try {
+      const res  = await fetch(`/user/${encodeURIComponent(username)}`);
+      if (!res.ok) { document.getElementById('usernameDisplay').textContent = 'User not found'; return; }
+      const user = await res.json();
+
+      document.title = `Bean There – ${user.username || username}`;
+      document.getElementById('usernameDisplay').textContent = user.fullName || user.username || username;
+      document.getElementById('userTitle').textContent       = user.title   || '';
+      document.getElementById('userBio').textContent         = user.bio     || 'No bio yet.';
+
+      const avatarEl = document.getElementById('userAvatar');
+      if (user.avatar) avatarEl.src = user.avatar;
+
+    } catch(err) {
+      document.getElementById('usernameDisplay').textContent = 'Error loading user';
+    }
+  }
+
+  /* ── LOAD REVIEWS ── */
+
+  let allReviews = [];
+
+  async function loadReviews() {
+    const container = document.getElementById('reviewsContainer');
+    const btn       = document.getElementById('seeMoreReviewsBtn');
+    try {
+      const res = await fetch(`/reviews/user/${encodeURIComponent(username)}`);
+      if (!res.ok) throw new Error();
+      allReviews = await res.json();
+
+      if (!allReviews.length) {
+        container.innerHTML = '<p class="state-msg">No reviews yet.</p>';
+        return;
+      }
+
+      renderReviews(allReviews.slice(0, 3));
+
+      if (allReviews.length > 3) {
+        btn.hidden      = false;
+        btn.textContent = `See all ${allReviews.length} reviews`;
+        btn.onclick = () => {
+          renderReviews(allReviews);
+          btn.hidden = true;
+        };
+      }
+
+    } catch(err) {
+      container.innerHTML = '<p class="state-msg">Could not load reviews.</p>';
+    }
+  }
+
+  function renderReviews(list) {
+    const container = document.getElementById('reviewsContainer');
+    container.innerHTML = list.map(buildReviewCard).join('');
+    wireCardClicks(container, allReviews);
+  }
+
+  /* ── LOAD REPLIES ── */
+
+  let allReplies = [];
+
+  async function loadReplies() {
+    const container = document.getElementById('repliesContainer');
+    const btn       = document.getElementById('seeMoreRepliesBtn');
+    try {
+      const res = await fetch(`/replies/user/${encodeURIComponent(username)}`);
+      if (!res.ok) throw new Error();
+      allReplies = await res.json();
+
+      if (!allReplies.length) {
+        container.innerHTML = '<p class="state-msg">No replies yet.</p>';
+        return;
+      }
+
+      renderReplies(allReplies.slice(0, 3));
+
+      if (allReplies.length > 3) {
+        btn.hidden      = false;
+        btn.textContent = `See all ${allReplies.length} replies`;
+        btn.onclick = () => {
+          renderReplies(allReplies);
+          btn.hidden = true;
+        };
+      }
+
+    } catch(err) {
+      container.innerHTML = '<p class="state-msg">Could not load replies.</p>';
+    }
+  }
+
+  function renderReplies(list) {
+    const container = document.getElementById('repliesContainer');
+    container.innerHTML = list.map(rep => `
+      <div class="reply-card">
+        <div class="reply-meta">
+          <strong>${rep.username || username}</strong>
+          <span style="color:#888;font-weight:400;">replied to</span>
+          <strong>${rep.replyToUser || 'Anonymous'}</strong>
+          ${rep.establishmentName
+            ? `<span class="reply-cafe-tag">${rep.establishmentName}</span>`
+            : ''}
+        </div>
+        <div class="reply-text">${rep.text || ''}</div>
+        <div class="reply-date">${rep.date || ''}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ── BOOT ── */
+
+  loadUserProfile();
+  loadReviews();
+  loadReplies();
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>

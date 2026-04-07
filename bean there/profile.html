@@ -199,17 +199,55 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
     }
+    .view-review-panel {
+      width: min(480px, calc(100% - 32px));
+      max-width: 480px;
+      text-align: left !important;
+    }
+
+    #viewReviewTitle {
+      font-family: Lora, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #2b2b2b;
+      margin: 0 0 8px;
+    }
+
+    #viewReviewMeta {
+      font-size: 13px;
+      color: #666;
+      margin: 0 0 6px;
+    }
+
+    #viewReviewText {
+      margin: 0;
+      line-height: 1.6;
+      text-align: justify;
+    }
     .review-card:hover { transform:translateY(-4px); box-shadow:0 10px 24px rgba(0,0,0,0.12); }
 
     .review-img { width:100%; height:180px; border-radius:16px; overflow:hidden; background:#dfe8f5; }
     .review-img img { width:100%; height:100%; object-fit:cover; }
 
-    .review-content { display:flex; flex-direction:column; gap:8px; }
+    .review-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: 100%;
+      justify-content: space-between;
+    }
     .review-top     { display:flex; justify-content:space-between; font-size:13px; color:#253d67; }
     .review-title   { font-family:Lora,serif; font-size:26px; color:#d45a2a; display:flex; align-items:center; gap:8px; }
     .review-title-text { font-weight:700; font-size:15px; color:#2b2b2b; margin-top:10px; }
     .review-location { color:#253d67; font-size:14px; font-weight:600; margin-top:-4px; }
-    .review-text    { font-size:14px; line-height:1.55; }
+    .review-text {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 4px;
+      flex-grow: 1; 
+    }
+
     .review-tags    { display:flex; gap:10px; font-size:12px; color:#253d67; flex-wrap:wrap; }
     .tag            { display:inline-flex; align-items:center; gap:5px; }
     .tag img        { width:13px; height:13px; }
@@ -217,7 +255,12 @@
     .rating img     { width:17px; height:17px; }
     .review-text-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
     .review-text { flex:1; }
-    .review-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; margin-top:2px; }
+    .review-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: auto;   /* THIS IS THE MAGIC */
+    }
     .edited-label   { font-size:11px; color:#718096; font-style:italic; }
 
     
@@ -517,6 +560,17 @@
   </div>
 </div>
 
+<div id="viewReviewModal" class="modal" hidden>
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-panel auth-panel view-review-panel">
+    <button id="xViewReview" class="modal-close-review">✕</button>
+
+    <h2 id="viewReviewTitle"></h2>
+    <p id="viewReviewMeta"></p>
+    <p id="viewReviewText"></p>
+  </div>
+</div>
 
 <div id="writeReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" data-close-write></div>
@@ -1012,41 +1066,107 @@ document.addEventListener("DOMContentLoaded", () => {
  
   function renderAllReviews() {
     const c = document.getElementById('reviewContainer');
-    if (!reviewsData.length) { c.innerHTML = '<div class="empty-state">No reviews yet — write your first one!</div>'; return; }
+    if (!reviewsData.length) {
+      c.innerHTML = '<div class="empty-state">No reviews yet — write your first one!</div>';
+      return;
+    }
+
     const username = getCurrentUsername().replace(/^@+/,'');
+
     c.innerHTML = reviewsData.map(rev => {
-      const beans   = getBeans(rev.rating);
-      const tags    = (rev.tags||[]).map(t => { const ic=tagIcons[t]; return `<span class="tag">${ic?`<img src="${ic}" alt="${t}">`:''}${t}</span>`; }).join('');
+      const beans = getBeans(rev.rating);
+
+      const tags = (rev.tags || []).map(t => {
+        const ic = tagIcons[t];
+        return `<span class="tag">${ic ? `<img src="${ic}" alt="${t}">` : ''}${t}</span>`;
+      }).join('');
+
       const edited = rev.editedAt
         ? ` <span class="edited-label">• edited ${formatDate(rev.editedAt)}</span>`
         : '';
+
+      const maxLength = 60;
+      const fullText = rev.text || '';
+
+      const shortText = fullText.length > maxLength
+        ? fullText.substring(0, maxLength) + '...'
+        : fullText;
+
       return `
         <div class="review-card" data-id="${rev.id}">
-          <div class="review-img"><img src="${rev.image}" alt="${rev.cafeName}"></div>
+          <div class="review-img">
+            <img src="${rev.image}" alt="${rev.cafeName}">
+          </div>
+
           <div class="review-content">
             <div class="review-top">
               <div><strong>${username}</strong><br>${rev.date}${edited}</div>
               <div class="review-tags">${tags}</div>
             </div>
+
             <div class="review-title">
               ${rev.cafeName}
               <span class="rating">${beans}</span>
             </div>
+
             ${rev.location ? `<div class="review-location">${rev.location}</div>` : ''}
-            <div class="review-title-text">${rev.title || 'Untitled Review'}</div>
-            <div class="review-text-row">
-              <div class="review-text">${rev.text}</div>
-              <div class="review-actions">
-                <button class="btn-edit-review card-edit-inline" data-id="${rev.id}"><img src="icons/edit.png" width="13" style="opacity:0.75;"> Edit</button>
-                <button class="delete-review-btn del-review" data-review-id="${rev.id}"><img src="icons/delete.png" width="13" style="opacity:0.75;"> Delete Review</button>
-              </div>
+
+            <div class="review-title-text">
+              ${rev.title || 'Untitled Review'}
+            </div>
+
+            <!-- ✅ EXACT RATINGS STYLE -->
+            <div class="review-text">
+              ${shortText}
+              ${fullText.length > maxLength ? '<span style="color:#888;"> (See more)</span>' : ''}
+            </div>
+
+            <div class="review-actions">
+              <button class="btn-edit-review card-edit-inline" data-id="${rev.id}">
+                <img src="icons/edit.png" width="13" style="opacity:0.75;"> Edit
+              </button>
+
+              <button class="delete-review-btn del-review" data-review-id="${rev.id}">
+                <img src="icons/delete.png" width="13" style="opacity:0.75;"> Delete Review
+              </button>
             </div>
           </div>
-        </div>`;
+        </div>
+      `;
     }).join('');
+
+    // ✅ CLICK = OPEN MODAL (LIKE RATINGS)
+    c.querySelectorAll('.review-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+
+        if (
+          e.target.closest('.review-actions') ||
+          e.target.closest('.btn-edit-review') ||
+          e.target.closest('.delete-review-btn')
+        ) return;
+
+        const id = card.dataset.id;
+        const review = reviewsData.find(r => String(r.id) === String(id));
+        if (!review) return;
+
+        document.getElementById('viewReviewTitle').textContent =
+          review.title || 'Untitled Review';
+
+        document.getElementById('viewReviewMeta').textContent =
+          `${review.cafeName} • ${review.date || ''}`;
+
+        document.getElementById('viewReviewText').textContent =
+          review.text || '';
+
+        document.getElementById('viewReviewModal').hidden = false;
+      });
+    });
+
+    // keep existing buttons
     c.querySelectorAll('.card-edit-inline').forEach(b =>
       b.addEventListener('click', () => openReviewModal(b.dataset.id))
     );
+
     c.querySelectorAll('.del-review').forEach(btn =>
       btn.addEventListener('click', () => {
         selectedReviewId = btn.dataset.reviewId;
@@ -1129,6 +1249,10 @@ document.addEventListener("DOMContentLoaded", () => {
       editReviewStars.appendChild(s);
     }
   }
+
+  document.getElementById('xViewReview').onclick = () => {
+    document.getElementById('viewReviewModal').hidden = true;
+  };
 
   function openReviewModal(id) {
     const rev = reviewsData.find(r => String(r.id) === String(id));

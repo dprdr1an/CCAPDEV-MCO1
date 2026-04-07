@@ -207,6 +207,32 @@
       margin-top: -8px;
     }
 
+    .view-review-panel {
+      width: min(480px, calc(100% - 32px));
+      max-width: 480px;
+      text-align: left !important;
+    }
+
+    #viewReviewTitle {
+      font-family: Lora, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #2b2b2b;
+      margin: 0 0 8px;
+    }
+
+    #viewReviewMeta {
+      font-size: 13px;
+      color: #666;
+      margin: 0 0 6px;
+    }
+
+    #viewReviewText {
+      margin: 0;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
     .review-tags{ display:flex; gap:14px; font-size:13px; color:#253d67; }
     .tag{ display:inline-flex; align-items:center; gap:6px; }
     .tag img{ width:14px; height:14px; }
@@ -543,6 +569,18 @@
         <button type="submit" class="auth-btn">Sign Up</button>
       </form>
     </div>
+</div>
+
+<div id="viewReviewModal" class="modal" hidden>
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-panel auth-panel view-review-panel">
+    <button id="xViewReview" class="modal-close-review">✕</button>
+
+    <h2 id="viewReviewTitle"></h2>
+    <p id="viewReviewMeta"></p>
+    <p id="viewReviewText"></p>
+  </div>
 </div>
 
 <script>
@@ -895,7 +933,7 @@ if (password.length < 6 || password.length > 50) {
         }).join('');
 
         return `
-          <div class="review-card">
+          <div class="review-card" data-id="${r._id}">
             <div class="review-img">
               <img src="${r.photoUrl || r.image || 'apdev-tbv/cafe4.jpg'}" alt="${r.establishmentName || ''}">
             </div>
@@ -917,6 +955,34 @@ if (password.length < 6 || password.length > 50) {
             </div>
           </div>`;
       }).join('');
+
+      document.querySelectorAll('.review-card').forEach(card => {
+          card.addEventListener('click', (e) => {
+
+            if (
+              e.target.closest('.review-actions') ||
+              e.target.closest('.like-btn') ||
+              e.target.closest('.dislike-btn') ||
+              e.target.closest('.reply-btn') ||
+              e.target.closest('.see-more-btn')
+            ) return;
+
+            const id = card.dataset.id;
+            const review = reviews.find(r => r._id === id);
+            if (!review) return;
+
+            document.getElementById('viewReviewTitle').textContent =
+              review.title || 'Untitled Review';
+
+            document.getElementById('viewReviewMeta').textContent =
+              `${review.username} • ${review.datePosted || ''}`;
+
+            document.getElementById('viewReviewText').textContent =
+              review.reviewText;
+
+            document.getElementById('viewReviewModal').hidden = false;
+          });
+        });
 
     } catch (err) {
       container.innerHTML = '<p style="color:#666;">Could not load reviews.</p>';
@@ -965,6 +1031,10 @@ addToTBVBtn.onclick = async () => {
     console.error(err);
     alert("Failed to add to TBV");
   }
+};
+
+document.getElementById('xViewReview').onclick = () => {
+  document.getElementById('viewReviewModal').hidden = true;
 };
 </script>
 </body>
