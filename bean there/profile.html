@@ -6,7 +6,7 @@
   <title>Bean There – Profile</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* ─── TOKENS ────────────────────────────────────────────── */
+    
     :root {
       --bg: #efe8d6;
       --sidebar: #5b5f10;
@@ -17,21 +17,21 @@
       --profile-name: #c0441a;
     }
 
-    /* ─── RESET ─────────────────────────────────────────────── */
+    
     *, *::before, *::after { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: Montserrat, system-ui, sans-serif; background: var(--bg); color: #2b2b2b; }
 
-    /* ─── ANIMATIONS ─────────────────────────────────────────── */
+    
     @keyframes floatUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
     .animate-on-load { opacity:0; animation: floatUp 0.9s ease-out forwards; }
     .delay-1 { animation-delay: 0.15s; }
     .delay-2 { animation-delay: 0.35s; }
 
-    /* ─── OUTER FRAME ────────────────────────────────────────── */
+    
     .frame  { width:100%; height:100vh; overflow:hidden; }
     .layout { display:grid; grid-template-columns:260px 1fr; height:100%; column-gap:18px; }
 
-    /* ─── SIDEBAR ────────────────────────────────────────────── */
+    
     .sidebar { background:var(--sidebar); color:#fff; padding:28px; margin:18px 0 18px 18px; border-radius:22px; height:calc(100% - 36px); display:flex; flex-direction:column; justify-content:space-between; }
     .logo    { font-family:Lora,serif; font-size:42px; font-weight:700; letter-spacing:1px; }
     .nav     { margin-top:36px; display:flex; flex-direction:column; gap:26px; }
@@ -39,7 +39,7 @@
     .nav a:hover, .sidebar .auth div:hover { color:#fa7a11; cursor:pointer; transition:0.3s; }
     .auth    { font-size:20px; }
 
-    /* ─── MAIN PANEL ─────────────────────────────────────────── */
+    
     .main {
       height:calc(100% - 36px);
       margin:18px 18px 0 0;
@@ -50,7 +50,7 @@
       position:relative;
     }
 
-    /* ─── MODALS — z-index 9000, always on top ───────────────── */
+   
     .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:9000; }
     .modal[hidden] { display:none; }
     .modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.38); }
@@ -72,7 +72,7 @@
     .btn-secondary:hover { background:rgba(0,0,0,0.04); }
     .btn-primary { background:var(--accent); color:#fff; border-radius:8px; }
 
-    /* ─── FAB — z-index 800, always below modals ─────────────── */
+    
     #addReviewFab {
       position:fixed; bottom:30px; right:30px;
       width:65px; height:65px; border-radius:50%;
@@ -85,7 +85,7 @@
     #addReviewFab:hover { transform:translateY(-2px); }
     #addReviewFab.hidden-fab { opacity:0; pointer-events:none; }
 
-    /* ─── USER MENU (top-right) ─────────────────────────────── */
+   
     .user-menu { position:absolute; top:20px; right:28px; }
     .user-mini-btn {
       width:50px; height:50px; border-radius:50%; padding:0;
@@ -113,7 +113,7 @@
     .ud-signout-btn:hover { background:rgba(255,80,60,0.06); }
     @media(max-width:520px) { .user-dropdown { right:8px; left:8px; width:auto; } }
 
-    /* ─── PROFILE HEADER (café page style) ──────────────────── */
+    
     .profile-header {
       display:flex; align-items:flex-start; gap:28px;
       max-width:var(--content-width);
@@ -149,7 +149,7 @@
     }
     .edit-profile-btn:hover { background:rgba(127,123,46,0.06); }
 
-    /* ─── SEGMENTED CONTROL ───────────────────────────────────── */
+    
     .seg-wrap { max-width:var(--content-width); margin:0 auto 24px; }
     .seg-bar  { display:inline-flex; gap:0; background:rgba(207,224,255,0.5); border-radius:14px; padding:5px; }
     .seg-btn  {
@@ -160,14 +160,14 @@
     }
     .seg-btn.active { background:#fff; color:#253d67; box-shadow:0 2px 8px rgba(0,0,0,0.10); }
 
-    /* ─── SECTION TITLES (café title style) ─────────────────── */
+    
     .section       { max-width:var(--content-width); margin:0 auto; margin-bottom: 10px; }
     .section-title {
       font-family:Lora,serif; font-size:44px; font-weight:700;
       color:var(--profile-name); margin:0 0 20px; letter-spacing:-0.5px;
     }
 
-    /* ─── HORIZONTAL SCROLL TRACK ────────────────────────────── */
+    
     .h-scroll-track {
       display:flex; gap:22px;
       overflow-x:auto; overflow-y:visible;
@@ -181,11 +181,11 @@
     .h-scroll-track::-webkit-scrollbar-track { background:transparent; }
     .h-scroll-track::-webkit-scrollbar-thumb { background:rgba(127,123,46,0.25); border-radius:10px; }
 
-    /* ─── REVIEW CARD — identical to ratings.html ────────────── */
+    
     .review-card {
       width: 100%;
       max-width: var(--content-width);
-      flex: none; /* VERY IMPORTANT */
+      flex: none; 
       scroll-snap-align: start;
 
       background: var(--card-bg);
@@ -220,7 +220,7 @@
     .review-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; margin-top:2px; }
     .edited-label   { font-size:11px; color:#718096; font-style:italic; }
 
-    /* Top-right action badge (subtle, appears inside card) */
+    
     .card-top-btn {
       position:absolute; top:14px; right:14px;
       width:30px; height:30px; border-radius:50%;
@@ -233,7 +233,7 @@
     .card-top-btn:hover { opacity:1; background:rgba(255,255,255,0.95); }
     .card-top-btn img   { width:15px; height:15px; display:block; }
 
-    /* Inline action buttons */
+    
     .btn-edit-review {
       padding:6px 18px; border-radius:20px;
       border:1.5px solid var(--accent); background:transparent;
@@ -274,7 +274,7 @@
       justify-content: flex-end;
       margin-top: 28px;
     }
-    /* ─── WRITE / EDIT REVIEW PANEL ──────────────────────────── */
+    
     .edit-review-panel {
       background:#f8f5ee; border-radius:20px; padding:36px 30px;
       width:min(480px, calc(100% - 32px));
@@ -290,7 +290,7 @@
     }
     .btn-save-review:hover { background:#4a3f35; color:#fff; }
 
-    /* Form rows */
+    
     .wr-row  { display:flex; align-items:center; gap:10px; margin:12px 0; }
     .wr-row label { min-width:100px; text-align:left; font-weight:700; color:#4a3f35; }
     #wrcafe, #wrCafe, #wrText, #editReviewText, #editReviewTitleInput { font-family:Montserrat,system-ui,sans-serif; }
@@ -311,7 +311,7 @@
     .upload-btn:hover { background:#f5f3f0; }
     .file-name { margin-left:10px; font-size:13px; color:#777; }
 
-    /* ─── AUTH PANELS ─────────────────────────────────────────── */
+    
     .auth-panel { background:#f8f5ee; border-radius:20px; padding:40px 30px; width:min(480px, calc(100% - 32px)); text-align:center; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1); }
     .auth-title { font-family:'Lora',serif; font-size:32px; font-weight:700; color:#4a3f35; margin:0 0 30px; line-height:1.2; }
     .auth-group { display:flex; align-items:center; gap:14px; margin:14px 0; }
@@ -323,13 +323,13 @@
     .remember-row input[type="checkbox"] { width:16px; height:16px; flex: none; accent-color:#5b5f10; cursor:pointer; }
     .remember-row label { min-width:auto; font-weight:500; color:#4a3f35; cursor:pointer; }
 
-    /* Modal avatar preview */
+    
     #modalAvatarPreview { border-radius:50%; display:block; }
     #inputAvatar  { font-size:14px; }
     #removeAvatarBtn { background:transparent; }
     #removeAvatarBtn:hover { background:rgba(0,0,0,0.04); }
 
-    /* ─── RESPONSIVE ──────────────────────────────────────────── */
+    
     @media(max-width:980px) {
       :root { --content-width:820px; }
       .review-card { flex:0 0 90vw; grid-template-columns:1fr; }
@@ -354,7 +354,7 @@
 <div class="frame">
   <div class="layout">
 
-    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  
     <aside class="sidebar animate-on-load delay-1">
       <div>
         <div class="logo">bean<br>there</div>
@@ -375,10 +375,10 @@
       </div>
     </aside>
 
-    <!-- ═══════════════ MAIN ═══════════════ -->
+    
     <main class="main animate-on-load delay-2">
 
-      <!-- User mini-menu (top right) -->
+    
       <div class="user-menu" id="userMenu">
         <button id="userMenuBtn" class="user-mini-btn"
                 aria-haspopup="true" aria-expanded="false"
@@ -403,13 +403,13 @@
         </div>
       </div>
 
-      <!-- Not logged in -->
+      
       <div id="profileMessage" style="display:none; text-align:center; margin-top:60px; font-size:18px;">
         <h2>You're not logged in 👤</h2>
         <p>Please log in or sign up to view your profile.</p>
       </div>
 
-      <!-- ─── PROFILE HEADER ─── -->
+     
       <div class="profile-header" id="profileHeaderEl" style="display:none;">
         <div class="avatar-large">
           <img id="avatarLargeImg" src="icons/noprof.jpg" alt="profile photo">
@@ -426,33 +426,33 @@
         </div>
       </div>
 
-      <!-- ─── REVIEWS TAB ─── -->
+     
       <section class="section" id="tabReviews">
         <h2 class="section-title">My Reviews</h2>
         <div class="h-scroll-track" id="reviewContainer"></div>
       </section>
 
-      <!-- ─── REPLIES TAB ─── -->
+    
       <section class="section" id="tabReplies">
         <h2 class="section-title">My Replies</h2>
         <div class="h-scroll-track" id="repliesContainer"></div>
       </section>
 
     </main>
-  </div><!-- /.layout -->
-</div><!-- /.frame -->
+  </div>
+</div>
 
-<!-- ═══════════════ FAB ═══════════════ -->
+
 <button id="addReviewFab" aria-label="Write a review" title="Write a review" style="display:none;">+</button>
 
-<!-- ═══════════════ EDIT PROFILE MODAL ═══════════════ -->
+
 <div id="editProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
   <div class="modal-backdrop" data-close></div>
   <div class="modal-panel auth-panel" role="document">
     <button class="modal-close-review" aria-label="Close" data-close>✕</button>
     <h2 id="modalTitle" class="auth-title">Edit Profile</h2>
 
-    <!-- Avatar preview centered at top -->
+   
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px;">
       <div style="width:90px;height:90px;border-radius:50%;overflow:hidden;border:3px solid #e6eaea;">
         <img id="modalAvatarPreview" src="icons/noprof.jpg" alt="preview" style="width:100%;height:100%;object-fit:cover;display:block;">
@@ -483,7 +483,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ LOG IN MODAL ═══════════════ -->
+
 <div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" id="closeLogIn"></div>
   <div class="modal-panel auth-panel">
@@ -498,7 +498,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ SIGN UP MODAL ═══════════════ -->
+
 <div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" id="closeSignUp"></div>
   <div class="modal-panel auth-panel">
@@ -517,7 +517,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ WRITE REVIEW MODAL ═══════════════ -->
+
 <div id="writeReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" data-close-write></div>
   <div class="modal-panel edit-review-panel" role="document">
@@ -570,7 +570,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ EDIT REVIEW MODAL ═══════════════ -->
+
 <div id="editReviewModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" data-close-review></div>
   <div class="modal-panel edit-review-panel">
@@ -607,7 +607,7 @@
   </div>
 </div>
 
-<!-- ═══════════════ DELETE REPLY MODAL ═══════════════ -->
+
 <div id="deleteReviewModal" class="modal" hidden>
   <div class="modal-backdrop" onclick="document.getElementById('deleteReviewModal').hidden=true;"></div>
   <div class="modal-panel auth-panel">
@@ -635,11 +635,9 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════════
-     SCRIPTS
-══════════════════════════════════════════════════ -->
 
-<!-- S1: FAB visibility — hide when any modal opens -->
+
+
 <script>
 (function() {
   const fab = document.getElementById('addReviewFab');
@@ -653,7 +651,7 @@
 })();
 </script>
 
-<!-- S3: Auth UI + Login / Signup -->
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const logInModal  = document.getElementById('logInModal');
@@ -817,7 +815,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<!-- S4: Edit Profile Modal -->
+
 <script>
 (function() {
   const editBtn     = document.getElementById('editProfileBtn');
@@ -919,7 +917,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
-<!-- S5: User dropdown -->
+
 <script>
 (function() {
   const btn   = document.getElementById('userMenuBtn');
@@ -951,7 +949,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
-<!-- S6: Reviews + Replies render engine -->
+
 <script>
   let selectedReviewId  = null;
   let selectedReplyText = null;
@@ -973,7 +971,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ).join('');
   }
 
-  /* ── LOAD ── */
+  
   async function loadReviewsFromDB() {
     try {
       const res  = await fetch('/my-reviews', { credentials:'include' });
@@ -1011,7 +1009,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch(e) { console.error("Error loading replies:", e); }
   }
 
-  /* ── RENDER REVIEWS ── */
+ 
   function renderAllReviews() {
     const c = document.getElementById('reviewContainer');
     if (!reviewsData.length) { c.innerHTML = '<div class="empty-state">No reviews yet — write your first one!</div>'; return; }
@@ -1066,7 +1064,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ── RENDER REPLIES ── */
+  
   function renderAllReplies() {
     const c = document.getElementById('repliesContainer');
     if (!repliesData.length) { c.innerHTML = '<div class="empty-state">No replies yet.</div>'; return; }
@@ -1108,7 +1106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  /* ── EDIT REVIEW MODAL ── */
+  
   const editReviewModal  = document.getElementById('editReviewModal');
   const editReviewForm   = document.getElementById('editReviewForm');
   const editReviewText   = document.getElementById('editReviewText');
@@ -1138,7 +1136,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     reviewIdToEdit = id;
 
-    // ✅ ADD THIS LINE
+    
     document.getElementById('editReviewTitleInput').value = rev.title || '';
 
     editReviewText.value = rev.text || '';
@@ -1176,7 +1174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch(e) { alert('Error updating review.'); }
   });
 
-  /* ── DELETE REVIEW ── */
+  
   document.getElementById('confirmDeleteReview').onclick = async () => {
     try {
       const res = await fetch('/delete-review', {
@@ -1203,7 +1201,7 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedReviewId = null;
   };
 
-  /* ── DELETE REPLY ── */
+  
   const deleteModal = document.getElementById("deleteModal");
   document.getElementById("cancelDelete").onclick    = () => { deleteModal.hidden=true; selectedReviewId=null; selectedReplyText=null; };
   document.getElementById("closeDeleteModal").onclick= () => { deleteModal.hidden=true; };
@@ -1217,12 +1215,12 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch(e) { alert("Error deleting reply."); }
   };
 
-  /* ── INITIAL LOAD ── */
+  
   loadReviewsFromDB();
   loadMyReplies();
 </script>
 
-<!-- S7: FAB → Write Review -->
+
 <script>
 (function() {
   const fab        = document.getElementById('addReviewFab');

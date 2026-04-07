@@ -49,16 +49,14 @@ app.use(
   })
 );
 
-// serve your frontend
+
 app.use(express.static("bean there"));
 
 app.get("/", (req, res) => {
   res.sendFile("index.html", { root: "bean there" });
 });
 
-/* =========================
-   ESTABLISHMENT ROUTES
-========================= */
+
 
 app.get("/establishments", async (req, res) => {
   try {
@@ -105,9 +103,7 @@ app.get("/owner-establishment", async (req, res) => {
   }
 });
 
-/* =========================
-   AUTH ROUTES
-========================= */
+
 
 app.get("/session-owner", (req, res) => {
   if (!req.session.owner) {
@@ -130,22 +126,20 @@ app.post("/update-cafe", async (req, res) => {
       return res.status(404).json({ message: "Owner not found" });
     }
 
-    // FIX: guard against owner with no linked establishment
-    // (findByIdAndUpdate(undefined, ...) returns null silently)
+   
     if (!owner.establishmentId) {
       return res.status(400).json({ message: "No establishment linked to this owner account" });
     }
 
     const { bio, imageUrl } = req.body;
 
-    // FIX: validate bio length consistently with /update-profile
+    
     const cleanBio = typeof bio === "string" ? bio.trim() : "";
     if (cleanBio.length > 300) {
       return res.status(400).json({ message: "Bio must be 300 characters or less." });
     }
 
-    // FIX: use explicit $set so the update is unambiguous across all
-    // Mongoose versions, and add runValidators so schema rules are enforced
+    
     const updatePayload = {
       $set: {
         bio: cleanBio,
@@ -173,7 +167,7 @@ app.post("/update-cafe", async (req, res) => {
   }
 });
 
-// SIGN UP
+
 app.post("/signup", async (req, res) => {
   try {
     let { fullName, username, password, bio, title, avatar } = req.body;
@@ -228,7 +222,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// LOG IN
+
 app.post("/login", async (req, res) => {
   try {
     const { username, password, rememberMe } = req.body;
@@ -302,7 +296,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// CHECK CURRENT SESSION USER
+
 app.get("/session-user", (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ loggedIn: false });
@@ -314,7 +308,7 @@ app.get("/session-user", (req, res) => {
   });
 });
 
-// CHECK CURRENT SESSION OWNER
+
 app.get("/session-owner", (req, res) => {
   if (!req.session.owner) {
     return res.status(401).json({ loggedIn: false });
@@ -326,7 +320,7 @@ app.get("/session-owner", (req, res) => {
   });
 });
 
-// LOG OUT
+
 app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -339,11 +333,9 @@ app.post("/logout", (req, res) => {
   });
 });
 
-/* =========================
-   REVIEW ROUTES
-========================= */
 
-// GET ALL REVIEWS
+
+
 app.get("/reviews", async (req, res) => {
   try {
     const reviews = await Review.find();
@@ -378,7 +370,7 @@ app.get("/reviews", async (req, res) => {
   }
 });
 
-// GET REVIEWS BY CAFE
+
 app.get("/reviews-by-cafe/:id", async (req, res) => {
   try {
     const est = await Establishment.findById(req.params.id);
@@ -405,7 +397,7 @@ app.get("/reviews-by-cafe/:id", async (req, res) => {
   }
 });
 
-// GET MY REVIEWS
+
 app.get("/my-reviews", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -439,7 +431,7 @@ app.get("/my-reviews", async (req, res) => {
   }
 });
 
-// ADD REVIEW
+
 app.post("/add-review", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -481,7 +473,7 @@ app.post("/add-review", async (req, res) => {
   }
 });
 
-// EDIT REVIEW
+
 app.post("/edit-review", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -519,7 +511,7 @@ app.post("/edit-review", async (req, res) => {
   }
 });
 
-// OWNER REPLY TO REVIEW
+
 app.post("/reply-review", async (req, res) => {
   try {
     if (!req.session.owner) {
@@ -547,7 +539,7 @@ app.post("/reply-review", async (req, res) => {
             date: new Date().toLocaleDateString(),
             reviewId: reviewId,
             establishmentName: review.establishmentName,
-            role: "owner" // 🔥 THIS is the key
+            role: "owner" 
           }
         }
       },
@@ -561,7 +553,7 @@ app.post("/reply-review", async (req, res) => {
   }
 });
 
-// LIKE REVIEW
+
 app.post("/reviews/:id/like", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).send("Login required");
@@ -600,7 +592,7 @@ app.post("/reviews/:id/like", async (req, res) => {
   }
 });
 
-// DISLIKE REVIEW
+
 app.post("/reviews/:id/dislike", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).send("Login required");
@@ -639,7 +631,7 @@ app.post("/reviews/:id/dislike", async (req, res) => {
   }
 });
 
-// USER REPLY TO A REVIEW
+
 app.post("/reviews/:id/reply", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).send("Login required");
@@ -670,7 +662,7 @@ app.post("/reviews/:id/reply", async (req, res) => {
   }
 });
 
-// GET CURRENT USER'S REPLIES
+
 app.get('/my-replies', async (req, res) => {
   if (!req.session.user) return res.status(401).send("Login required");
   try {
@@ -683,7 +675,7 @@ app.get('/my-replies', async (req, res) => {
             text: reply.text,
             date: reply.date,
             establishmentName: reply.establishmentName,
-            reviewId: review._id,   // always use the parent review's _id directly
+            reviewId: review._id,   
             replyToUser: review.username,
             image: review.photoUrl || ""
           });
@@ -694,9 +686,7 @@ app.get('/my-replies', async (req, res) => {
   } catch (err) { res.status(500).send("Error fetching replies"); }
 });
 
-/* =========================
-   PROFILE ROUTES
-========================= */
+
 
 app.post("/update-profile", async (req, res) => {
   try {
@@ -818,11 +808,10 @@ app.delete("/delete-reply", async (req, res) => {
   }
 });
 
-/* =========================
-   TBV ROUTES
-========================= */
+ 
+ 
 
-// GET USER'S TBV LIST
+
 app.get("/tbv", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -838,7 +827,7 @@ app.get("/tbv", async (req, res) => {
   }
 });
 
-// ADD ESTABLISHMENT TO TBV
+
 app.post("/tbv/add", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -853,7 +842,7 @@ app.post("/tbv/add", async (req, res) => {
 
     const user = await User.findById(req.session.user.id);
 
-    // Prevent duplicates
+    
     if (!user.tbv.map(id => id.toString()).includes(establishmentId)) {
       user.tbv.push(establishmentId);
       await user.save();
@@ -867,7 +856,7 @@ app.post("/tbv/add", async (req, res) => {
   }
 });
 
-// REMOVE ESTABLISHMENT FROM TBV
+
 app.post("/tbv/remove", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -894,7 +883,7 @@ app.post("/tbv/remove", async (req, res) => {
 
 const PORT = 3000;
 
-// start server after DB connection
+
 (async () => {
   await connectDB();
   app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));

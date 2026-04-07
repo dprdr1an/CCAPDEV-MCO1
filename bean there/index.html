@@ -19,11 +19,11 @@
       --rounded: 22px;
       --gap: 28px;
 
-      /* ⭐ shared content width */
+      
       --content-width: 1500px;
     }
 
-    /* animation */
+    
     @keyframes floatUp {
       from { opacity: 0; transform: translateY(40px); }
       to { opacity: 1; transform: translateY(0); }
@@ -45,7 +45,7 @@
       color:#2b2b2b;
     }
 
-    /* ⭐ reusable alignment class */
+    
     .content-section{
       max-width: var(--content-width);
       margin-left: auto;
@@ -65,7 +65,7 @@
       column-gap:18px;
     }
 
-    /* SIDEBAR */
+   
     .sidebar{
       background:var(--sidebar);
       color:#fff;
@@ -92,7 +92,7 @@
       gap:26px;
     }
 
-    /* Custom Login Modal Styles */
+    
     .login-custom-panel {
       max-width: 480px;
       width: 90%;
@@ -156,7 +156,7 @@
       font-size: 18px;
     }
 
-    /* Styling the Checkbox to match the olive theme */
+    
     .remember-me input[type="checkbox"] {
       width: 20px;
       height: 20px;
@@ -198,12 +198,12 @@
       transition: 0.3s;
     }
 
-    /* Modal Styles */
+    
     .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .modal[hidden] { display: none; }
     .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
     .modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
-    /* MAIN */
+    
     .main{
       height:calc(100% - 36px);
       overflow-y:auto;
@@ -263,9 +263,9 @@
       display: block;
     }
 
-    /* HERO */
+    
     .hero {
-    position: relative; /* important */
+    position: relative; 
     background-color: #743014;
     height: 577px;
     margin: 24px auto;
@@ -278,17 +278,17 @@
     overflow: hidden;
   }
 
-  /* image layer */
+  
   .hero::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url('icons/kape.jpeg') center/cover no-repeat;
-    opacity: 0.25; /* 🔥 adjust transparency here */
+    opacity: 0.25; 
     z-index: 0;
   }
 
-  /* make text stay above */
+  
   .hero .brand {
     position: relative;
     z-index: 1;
@@ -299,7 +299,7 @@
       font-size:34px;
     }
 
-    /* INFO CARDS */
+    
     .info-row{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -322,7 +322,7 @@
       font-size: 30px;
     }
 
-    /* MOST VISITED CAROUSEL */
+   
     .most{
       margin:26px auto;
       background-color: #c3c071;
@@ -348,14 +348,14 @@
       position: relative;
     }
 
-    /* wrapper that we'll fade during transitions */
+    
     .carousel-wrapper {
       height: 400px;
       position: relative;
       width: 100%;
       margin: 0 auto;
       transition: opacity 0.45s ease;
-      /* center content area for absolute cards */
+  
     }
 
     .carousel-wrapper.fade-out {
@@ -363,7 +363,7 @@
       pointer-events: none;
     }
 
-    /* Make cards absolutely positioned so we can keep left/center/right positions and animate them gracefully */
+   
     .cafe-card {
       background: #6f6f2b;
       border-radius: 12px;
@@ -377,7 +377,7 @@
       opacity: 0.6;
     }
 
-    /* positions */
+    
     .pos-left {
       left: 18%;
       transform: translate(-50%, -50%) scale(0.85);
@@ -430,7 +430,7 @@
       font-size: 22px;
     }
 
-    /* Navigation Controls */
+    
     .carousel-controls {
       display: flex;
       justify-content: center;
@@ -460,7 +460,7 @@
       transform: translateY(0);
     }
 
-    /* Dots indicator */
+    
     .carousel-dots {
       display: flex;
       justify-content: center;
@@ -482,9 +482,7 @@
       height: 12px;
     }
 
-    /* ── ALL CAFES SECTION ───────────────────────────────── */
-
-    /* Outer section wrapper */
+   
     .all-cafes-section {
       margin: 26px auto;
       padding: 32px 28px 36px;
@@ -492,12 +490,12 @@
 
       background: transparent;
 
-      position: relative;   /* ✅ REQUIRED */
-      isolation: isolate;   /* ✅ keeps effects inside */
-      overflow: hidden;     /* ✅ prevents bleed */
+      position: relative;   
+      isolation: isolate;  
+      overflow: hidden;    
     }
 
-    /* title */
+    
     .all-cafes-section h4 {
       text-align: center;
       margin: 0 0 24px;
@@ -507,7 +505,7 @@
       letter-spacing: 0.3px;
     }
 
-    /* Vertical list container */
+   
     .cafe-list {
       max-width: var(--content-width);
       margin: 0 auto;
@@ -533,7 +531,7 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     }
 
-    /* Left: name + location stacked */
+   
     .cafe-list-content {
       display: flex;
       flex-direction: column;
@@ -607,7 +605,7 @@
       outline: none;
     }
 
-    /* Right: rating top, TBV button below — right-aligned */
+    
     .cafe-list-actions {
       display: flex;
       flex-direction: column;
@@ -641,7 +639,7 @@
       color: #5b7ba8;
     }
 
-    /* TBV button — matches cafe.html .tbv-btn exactly */
+    
     .tbv-btn {
       display: inline-flex;
       align-items: center;
@@ -674,7 +672,7 @@
       padding: 32px 0;
     }
 
-    /* FOOTER */
+    
     .footer{
       margin:26px auto;
       background:#c3c071;
@@ -695,7 +693,7 @@
       font-size: 30px;
     }
 
-    /* MOBILE */
+    
     @media(max-width:880px){
       .layout{grid-template-columns:1fr}
       .sidebar{order:2;height:auto}
@@ -720,7 +718,7 @@
       .pos-right { left: 88%; }
     }
 
-    /* ✅ UNIFIED AUTH MODAL STYLE */
+    
     .auth-panel {
       background-color: #f8f5ee;
       border-radius: 20px;
@@ -731,7 +729,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
-    /* title */
+    
     .auth-title {
       font-family: 'Lora', serif;
       font-size: 32px;
@@ -741,7 +739,7 @@
       line-height: 1.2;
     }
 
-    /* inputs */
+    
     .auth-group {
       display: flex;
       align-items: center;
@@ -766,7 +764,7 @@
       outline: none;
     }
 
-    /* button */
+    
     .auth-btn {
       margin-top: 20px;
       padding: 10px 40px;
@@ -794,7 +792,7 @@
       width: 16px;
       height: 16px;
       flex: none;
-      accent-color: #5b5f10; /* matches your theme */
+      accent-color: #5b5f10; 
       cursor: pointer;
     }
 
@@ -878,8 +876,7 @@
           </div>
         </section>
 
-        <!-- ── EXPLORE ALL CAFES ────────────────────────────── -->
-        <!-- Sits directly below the carousel; scrollable list    -->
+       
         <section class="all-cafes-section content-section">
           <div class="search-wrap" style="margin-bottom:8px;">
             <div class="search">
@@ -903,7 +900,7 @@
             <p class="cafe-list-empty">Loading cafes…</p>
           </div>
         </section>
-        <!-- ────────────────────────────────────────────────── -->
+       
 
         <section class="footer content-section">
           <div>
@@ -1003,7 +1000,7 @@
  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   document.addEventListener("DOMContentLoaded", () => {
 
-  // --- 1. SELECTORS ---
+  
   const logInModal = document.getElementById('logInModal');
   const signUpModal = document.getElementById('signUpModal');
   const logInForm = document.getElementById('logInForm');
@@ -1014,7 +1011,7 @@
 
   console.log(loginBtn);
 
-  // --- AUTH UI ---
+ 
   const authSection = document.getElementById("authSection");
   const userSection = document.getElementById("userSection");
   const welcomeUser = document.getElementById("welcomeUser");
@@ -1049,7 +1046,7 @@
   }
 }
 
-  // run on load
+  
   updateUI();
 
     logoutBtn.onclick = async () => {
@@ -1073,7 +1070,7 @@
   }
 };
 
-  // --- 2. MODAL CONTROLS ---
+ 
   loginBtn.onclick = () => logInModal.hidden = false;
   signupBtn.onclick = () => signUpModal.hidden = false;
 
@@ -1104,7 +1101,7 @@
     });
   }
 
-  // --- 3. CHECK EXISTING SESSION ---
+ 
   async function checkSessionOnLoad() {
   try {
     const ownerResponse = await fetch('/session-owner', {
@@ -1149,7 +1146,7 @@
 
   checkSessionOnLoad();
 
-  // --- 4. LOGIN HANDLER ---
+ 
   logInForm.onsubmit = async function(e) {
     e.preventDefault();
 
@@ -1222,7 +1219,7 @@ if (password.length < 6 || password.length > 50) {
     }
   };
 
-  // --- 5. SIGNUP HANDLER ---
+ 
   signUpForm.onsubmit = async function(e) {
     e.preventDefault();
 
@@ -1297,7 +1294,7 @@ if (title.length > 50) {
     }
   };
 
-  // --- 6. CAROUSEL & SEARCH LOGIC ---
+ 
   let cafes = [];
 let activeCafes = [];
 let currentIndex = 0;
@@ -1306,9 +1303,7 @@ let currentIndex = 0;
   let isAnimating = false;
   let autoplay;
 
-  // ── ALL CAFES: ratings lookup map ──────────────────────
-  // Built once from /reviews; keyed by lowercase establishment name.
-  // Shape: { [nameLower]: { total: Number, count: Number } }
+
   let ratingsMap = {};
 
   function getIndex(i) {
@@ -1327,7 +1322,7 @@ let currentIndex = 0;
     </div>
   `;
 
-  // center card opens cafe page on one click
+
   if (position === "pos-center") {
     card.addEventListener("click", () => {
       if (cafe.id) {
@@ -1360,15 +1355,15 @@ async function loadCafes() {
     renderCarousel();
     startAutoplay();
 
-    // ── ALL CAFES: fetch ratings then render the full list ──
+    
     await loadRatingsMap();
     renderAllCafes(cafes);
 
-    // ── SEARCH + SORT wiring (runs after cafes are loaded) ──
+   
     function sortCafes(list) {
       const sorted = [...list];
       const val = document.getElementById('sortSelect').value;
-      const ratingsMap_ = ratingsMap; // closure
+      const ratingsMap_ = ratingsMap; 
       if (val === 'highest') {
         sorted.sort((a, b) => {
           const aKey = (a.name||'').trim().toLowerCase();
@@ -1386,7 +1381,7 @@ async function loadCafes() {
           return aAvg - bAvg;
         });
       }
-      // newest/oldest: preserve server order (already newest-first by default)
+      
       return sorted;
     }
 
@@ -1481,17 +1476,13 @@ async function loadCafes() {
     currentIndex = 0;
     createDots();
     renderCarousel();
-    // ── ALL CAFES: mirror the same filter ──────────────────
+
     renderAllCafes(activeCafes);
   }
 
-  // ── ALL CAFES FUNCTIONS ─────────────────────────────────
+  
 
-  /**
-   * Fetches all reviews and builds ratingsMap:
-   *   { [establishmentNameLower]: { total, count } }
-   * Called once by loadCafes() so we only hit /reviews once.
-   */
+  
   async function loadRatingsMap() {
     try {
       const res = await fetch('/reviews');
@@ -1509,12 +1500,7 @@ async function loadCafes() {
     }
   }
 
-  /**
-   * Returns the HTML for 5 bean icons representing `avg`.
-   * Filled beans for the whole-number part, half-opacity for
-   * a 0.5 remainder, greyed-out for the rest. Returns a
-   * "no ratings" label if avg is null.
-   */
+  
   function buildRatingBeans(avg) {
     if (avg === null) {
       return '<span class="cafe-list-no-rating">No ratings yet</span>';
@@ -1536,11 +1522,7 @@ async function loadCafes() {
     return html;
   }
 
-  /**
-   * Renders a compact clickable card for each cafe in `list`
-   * into #cafeList. Responds to the same search state as the
-   * carousel so both sections stay in sync.
-   */
+  
   function renderAllCafes(list) {
     const container = document.getElementById('cafeList');
     if (!container) return;
@@ -1551,7 +1533,7 @@ async function loadCafes() {
     }
 
     container.innerHTML = list.map(cafe => {
-      // Look up average from ratingsMap using case-insensitive name match
+      
       const key  = (cafe.name || '').trim().toLowerCase();
       const data = ratingsMap[key];
       const avg  = (data && data.count > 0) ? data.total / data.count : null;
@@ -1573,20 +1555,19 @@ async function loadCafes() {
     }).join('');
   }
 
-  // --- 7. INITIALIZATION ---
+  
 
-  // Wire prev / next buttons
   document.getElementById("nextBtn").onclick = () => slideTo(getIndex(currentIndex + 1));
   document.getElementById("prevBtn").onclick = () => slideTo(getIndex(currentIndex - 1));
 
-  // Pause autoplay while the user hovers over the carousel
+
   carousel.addEventListener("mouseenter", stopAutoplay);
   carousel.addEventListener("mouseleave", startAutoplay);
 
-  // Boot everything — fetches establishments, builds carousel + all-cafes list
+ 
   loadCafes();
 
-  }); // end DOMContentLoaded
+  }); 
 
 async function addToTBV(id, event) {
   event.stopPropagation();
@@ -1606,7 +1587,7 @@ async function addToTBV(id, event) {
       return;
     }
 
-    // 🔥 Update button UI
+    
     const btn = event.target.closest("button");
     if (btn) {
       btn.innerHTML = "Added";

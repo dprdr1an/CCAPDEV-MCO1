@@ -5,7 +5,7 @@ const OwnerSchema = new mongoose.Schema(
     username: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true },
 
-    // ties owner to exactly one establishment
+    
     establishmentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Establishment",

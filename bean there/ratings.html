@@ -16,7 +16,7 @@
       --content-width: 1500px;
     }
     
-    /* animation */
+    
     @keyframes floatUp {
       from { opacity: 0; transform: translateY(40px); }
       to { opacity: 1; transform: translateY(0); }
@@ -51,7 +51,7 @@
       column-gap:18px;
     }
 
-    /* SIDEBAR */
+    
     .sidebar{
       background:var(--sidebar);
       color:#fff;
@@ -95,7 +95,7 @@
       transition:0.3s;
     }
     
-    /* Custom Login Modal Styles */
+    
     .login-custom-panel {
       max-width: 480px;
       width: 90%;
@@ -159,7 +159,7 @@
       font-size: 18px;
     }
 
-    /* Styling the Checkbox to match the olive theme */
+    
     .remember-me input[type="checkbox"] {
       width: 20px;
       height: 20px;
@@ -201,12 +201,12 @@
       transition: 0.3s;
     }
 
-    /* Modal Styles */
+   
     .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .modal[hidden] { display: none; }
     .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
     .modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
-    /* MAIN */
+  
     .main{
       height:calc(100% - 36px);
       margin:18px 18px 0 0;
@@ -262,7 +262,7 @@
       display: block;
     }
 
-    /* REVIEWS */
+
     .reviews {
       max-width: var(--content-width);
       margin: 22px auto 0px;
@@ -409,7 +409,7 @@
     .active { opacity: 1; filter: none; transform: scale(1.2); }
 
 
-    /* ── SORT BAR ── */
+  
     .sort-bar {
       max-width: var(--content-width);
       margin: 10px auto 6px;
@@ -452,14 +452,14 @@
       outline: none;
     }
 
-    /* MOBILE */
+  
     @media(max-width:880px){
       .layout{grid-template-columns:1fr}
       .sidebar{order:2;height:auto}
       .main{order:1}
     }
 
-    /* ✅ UNIFIED AUTH MODAL STYLE */
+   
     .auth-panel {
       background-color: #f8f5ee;
       border-radius: 20px;
@@ -470,7 +470,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
-    /* title */
+    
     .auth-title {
       font-family: 'Lora', serif;
       font-size: 32px;
@@ -480,7 +480,7 @@
       line-height: 1.2;
     }
 
-    /* inputs */
+    
     .auth-group {
       display: flex;
       align-items: center;
@@ -505,7 +505,7 @@
       outline: none;
     }
 
-    /* button */
+    
     .auth-btn {
       margin-top: 20px;
       padding: 10px 40px;
@@ -533,7 +533,7 @@
       width: 16px;
       height: 16px;
       flex: none;
-      accent-color: #5b5f10; /* matches your theme */
+      accent-color: #5b5f10; 
       cursor: pointer;
     }
 
@@ -713,7 +713,7 @@
   <script>
   document.addEventListener("DOMContentLoaded", () => {
 
-  // --- 1. SELECTORS ---
+  
   const logInModal = document.getElementById('logInModal');
   const signUpModal = document.getElementById('signUpModal');
   const logInForm = document.getElementById('logInForm');
@@ -724,7 +724,7 @@
 
   console.log(loginBtn);
 
-  // --- AUTH UI ---
+  
   const authSection = document.getElementById("authSection");
   const userSection = document.getElementById("userSection");
   const welcomeUser = document.getElementById("welcomeUser");
@@ -759,7 +759,7 @@
   }
 }
 
-  // run on load
+  
   updateUI();
 
     logoutBtn.onclick = async () => {
@@ -783,7 +783,7 @@
   }
 };
 
-  // --- 2. MODAL CONTROLS ---
+  
   loginBtn.onclick = () => logInModal.hidden = false;
   signupBtn.onclick = () => signUpModal.hidden = false;
 
@@ -814,7 +814,7 @@
     });
   }
 
-  // --- 3. CHECK EXISTING SESSION ---
+  
   async function checkSessionOnLoad() {
   try {
     const ownerResponse = await fetch('/session-owner', {
@@ -859,7 +859,7 @@
 
   checkSessionOnLoad();
 
-  // --- 4. LOGIN HANDLER ---
+  
   logInForm.onsubmit = async function(e) {
   e.preventDefault();
 
@@ -928,7 +928,7 @@
   }
 };
 
-  // --- 5. SIGNUP HANDLER ---
+ 
   signUpForm.onsubmit = async function(e) {
     e.preventDefault();
 
@@ -1360,7 +1360,7 @@ document.getElementById('replyForm').addEventListener('submit', async function(e
 
     document.getElementById('replyModal').hidden = true;
 
-    // Reload reviews so the new reply appears immediately without refreshing
+    
     await loadReviews();
 
   } catch (err) {
@@ -1372,7 +1372,7 @@ document.addEventListener("click", function(e) {
   if (e.target.classList.contains("see-more-btn")) {
     const reviewId = e.target.dataset.id;
 
-    const review = allReviews.find(r => r._id === reviewId); // 🔥 USE allReviews
+    const review = allReviews.find(r => r._id === reviewId); 
     if (!review) return;
 
     const fullReplies = (review.replies || []).map(rep => `

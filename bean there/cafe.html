@@ -42,7 +42,7 @@
       column-gap: 18px;
     }
 
-    /* ── SIDEBAR ── */
+    
     .sidebar{
       background: var(--sidebar);
       color: #fff;
@@ -61,7 +61,7 @@
     .sidebar .nav a:hover,
     .sidebar .auth div:hover{ color:#fa7a11; cursor:pointer; transition:0.3s; }
 
-    /* ── MAIN ── */
+  
     .main{
       height: calc(100% - 36px);
       margin: 18px 18px 0 0;
@@ -71,7 +71,7 @@
       overflow-y: auto;
     }
 
-    /* ── SEARCH ── */
+
     .search-wrap{ display:flex; justify-content:center; margin-bottom:20px; }
     .search{
       width: 100%;
@@ -89,7 +89,7 @@
     .search button{ border:0; background:transparent; cursor:pointer; }
     .search button img{ width:18px; height:18px; display:block; }
 
-    /* ── CAFE HEADER ── */
+    
     .cafe-header{
       display:block;
     }
@@ -121,7 +121,7 @@
     }
     .score-divider{ color: var(--muted); }
 
-    /* ── PHOTO GRID ── */
+    
     .photo-grid{
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -141,7 +141,7 @@
     .photo-grid img:first-child{ grid-row: auto; }
     .photo-grid img:last-child { grid-row: auto; }
 
-    /* ── REVIEW CARDS — identical to ratings.html ── */
+ 
     .reviews{
       max-width: var(--content-width);
       margin: 0 auto;
@@ -222,7 +222,7 @@
     }
     .review-text{ font-size:14px; line-height:1.5; margin-top:4px; }
 
-    /* ── FAB — identical to profile.html ── */
+    
     #addReviewFab{
       position: fixed;
       bottom: 30px;
@@ -242,7 +242,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
-    /* ── MODALS ── */
+   
     .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
     .modal[hidden]{ display:none; }
     .modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0.3); }
@@ -270,7 +270,7 @@
       .review-img{ height:200px; }
     }
 
-    /* ✅ UNIFIED AUTH MODAL STYLE */
+  
     .auth-panel {
       background-color: #f8f5ee;
       border-radius: 20px;
@@ -281,7 +281,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
-    /* title */
+  
     .auth-title {
       font-family: 'Lora', serif;
       font-size: 32px;
@@ -291,7 +291,7 @@
       line-height: 1.2;
     }
 
-    /* inputs */
+    
     .auth-group {
       display: flex;
       align-items: center;
@@ -316,7 +316,7 @@
       outline: none;
     }
 
-    /* button */
+    
     .auth-btn {
       margin-top: 20px;
       padding: 10px 40px;
@@ -344,7 +344,7 @@
       width: 16px;
       height: 16px;
       flex: none;
-      accent-color: #5b5f10; /* matches your theme */
+      accent-color: #5b5f10; 
       cursor: pointer;
     }
 
@@ -393,7 +393,7 @@
 <div class="frame">
   <div class="layout">
 
-    <!-- SIDEBAR -->
+  
     <aside class="sidebar animate-on-load delay-1">
       <div>
         <div class="logo">bean<br>there</div>
@@ -414,10 +414,10 @@
       </div>
     </aside>
 
-    <!-- MAIN -->
+   
     <main class="main animate-on-load delay-2">
 
-      <!-- Search -->
+      
       <div class="search-wrap">
         <div class="search">
           <input id="q" placeholder="Search cafes, owners, tags..." />
@@ -425,7 +425,7 @@
         </div>
       </div>
 
-      <!-- Cafe Header -->
+      
       <div class="cafe-header">
         <div class="cafe-top">
           <div class="cafe-name-row">
@@ -440,7 +440,7 @@
         <div id="cafeLocation" style="font-size:15px; color:#6b6151; margin-top:10px; margin-bottom:18px;"></div>
       </div>
 
-      <!-- Photo Grid -->
+     
       <div class="photo-grid" id="photoGrid"></div>
       <p id="cafeBio" style="
           color: #bfb0a8;
@@ -450,7 +450,7 @@
           max-width: 1000px;
         "></p>
 
-      <!-- Reviews -->
+    
       <div class="reviews">
         <h2 class="reviews-title">User Reviews</h2>
         <div id="reviewsContainer" style="display:flex; flex-direction:column; gap:22px;">
@@ -462,10 +462,10 @@
   </div>
 </div>
 
-<!-- FAB -->
+
 <button id="addReviewFab" aria-label="Write a review" title="Write a review">+</button>
 
-<!-- LOGIN MODAL -->
+
 <div id="logInModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" id="closeLogIn"></div>
   <div class="modal-panel auth-panel">
@@ -495,7 +495,7 @@
     </div>
 </div>
 
-<!-- SIGN UP MODAL -->
+
 <div id="signUpModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" id="closeSignUp"></div>
   <div class="modal-panel auth-panel">
@@ -548,7 +548,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ── AUTH (same as ratings.html) ──
+  
   const logInModal  = document.getElementById('logInModal');
   const signUpModal = document.getElementById('signUpModal');
   const logInForm   = document.getElementById('logInForm');
@@ -798,7 +798,7 @@ if (password.length < 6 || password.length > 50) {
   }
 };
 
-  // ── FAB ──
+
   document.getElementById('addReviewFab').onclick = () => {
     const username = localStorage.getItem('beanthere_profile_username');
     if (!username) {
@@ -809,7 +809,7 @@ if (password.length < 6 || password.length > 50) {
     }
   };
 
-  // ── LOAD CAFE ──
+
   const params = new URLSearchParams(window.location.search);
   const cafeId = params.get('id');
 
@@ -932,7 +932,7 @@ const addToTBVBtn = document.getElementById("addToTBVBtn");
 
 addToTBVBtn.onclick = async () => {
   try {
-    // get cafe ID from URL
+   
     const params = new URLSearchParams(window.location.search);
     const establishmentId = params.get("id");
 
@@ -957,7 +957,7 @@ addToTBVBtn.onclick = async () => {
       return;
     }
 
-    // UX feedback
+    
     addToTBVBtn.textContent = "Added";
     addToTBVBtn.disabled = true;
 

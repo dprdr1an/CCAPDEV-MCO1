@@ -22,7 +22,7 @@
       --content-width: 1500px;
     }
 
-    /* animation */
+   
     @keyframes floatUp {
       from { opacity: 0; transform: translateY(40px); }
       to { opacity: 1; transform: translateY(0); }
@@ -44,7 +44,7 @@
       color:#2b2b2b;
     }
 
-    /* reusable alignment class */
+    
     .content-section{
       max-width: var(--content-width);
       margin-left: auto;
@@ -64,7 +64,7 @@
       column-gap:18px;
     }
 
-    /* SIDEBAR */
+   
     .sidebar{
       background:var(--sidebar);
       color:#fff;
@@ -110,7 +110,7 @@
       transition: 0.3s;
     }
 
-    /* Custom Login Modal Styles */
+    
     .login-custom-panel {
       max-width: 480px;
       width: 90%;
@@ -215,13 +215,13 @@
       transition: 0.3s;
     }
 
-    /* Modal Styles */
+    
     .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000; }
     .modal[hidden] { display: none; }
     .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
     .modal-panel { position: relative; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; z-index: 2001; }
 
-    /* MAIN */
+    
     .main{
       height:calc(100% - 36px);
       overflow-y:auto;
@@ -231,7 +231,7 @@
       border-radius:24px;
     }
 
-    /* SEARCH */
+
     .search-wrap{
       display:flex;
       justify-content:center;
@@ -279,7 +279,7 @@
       font-family: Montserrat, system-ui, sans-serif;
     }
 
-    /* ===== TBV PAGE STYLES ===== */
+   
 
     .section-title{
       font-family: Lora, serif;
@@ -288,7 +288,7 @@
       color:#24335c;
     }
 
-    /* Recently Added */
+   
     .recent{
       max-width: var(--content-width);
       margin: 0 auto 8px;
@@ -308,7 +308,7 @@
       gap: 14px;
     }
 
-    /* empty block inside recent-grid */
+    
     .recent-grid .empty-block{
       min-height: 160px;
       display:flex;
@@ -361,7 +361,7 @@
       transform: translateY(-4px);
     }
 
-    /* Top Cities */
+   
     .cities-grid{
       max-width: var(--content-width);
       margin: 0 auto;
@@ -385,10 +385,10 @@
       height: 175px;
       border-radius: 18px;
       background: transparent;
-      overflow: hidden; /* clips single images to border-radius */
+      overflow: hidden;
     }
 
-    /* single image inside city-photo (non-stacked) */
+    
     .city-photo img:not(.p){
       width: 100%;
       height: 100%;
@@ -397,16 +397,16 @@
       border-radius: 18px;
     }
 
-    /* city photos stack animation */
+    
     .city-photo.stack{
       position: relative;
       height: 185px;
       border-radius: 14px;
-      overflow: visible; /* important so the tilt can stick out */
+      overflow: visible; 
       background: transparent;
     }
 
-    /* the 3 stacked images */
+   
     .city-photo.stack .p{
       position: absolute;
       left: 50%;
@@ -419,7 +419,7 @@
       transform: translateX(-50%);
     }
 
-    /* default look (not hovered) */
+    
     .city-photo.stack .back{
       transform: translateX(-50%) rotate(-10deg);
       opacity: 0.35;
@@ -479,7 +479,7 @@
       margin-top: 10px;
     }
 
-    /* NEW — cafe count under city name */
+    
     .city-count{
       text-align: center;
       color: #dbe6ff;
@@ -487,7 +487,7 @@
       margin-top: 4px;
     }
 
-    /* All Listed TBVs */
+    
     .sub-title{
       font-family: Lora, serif;
       font-size: 44px;
@@ -607,7 +607,7 @@
       display:block;
     }
 
-    /* Card hover effects */
+  
     .tbv-card:hover{
       transform: translateY(-6px);
       box-shadow: 0 16px 28px rgba(0,0,0,0.18);
@@ -628,7 +628,7 @@
       outline-offset: 3px;
     }
 
-    /* ===== FILTER BAR ===== */
+    
     .tbv-filterbar{
       margin: 12px auto 14px;
       padding: 14px 14px 12px;
@@ -789,7 +789,7 @@
       color: rgba(74,74,58,0.85);
     }
 
-    /* ===== EMPTY STATES ===== */
+  
     .empty-block{
       border: 1.5px dashed rgba(255,255,255,0.35);
       border-radius: 16px;
@@ -853,7 +853,7 @@
       background: rgba(255,255,255,0.80);
     }
 
-    /* ===== REMOVE BUTTON ===== */
+    
     .remove-btn{
       border: none;
       background: transparent;
@@ -870,7 +870,7 @@
       transform: scale(1.15);
     }
 
-    /* MOBILE */
+   
     @media(max-width:1100px){
       .recent-grid{ grid-template-columns: repeat(2, 1fr); }
       .cities-grid{ grid-template-columns: 1fr; }
@@ -891,7 +891,7 @@
       .recent-grid{ grid-template-columns: 1fr; }
     }
 
-    /* ===== UNIFIED AUTH MODAL STYLE ===== */
+    
     .auth-panel {
       background-color: #f8f5ee;
       border-radius: 20px;
@@ -1213,7 +1213,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
 
-      // --- 1. SELECTORS ---
+    
       const logInModal  = document.getElementById('logInModal');
       const signUpModal = document.getElementById('signUpModal');
       const logInForm   = document.getElementById('logInForm');
@@ -1225,7 +1225,7 @@
       const tbvMessage = document.getElementById("tbvMessage");
       const tbvContent = document.getElementById("tbvContent");
 
-      // --- AUTH UI ---
+     
       const authSection = document.getElementById("authSection");
       const userSection = document.getElementById("userSection");
       const welcomeUser = document.getElementById("welcomeUser");
@@ -1266,7 +1266,7 @@
         }
       }
 
-      // run on load
+      
       updateUI();
 
       logoutBtn.onclick = async () => {
@@ -1290,7 +1290,7 @@
         }
       };
 
-      // --- 2. MODAL CONTROLS ---
+  
       loginBtn.onclick  = () => { logInModal.hidden  = false; };
       signupBtn.onclick = () => { signUpModal.hidden = false; };
 
@@ -1320,7 +1320,7 @@
         });
       }
 
-      // --- 3. CHECK EXISTING SESSION ---
+     
       async function checkSessionOnLoad() {
         try {
           const ownerResponse = await fetch('/session-owner', {
@@ -1367,7 +1367,7 @@
 
       checkSessionOnLoad();
 
-      // --- 4. LOGIN HANDLER ---
+  
       logInForm.onsubmit = async function(e) {
         e.preventDefault();
 
@@ -1431,7 +1431,7 @@
         }
       };
 
-      // --- 5. SIGNUP HANDLER ---
+      
       signUpForm.onsubmit = async function(e) {
         e.preventDefault();
 
@@ -1493,7 +1493,7 @@
         }
       };
 
-      // --- 6. WIRE UP SEARCH & TBV LOAD ---
+      
       document.getElementById("searchBtn").addEventListener("click", filterTBV);
       document.getElementById("q").addEventListener("input", filterTBV);
 
@@ -1504,25 +1504,15 @@
 
       document.getElementById("sortSelect").addEventListener("change", filterTBV);
 
-    }); // end DOMContentLoaded
+    }); 
   </script>
 
 
-  <!-- ═══════════════ SCRIPT 2 — TBV DATA ═══════════════
-       All functions are global so they are accessible from
-       both the DOMContentLoaded callback above and from
-       onclick handlers on dynamically generated cards.
-  ════════════════════════════════════════════════════════ -->
+
   <script>
-    /* ── STATE ──────────────────────────────────────────── */
+    
     let allTbvCafes = [];   // master list from backend
 
-    /* ── HELPERS ────────────────────────────────────────── */
-
-    /**
-     * Returns the best available image URL from a cafe object.
-     * Falls back to a placeholder if nothing is found.
-     */
     function getImageSrc(cafe) {
       if (Array.isArray(cafe.imageUrl) && cafe.imageUrl.length > 0) {
         return cafe.imageUrl[0];
@@ -1533,22 +1523,14 @@
       return "apdev-tbv/cafe4.jpg";
     }
 
-    /**
-     * Extracts the last comma-separated segment as the "city".
-     * e.g. "Salcedo, Makati" → "Makati"
-     */
+    
     function extractCity(location) {
       if (!location) return "Unknown";
       const parts = location.split(",");
       return parts[parts.length - 1].trim() || location.trim();
     }
 
-    /* ── RENDER: RECENTLY ADDED ─────────────────────────── */
-
-    /**
-     * Fills #recentlyAddedContainer with the 4 most recently
-     * saved cafes (last 4 items in the array, reversed).
-     */
+   
     function renderRecentSection(cafes) {
       const container = document.getElementById("recentlyAddedContainer");
       if (!container) return;
@@ -1574,13 +1556,9 @@
         </div>`).join("");
     }
 
-    /* ── RENDER: TOP CITIES ─────────────────────────────── */
+    
 
-    /**
-     * Computes the top 3 cities by saved-cafe count and
-     * renders them into #topCitiesContainer.
-     * Uses the stacked-photo animation when a city has 3+ images.
-     */
+    
     function renderTopCities(cafes) {
       const container = document.getElementById("topCitiesContainer");
       if (!container) return;
@@ -1634,12 +1612,7 @@
       }).join("");
     }
 
-    /* ── RENDER: SINGLE TBV CARD ────────────────────────── */
-
-    /**
-     * Returns the HTML string for one TBV card.
-     * Preserves the original card design (tbv-card layout).
-     */
+     
     function renderCafeCard(cafe) {
       const amenities = [
         cafe.hasAircon  ? `<img src="icons/ac.png"     alt="Aircon">`  : "",
@@ -1676,9 +1649,7 @@
         </article>`;
     }
 
-    /* ── RENDER: EMPTY STATE ────────────────────────────── */
-
-    /** Shows the empty state inside #tbvContainer. */
+  
     function renderEmptyState() {
       const container = document.getElementById("tbvContainer");
       if (!container) return;
@@ -1690,7 +1661,7 @@
         </div>`;
     }
 
-    /** Shows a "no results" state inside #tbvContainer. */
+    
     function renderNoMatch() {
       const container = document.getElementById("tbvContainer");
       if (!container) return;
@@ -1701,12 +1672,7 @@
         </div>`;
     }
 
-    /* ── RENDER: TBV LIST ───────────────────────────────── */
-
-    /**
-     * Renders an array of cafe objects into #tbvContainer.
-     * Shows the empty state automatically when the list is empty.
-     */
+    
     function renderTBV(cafes) {
       const container = document.getElementById("tbvContainer");
       if (!container) return;
@@ -1719,13 +1685,7 @@
       container.innerHTML = cafes.map(renderCafeCard).join("");
     }
 
-    /* ── FILTER / SEARCH ────────────────────────────────── */
-
-    /**
-     * Reads the search input and sort select, filters + sorts
-     * allTbvCafes in memory, then re-renders the TBV list.
-     * Called on: input event, button click, sort change, clear.
-     */
+    
     function filterTBV() {
       if (!allTbvCafes.length) {
         renderEmptyState();
@@ -1735,7 +1695,7 @@
       const query = (document.getElementById("q")?.value || "").trim().toLowerCase();
       const sort  = document.getElementById("sortSelect")?.value || "recent";
 
-      // 1. Filter by search query
+      
       let result = allTbvCafes.filter(cafe => {
         const name     = (cafe.name     || "").toLowerCase();
         const location = (cafe.location || "").toLowerCase();
@@ -1743,15 +1703,13 @@
         return name.includes(query) || location.includes(query) || bio.includes(query);
       });
 
-      // 2. Sort
+      
       if (sort === "az") {
         result = result.slice().sort((a, b) => (a.name || "").localeCompare(b.name || ""));
       } else if (sort === "za") {
         result = result.slice().sort((a, b) => (b.name || "").localeCompare(a.name || ""));
       }
-      // "recent" = default order (as returned by backend)
-
-      // 3. Render
+     
       if (!result.length && query) {
         renderNoMatch();
       } else {
@@ -1759,13 +1717,7 @@
       }
     }
 
-    /* ── FETCH FROM BACKEND ─────────────────────────────── */
-
-    /**
-     * Fetches the user's TBV list from GET /tbv, populates
-     * allTbvCafes, and renders all sections of the page.
-     * Handles 401 (not logged in) gracefully.
-     */
+    
     async function loadTBV() {
       const tbvMessage   = document.getElementById("tbvMessage");
       const tbvContent   = document.getElementById("tbvContent");
@@ -1774,7 +1726,7 @@
       try {
         const res = await fetch("/tbv", { credentials: "include" });
 
-        // Not logged in → show message, hide content
+        
         if (res.status === 401) {
           if (tbvMessage) tbvMessage.style.display = "block";
           if (tbvContent) tbvContent.style.display = "none";
@@ -1788,11 +1740,11 @@
 
         allTbvCafes = Array.isArray(data) ? data : [];
 
-        // Render the supporting sections
+        
         renderRecentSection(allTbvCafes);
         renderTopCities(allTbvCafes);
 
-        // Render the main list (respects current search/sort)
+        
         if (!allTbvCafes.length) {
           renderEmptyState();
         } else {
@@ -1807,12 +1759,7 @@
       }
     }
 
-    /* ── REMOVE FROM TBV ────────────────────────────────── */
-
-    /**
-     * Sends POST /tbv/remove for the given establishmentId,
-     * then refreshes the entire TBV view without a page reload.
-     */
+    
     async function removeTBV(establishmentId) {
       try {
         const res = await fetch("/tbv/remove", {
@@ -1829,8 +1776,7 @@
           return;
         }
 
-        // Optimistically remove from local array so the UI updates instantly,
-        // then re-render without hitting the server again.
+       
         allTbvCafes = allTbvCafes.filter(c => c._id !== establishmentId);
 
         renderRecentSection(allTbvCafes);

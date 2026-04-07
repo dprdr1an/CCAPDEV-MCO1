@@ -44,7 +44,7 @@
       column-gap: 18px;
     }
 
-    /* ── SIDEBAR ── */
+   
     .sidebar{
       background: var(--sidebar);
       color: #fff;
@@ -63,7 +63,7 @@
     .sidebar .nav a:hover,
     .sidebar .auth div:hover{ color:#fa7a11; cursor:pointer; transition:0.3s; }
 
-    /* ── MAIN ── */
+
     .main{
       height: calc(100% - 36px);
       margin: 18px 18px 0 0;
@@ -74,7 +74,7 @@
       position: relative;
     }
 
-    /* ── CAFE HEADER (same as cafe.html) ── */
+    
     .cafe-header{
       max-width: var(--content-width);
       margin: 0 auto 22px;
@@ -107,7 +107,7 @@
     }
     .score-divider{ color: var(--muted); }
 
-    /* ── PHOTO GRID (same as cafe.html) ── */
+  
     .photo-grid{
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -124,7 +124,7 @@
       border-radius: 8px;
     }
 
-    /* ── CAFE META BELOW PHOTOS ── */
+   
     .cafe-meta{
       margin-bottom: 28px;
     }
@@ -155,7 +155,7 @@
       background: rgba(127,123,46,0.08);
     }
 
-    /* ── REVIEWS (identical to ratings.html) ── */
+    
     .reviews{
       max-width: var(--content-width);
       margin: 0 auto;
@@ -221,7 +221,7 @@
       margin-top: 10px;
     }
 
-    /* ── EDIT CAFE MODAL (same style as write/edit review in profile.html) ── */
+  
     .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
     .modal[hidden]{ display:none; }
     .modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,0.3); }
@@ -323,7 +323,7 @@
 <div class="frame">
   <div class="layout">
 
-    <!-- SIDEBAR -->
+  
     <aside class="sidebar animate-on-load delay-1">
       <div>
         <div class="logo">bean<br>there</div>
@@ -342,10 +342,10 @@
       </div>
     </aside>
 
-    <!-- MAIN -->
+  
     <main class="main animate-on-load delay-2">
 
-      <!-- Cafe Header: name + rating -->
+  
       <div class="cafe-header">
         <div class="cafe-top">
           <div class="cafe-name-row">
@@ -363,15 +363,15 @@
         <div id="cafeLocation" style="font-size:15px; color:#6b6151; margin-top:4px;"></div>
       </div>
 
-      <!-- Photo Grid -->
+      
       <div class="photo-grid" id="cafePhotoGrid"></div>
 
-      <!-- Cafe Meta: handle, bio, edit button -->
+  
       <div class="cafe-meta">
         <p class="cafe-bio" id="cafeBio">Placeholder for short bio</p>
       </div>
 
-      <!-- Reviews -->
+   
       <div class="reviews">
         <h2 class="reviews-title">My Cafe Reviews</h2>
         <div id="reviewContainer">
@@ -383,7 +383,7 @@
   </div>
 </div>
 
-<!-- EDIT CAFE MODAL -->
+
 <div id="editCafeModal" class="modal" role="dialog" aria-modal="true" hidden>
   <div class="modal-backdrop" data-close-cafe></div>
   <div class="modal-panel edit-cafe-panel" role="document">
@@ -436,7 +436,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // ── AUTH SIDEBAR ──
+ 
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
   const welcomeUser = document.getElementById('welcomeUser');
@@ -496,7 +496,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   loginBtn.onclick  = () => { window.location.href = 'index.html'; };
   signupBtn.onclick = () => { window.location.href = 'index.html'; };
 
-  // ── CHECK OWNER SESSION ──
+  
   async function checkOwnerSession() {
     for (let attempt = 0; attempt < 10; attempt++) {
       try {
@@ -518,7 +518,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return false;
   }
 
-  // ── HELPERS ──
+
 
   function formatDate(dateStr) {
     const d = new Date(dateStr);
@@ -542,7 +542,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     ).join('');
   }
 
-  // ── LOAD CAFE DATA ──
+  
   let currentCafeData = null;
 
   async function loadOwnerCafe() {
@@ -557,8 +557,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       document.getElementById('cafeName').textContent   = cafe.name     || 'Cafe Name';
 
-      // FIX: trim before checking so whitespace-only bios fall back correctly,
-      // and display the trimmed value so leading/trailing spaces are never shown
+      
+      
       const trimmedBio = typeof cafe.bio === 'string' ? cafe.bio.trim() : '';
       document.getElementById('cafeBio').textContent = trimmedBio.length > 0
         ? trimmedBio
@@ -566,7 +566,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       document.getElementById('cafeLocation').textContent = cafe.location || '';
 
-      // photo grid
+      
       const grid   = document.getElementById('cafePhotoGrid');
       const images = Array.isArray(cafe.imageUrl) && cafe.imageUrl.length
         ? cafe.imageUrl
@@ -581,7 +581,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ── LOAD REVIEWS ──
+ 
   async function loadCafeReviews() {
     const container = document.getElementById('reviewContainer');
     try {
@@ -589,7 +589,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res    = await fetch(`/reviews-by-cafe/${estId}`);
       const reviews = await res.json();
 
-      // compute average rating
+    
       if (reviews.length) {
         const avg = (reviews.reduce((s,r) => s + (r.rating||0), 0) / reviews.length).toFixed(1);
         document.getElementById('cafeRating').textContent = avg;
@@ -680,7 +680,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>`;
           }).join('');
 
-      // wire reply buttons
+     
       document.querySelectorAll('.reply-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.getElementById('replyReviewId').value = btn.dataset.id;
@@ -689,7 +689,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       });
 
-      // wire up click to go to review container with gap
       document.getElementById('reviewContainer').style.cssText = 'display:flex; flex-direction:column; gap:22px;';
 
     } catch (err) {
@@ -698,14 +697,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ── EDIT CAFE MODAL ──
+ 
   const editCafeBtn    = document.getElementById('editCafeBtn');
   const editCafeModal  = document.getElementById('editCafeModal');
   const editCafeForm   = document.getElementById('editCafeForm');
   const inputCafeBio   = document.getElementById('inputCafeBio');
   const inputCafeImage = document.getElementById('inputCafeImage');
 
-  // FIX: character counter so owners know the 300-char limit
+  
   function updateBioCounter() {
     const counter = document.getElementById('bioCounter');
     if (!counter) return;
@@ -718,13 +717,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   function openCafeModal() {
     if (!currentCafeData) return;
 
-    // FIX: use trimmed bio so the textarea never shows leading/trailing spaces.
-    // If bio is undefined (old documents) this safely becomes empty string.
+   
     inputCafeBio.value = typeof currentCafeData.bio === 'string'
       ? currentCafeData.bio.trim()
       : '';
 
-    // Update character counter on open
+   
     updateBioCounter();
 
     const grid   = document.getElementById('cafePhotosGrid');
@@ -764,7 +762,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   editCafeForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    // FIX: validate bio length on the client before sending — matches backend limit
+    
     const bioValue = inputCafeBio.value.trim();
     if (bioValue.length > 300) {
       alert(`Bio is too long (${bioValue.length}/300 characters). Please shorten it.`);
@@ -794,8 +792,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const result = await res.json();
       if (!res.ok) { alert(result.message || 'Failed to update cafe.'); return; }
 
-      // FIX: immediately apply the confirmed saved data from the response
-      // so the UI never shows a stale bio between close and re-fetch
+      
       if (result.cafe) {
         currentCafeData = { ...currentCafeData, ...result.cafe };
 
@@ -812,7 +809,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       closeCafeModal();
-      // FIX: still re-fetch to ensure full consistency (reviews, rating, etc.)
+    
       await loadOwnerCafe();
       alert('Cafe updated successfully!');
     } catch (err) {
@@ -822,7 +819,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   
 
-  // ── RUN ──
+ 
   const ok = await checkOwnerSession();
   if (ok) {
     await loadOwnerCafe();
@@ -857,7 +854,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!res.ok) { alert(result.message || 'Failed to save reply.'); return; }
 
         document.getElementById('replyModal').hidden = true;
-        await loadCafeReviews(); // refresh to show the reply
+        await loadCafeReviews(); 
         alert('Reply saved!');
       } catch (err) {
         alert('Error saving reply.');
