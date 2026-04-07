@@ -23,20 +23,20 @@ CRUD Operations
   The system fully implements CRUD operations for its core features:
 
   CREATE
-    Users can create accounts and submit reviews.
-    Cafe owners can crate and manage their cafe profiles.
+    - Users can create accounts and submit reviews.
+    - Cafe owners can crate and manage their cafe profiles.
 
   READ
-    Users can view the cafe listings, reviews, and profiles.
-    Data is retrieved from the MongoDB database and displayed in the frontend.
+    - Users can view the cafe listings, reviews, and profiles.
+    - Data is retrieved from the MongoDB database and displayed in the frontend.
 
   UPDATE
-    Users can edit their profiles and reviews.
-    Cafe owners can update cafe information and respond to reviews.
+    - Users can edit their profiles and reviews.
+    - Cafe owners can update cafe information and respond to reviews.
 
   DELETE
-    Users can delete their own reviews.
-    Data is properly removed from the database.
+    - Users can delete their own reviews.
+    - Data is properly removed from the database.
 
 
 Technologies Used
@@ -60,17 +60,17 @@ How to Run the Project
 
 
 Project Structure
-  config/ - database connection
-  models/ - MongoDB schemas
-  bean there/ - frontend files
-  app.ks - main server file
+  - config/ - database connection
+  - models/ - MongoDB schemas
+  - bean there/ - frontend files
+  - app.ks - main server file
 
 
 Group Members
-  Escueta, Cassandra Jersey M.
-  Galinato, Erylle Jerica U.
-  Nicolas, Sophia Lauren R.
-  Yap, Adrian Jericho M.
+  - Escueta, Cassandra Jersey M.
+  - Galinato, Erylle Jerica U.
+  - Nicolas, Sophia Lauren R.
+  - Yap, Adrian Jericho M.
 
 
 Notes
