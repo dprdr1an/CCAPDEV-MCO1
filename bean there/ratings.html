@@ -718,6 +718,19 @@
     </form>
   </div>
 </div>
+<div id="viewReviewModal" class="modal" hidden>
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-panel auth-panel" style="max-width:600px;">
+    <button id="xViewReview" class="modal-close-review">✕</button>
+
+    <h2 id="viewReviewTitle" style="font-family:Lora,serif;"></h2>
+
+    <p id="viewReviewMeta" style="font-size:13px; color:#666;"></p>
+
+    <p id="viewReviewText" style="margin-top:12px; line-height:1.6; text-align: justify;"></p>
+  </div>
+</div>
   <script>
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -1061,7 +1074,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById('closeReplyModal').onclick = () => document.getElementById('replyModal').hidden = true;
   document.getElementById('xReplyModal').onclick     = () => document.getElementById('replyModal').hidden = true;
-
+  document.getElementById('xViewReview').onclick = () => {
+    document.getElementById('viewReviewModal').hidden = true;
+  };
 });
 function renderReviews(data) {
   const container = document.getElementById("reviewsContainer");
@@ -1082,6 +1097,12 @@ function renderReviews(data) {
     const edited = review.editedAt
       ? ` <span class="edited-label">• edited ${formatDate(review.editedAt)}</span>`
       : '';
+
+    const maxLength = 120;
+    const fullText = review.reviewText || '';
+    const shortText = fullText.length > maxLength
+      ? fullText.substring(0, maxLength) + '...'
+      : fullText;
 
     const beans = Array.from({ length: 5 }, (_, i) => {
       return i < (review.rating || 0)
@@ -1183,7 +1204,10 @@ function renderReviews(data) {
           <div class="review-location">${review.location || ""}</div>
           <div class="review-title-text">${review.title || 'Untitled Review'}</div>
           <div class="review-text-row">
-            <div class="review-text">${review.reviewText}</div>
+            <div class="review-text">
+              ${shortText}
+              ${fullText.length > maxLength ? '<span style="color:#888;"> (See more)</span>' : ''}
+            </div>
             <div class="review-actions">
               <div class="icon-btn like-btn">
                 <img src="icons/like.png" class="${isLiked ? 'active' : 'faded'}">
@@ -1213,6 +1237,37 @@ function renderReviews(data) {
         ` : ''}
       </div>`;
   }).join("");
+
+  document.querySelectorAll('.review-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // 🚫 IGNORE clicks from buttons/actions
+      if (
+        e.target.closest('.review-actions') ||
+        e.target.closest('.like-btn') ||
+        e.target.closest('.dislike-btn') ||
+        e.target.closest('.reply-btn') ||
+        e.target.closest('.see-more-btn')
+      ) {
+        return;
+      }
+      const id = card.dataset.id;
+      const review = allReviews.find(r => r._id === id);
+      if (!review) return;
+
+      const modal = document.getElementById('viewReviewModal');
+
+      document.getElementById('viewReviewTitle').textContent =
+        review.title || 'Untitled Review';
+
+      document.getElementById('viewReviewMeta').textContent =
+        `${review.username} • ${review.datePosted || ''}`;
+
+      document.getElementById('viewReviewText').textContent =
+        review.reviewText;
+
+      modal.hidden = false;
+      });
+  });
 
   document.querySelectorAll('.review-title[data-id]').forEach(el => {
     el.addEventListener('click', () => {
@@ -1291,6 +1346,7 @@ document.addEventListener("click", function(e) {
   const replyBtn   = e.target.closest(".reply-btn");
 
   if (likeBtn) {
+    e.stopPropagation();
     if (!requireLogin()) return;
     const card = likeBtn.closest(".review-card");
     const reviewId = card.dataset.id;
@@ -1319,6 +1375,7 @@ document.addEventListener("click", function(e) {
   }
 
   if (dislikeBtn) {
+    e.stopPropagation();
     if (!requireLogin()) return;
     const card = dislikeBtn.closest(".review-card");
     const reviewId = card.dataset.id;
@@ -1347,6 +1404,7 @@ document.addEventListener("click", function(e) {
   }
 
   if (replyBtn) {
+    e.stopPropagation();
     if (!requireLogin()) return;
     const card = replyBtn.closest(".review-card");
     document.getElementById('replyReviewId').value = card.dataset.id;
@@ -1383,6 +1441,7 @@ document.getElementById('replyForm').addEventListener('submit', async function(e
 
 document.addEventListener("click", function(e) {
   if (e.target.classList.contains("see-more-btn")) {
+    e.stopPropagation();
     const reviewId = e.target.dataset.id;
 
     const review = allReviews.find(r => r._id === reviewId); 
