@@ -985,7 +985,7 @@ document.addEventListener("DOMContentLoaded", () => {
         location: r.location || "",
         rating:   r.rating,
         date:     r.datePosted || "No date",
-        editedOn: null,
+        editedAt: r.editedAt || null,
         title:    r.title,
         text:     r.reviewText,
         image:    r.photoUrl || r.image || "apdev-tbv/cafe4.jpg",
@@ -1019,7 +1019,9 @@ document.addEventListener("DOMContentLoaded", () => {
     c.innerHTML = reviewsData.map(rev => {
       const beans   = getBeans(rev.rating);
       const tags    = (rev.tags||[]).map(t => { const ic=tagIcons[t]; return `<span class="tag">${ic?`<img src="${ic}" alt="${t}">`:''}${t}</span>`; }).join('');
-      const edited  = rev.editedOn ? `<span class="edited-label"> · edited ${rev.editedOn}</span>` : '';
+      const edited = rev.editedAt
+        ? ` <span class="edited-label">• edited ${formatDate(rev.editedAt)}</span>`
+        : '';
       return `
         <div class="review-card" data-id="${rev.id}">
           <div class="review-img"><img src="${rev.image}" alt="${rev.cafeName}"></div>
@@ -1053,6 +1055,15 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('deleteReviewModal').hidden = false;
       })
     );
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   }
 
   /* ── RENDER REPLIES ── */

@@ -163,6 +163,13 @@
       flex-direction: column;
       gap: 22px;
     }
+
+    .edited-label {
+        font-size: 11px;
+        color: #718096;
+        font-style: italic;
+    }
+    
     .reviews-title{
       font-size: 26px;
       font-family: Lora, serif;
@@ -512,6 +519,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ── HELPERS ──
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
   const tagIcons = {
     "Air-conditioned": "icons/ac.png",
     "Socket":          "icons/socket.png",
@@ -584,6 +601,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       container.innerHTML = reviews.map(r => {
+        const edited = r.editedAt
+          ? ` <span class="edited-label">• edited ${formatDate(r.editedAt)}</span>`
+          : '';
         const tags = (r.tags || []).map(tag => {
           const icon = tagIcons[tag];
           return `<span class="tag">${icon ? `<img src="${icon}">` : ''} ${tag}</span>`;
@@ -619,7 +639,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <div class="review-top">
                   <div>
                     <strong>${r.username || 'Anonymous'}</strong><br>
-                    ${r.datePosted || ''}
+                    ${r.datePosted || ''}${edited}
                   </div>
                   <div class="review-tags">${tags}</div>
                 </div>

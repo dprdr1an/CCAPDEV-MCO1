@@ -314,6 +314,12 @@
       opacity: 1; 
     }
 
+    .edited-label {
+        font-size: 11px;
+        color: #718096;
+        font-style: italic;
+    }
+
     .review-title {
       font-family: Lora, serif;
       font-size: 28px;
@@ -1002,6 +1008,15 @@ if (title.length > 50) {
 <script>
 let allReviews = [];
 
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
 const tagIcons = {
   "Air-conditioned": "icons/ac.png",
   "Socket": "icons/socket.png",
@@ -1056,6 +1071,9 @@ function renderReviews(data) {
   };
 
   container.innerHTML = data.map(review => {
+    const edited = review.editedAt
+      ? ` <span class="edited-label">• edited ${formatDate(review.editedAt)}</span>`
+      : '';
 
     const beans = Array.from({ length: 5 }, (_, i) => {
       return i < (review.rating || 0)
@@ -1144,7 +1162,7 @@ function renderReviews(data) {
           <div class="review-top">
             <div>
               <strong>${review.username}</strong><br>
-              ${review.datePosted || ""}
+              ${review.datePosted || ""}${edited}
             </div>
             <div class="review-tags">${tags}</div>
           </div>

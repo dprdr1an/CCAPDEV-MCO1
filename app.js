@@ -499,7 +499,8 @@ app.post("/edit-review", async (req, res) => {
         ...(title !== undefined ? { title: title.trim() } : {}),
         reviewText,
         rating,
-        tags: Array.isArray(tags) ? tags : []
+        tags: Array.isArray(tags) ? tags : [],
+        editedAt: new Date()
       },
       { new: true }
     );

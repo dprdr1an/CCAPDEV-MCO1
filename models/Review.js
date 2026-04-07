@@ -10,6 +10,7 @@ const ReviewSchema = new mongoose.Schema({
   datePosted: { type: String, default: "" },
   photoUrl: { type: String, default: "" },
 
+  editedAt: { type: Date, default: null },
   likes: { type: Number, default: 0 },
   dislikes: { type: Number, default: 0 },
   likedBy: { type: [String], default: [] },
