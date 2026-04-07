@@ -1159,7 +1159,6 @@ function renderReviews(data) {
             padding: 10px 16px;
             font-size: 13px;
           ">
-           <strong class="clickable-user" onclick="goToProfile('${rep.username}')">
   ${rep.username || 'Anonymous'}
               ${rep.role === "owner" ? `
                 <span style="
@@ -1212,9 +1211,6 @@ function renderReviews(data) {
               <strong class="user-link" data-user="${review.username}">
                 ${review.username}
               </strong><br>
-              <strong class="clickable-user" onclick="goToProfile('${review.username}')">
-  ${review.username}
-</strong><br>
               ${review.datePosted || ""}${edited}
             </div>
             <div class="review-tags">${tags}</div>
