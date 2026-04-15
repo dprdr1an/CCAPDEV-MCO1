@@ -607,6 +607,33 @@ app.post("/edit-review", async (req, res) => {
   }
 });
 
+app.post("/delete-review", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not logged in" });
+    }
+
+    const { reviewId } = req.body;
+
+    if (!reviewId) {
+      return res.status(400).json({ message: "Missing reviewId" });
+    }
+
+    const deleted = await Review.findOneAndDelete({
+      _id: reviewId,
+      username: req.session.user.username  // ensures only the owner can delete
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Review not found or not authorized" });
+    }
+
+    res.json({ message: "Review deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error deleting review" });
+  }
+});
 
 app.post("/reply-review", async (req, res) => {
   try {
